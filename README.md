@@ -4,11 +4,12 @@
 
 注：原网站使用的是[jekyll](https://jekyllrb.com/docs/installation/)与[prose](https://github.com/prose/prose)
 
-1.fork源仓库，复制一份到本地
-2.[安装jekyll](https://jekyllrb.com/docs/installation/)（需先安装ruby、gems及其依赖）
-3.进入本地仓库，输入：
+1.fork源仓库，复制一份到本地  
+2.[安装jekyll](https://jekyllrb.com/docs/installation/)（需先安装ruby、gems及其依赖）  
+3.进入本地仓库，输入：  
+
 ```
 jekyll serve --watch
 ```
 
-prose目前看来是编辑md文档和管理github仓库内文件用。
+prose目前看来是编辑md文档和管理github仓库内文件用，这个文档就是在prose中修改提交的，挺好用的。
