@@ -10,3 +10,5 @@
 ```
 jekyll serve --watch
 ```
+
+prose目前看来是编辑md文档和管理github仓库内文件用。
