@@ -1,39 +1,87 @@
 ---
 layout: page
-title: The Bash Guide
-subtitle: A quality-driven guide through the shell's many features.
+title: Bash 指南
+subtitle: 四篇 Bash 相关的高质量指南，译自 The Bash Guide
 editable: false
 ---
 
 <section>
-
-    <p>This guide is an introduction to basic and advanced concepts of the bash shell.</p>
-    <p>It teaches both newcomers and long-time users the best, safest and most robust ways of writing powerful bash scripts as well as making efficient and speedy interactive use of the shell.</p>
-    <p>This guide has gone through several iterations and is the result of a severe lack of consistent, clear and reliable language on the topic on the rest of the Internet as well as the public library or book stores.</p>
-
-    <h2>Authorship</h2>
-    <p>The primary author and maintainer of this guide is <a href="https://www.lhunath.com">lhunath (Maarten Billemont)</a>.</p>
-    <p>This guide is open source, licensed under <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a> (CC-BY-SA).  The source code is available at <a href="https://github.com/lhunath/guide.bash.academy">GitHub</a>.  Go there to report issues or fork the guide to contribute changes (big or small).  To keep up to date with new chapters or improvements to this guide, you could star the GitHub project.</p>
-    <p>For advice, comments, suggestions, corrections or recommendations, contact lhunath, <a href="https://github.com/lhunath/guide.bash.academy/issues">file an issue</a> or visit <a href="irc://freenode.org/#bash">the freenode.org #bash community on IRC</a>.
-    <p>This guide is an active work in progress.  New chapters are being written and existing chapters are continuously being updated and improved.</p>
-    <p>Using this guide, I am sharing my knowledge and expertise with the world freely in the hopes of benefitting you and all others like you.  If you've benefitted from the knowledge and experience gained through this guide, consider "giving back" to encourage a society of open access and freedom of information.  You can give back by providing feedback on the guide at the GitHub project page, making corrections by hitting the <em>edit</em> buttons on the chapter pages, sharing this
-    guide with any of your friends that have similar interests so that they too may learn as you have, or contributing financially in gratitude for my work, time and effort put into writing and maintaining this guide.</p>
-
-    {% include contribute.html %}
-
-    <p><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a></p>
-
-    <h2>Exercises</h2>
-    <p>After introducing new practical concepts, the guide offers a set of exercises to allow you to practice your new knowledge.  For a summary of all exercises in this guide, see <a href="exercises">our exercises index</a>.</p>
-
-    <h2>Chapters</h2>
-    <ol id="chapter_list">
-        {% assign chapters = site.pages | where: 'layout', 'chapter' | sort: 'chapter' %}
-        {% for chapter in chapters %}
-            <li><label for="done_{{ chapter.id }}"><input type="checkbox" id="done_{{ chapter.id }}"> I'm done</label>
-                <a href="{{ chapter.url }}">{{ chapter.title }}</a><sup>{{ chapter.status }}</sup>: {{ chapter.subtitle }}
-                <p>{{ chapter.description }}</p></li>
-        {% endfor %}
+    <h2>内容</h2>
+    <p>这里是 <strong>Bash</strong> 相关的、4篇质量极高的学习指南。分别为：</p>
+    <ol>
+        <li>
+            <a href="inception">开篇</a>：Bash 是什么，它活在哪里？
+            <p>
+                简介
+                Bash，以及如何安装和启动它；终端，键盘及结果显示；程序，进程以及他们内部流动的信息如何被连接在一起
+            </p>
+        </li>
+        <li>
+            <a href="commands">命令与参数</a>：我要如何给 bash 下指令?
+            <p>
+                关于什么是命令，如何发布他们；交互模式与脚本；命令语法，通过名称搜索命令与程序；参数与单词分割，以及输入和输出重定向
+            </p>
+        </li>
+        <li>
+            <a href="expansions">变量与扩展</a>：我如何储存并使用数据？
+            <p>
+                Bash
+                参数与变量；环境变量，特殊参数以及数组参数；扩展参数，扩展运算控制符，命令替换与进程替换；路径名扩展，尾数扩展与括号扩展
+            </p>
+        </li>
+        <li>
+            <a href="conditionals">测试与条件</a>：不同的命令给不同的数据
+            <p>
+                退出代码，成功与失败，测试文件，字符串与数值，处理不同的条件，条件操作符以及条件复合命令
+            </p>
+        </li>
     </ol>
+    <ul>
+        <li><a href="exercises">练习题索引</a></li>
+    </ul>
+    <p>
+        按原作者的构想，这份 Bash 指南共<a href="https://guide.bash.academy/"
+            >11章</a
+        >内容。遗憾的是，作者只完成了前面4章，但因其写作质量之高、讲解之透彻，还是极为可贵，遂将这4篇指南翻译并分享于此。
+    </p>
+    <p>原作者对整份指南的介绍如下：</p>
+    <footer>
+        这份指南是对bash shell 基础及高级概念的介绍。<br />
+        旨在把编写强力bash脚本以及高效快速交互式运用shell的最好、最安全、最可靠的方法，教给bash新手及长时间使用者。
+        <br />
+        这份指南已经过多版迭代，是就此话题无论在互联网上、公共图书馆还是书店，都始终严重缺乏持续、清晰又可靠的语言的结果。
+    </footer>
+    <p>
+        如此精彩的教程却不完整，实在可惜。但此前，作者与GreyCat其实已就 Bash
+        <strong>完整</strong> 写过一份旧版指南，感兴趣的读者请移步<a
+            href="https://mywiki.wooledge.org/BashGuide"
+            >此处</a
+        >查看，或<a href="https://folk.ntnu.no/geirha/bashguide.pdf"
+            >在线阅读pdf版</a
+        >。
+    </p>
 
+    <h2>署名</h2>
+    <p>
+        原作者是<a href="https://www.lhunath.com"
+            >lhunath （Maarten Billemont）</a
+        >，英文版原址在<a href="https://guide.bash.academy/">这里</a
+        >，英文源码仓库在<a href="https://github.com/lhunath/guide.bash.academy"
+            >这里</a
+        >，中文源码仓库在<a href="https://github.com/snownstone/BashGuide"
+            >这里</a
+        >，遵照
+        <a
+            href="https://creativecommons.org/licenses/by-sa/4.0/?__cf_chl_captcha_tk__=30246be95e532e523c2db550664d3cdca226ad7b-1605027859-0-AYl6spOQ8NlUbexVcsXtXSE5xUaCVxBJ_4MT-xTGdc6PKXa8d8t5o9AcmGBObnlny2tVHL1UnOwwHSkzRKNRjI7a9NYmkpf9zM7X5rE7adrogBjYGQboqQD0gyrx_WNm_OzcHVS1hyoSxc6xlAmkDE6r8u6YYBt8ZRszKqXx1lBJpf8BvCDspf0dW3jfp9Lgr_qixYWkbEEg_6VbUzn0ueS43uV7JTo6M-rWwqBSQenpRb9YxRuhHZIfMQ0G1nGFvmeLNBtxPdonSbHNcGLfx3F9fdB52EzL8ZI61TPHsGiRGS8KYTr4YNdGlc0Rz4BWPSlKY0_GF2opYUWaPSdSsDm5vtmej9RKqBCNl8bHmz7OzQ3YRrvoXc5N9y0VsAMenwLeAb03dT_Wu_eMiwfiUIY37Wdc7JN_qV8aKHmfuQg1-o9vng73cw9a5Xv8v1IkztTjIKjoS03lcvCPqbNjhs4UlYPKZvFdjbkD-P5GlUwt3ncHGrauoaDFNNDCoNtDgQsGxVGS8dm3zpZXWvAjQQsQKmQ77E8Rx8bFbCknJszAg5-UhPm_1Jx0nZc3s62ryg"
+            >CC BY-SA 4.0 协议</a
+        >。
+    </p>
+    <p>
+        <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/"
+            ><img
+                alt="Creative Commons License"
+                style="border-width: 0"
+                src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"
+        /></a>
+    </p>
 </section>
