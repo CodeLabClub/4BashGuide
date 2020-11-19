@@ -2,13 +2,10 @@
 id: commands
 layout: chapter
 chapter: 2
-title: Commands And Arguments
-subtitle: How do I give bash instructions?
+title: 命令与参数
+subtitle: 我要如何给 bash 下指令？
 status: beta
-description: >-
-  About what a command is, and how to issue them; interactive mode and scripts;
-  command syntax, searching commands and programs by name; arguments and word
-  splitting as well as input and output redirection.
+description: 关于什么是命令，如何发布他们；交互模式与脚本；命令语法，通过名称搜索命令与程序；参数与单词分割，以及输入和输出重定向
 published: true
 ---
 
@@ -16,69 +13,61 @@ published: true
 
 
 <section>
-    <h1>What are bash commands and how do I write and issue them?</h1>
+    <h1>Bash 命令是什么，我要如何编写与发布他们？</h1>
 
-    <p>We learned a great deal about how bash and other processes work together in the terminal.  Let's refocus on bash and start figuring out how exactly we get stuff done with it.</p>
+    <p>从开篇到这里，关于 bash 和其他进程怎样在终端内协同工作，我们已了解很多。现在让我们重新聚焦 bash，搞清楚到底怎样用它把事情做成。</p>
 
-    <p>As mentioned earlier, bash waits for instructions from you and then executes them to the best of its abilities.  To get the most out of bash, and especially to avoid damage due to bash misunderstanding your intentions, it's important that you pay close attention to these basics of the bash shell language.  There are many people that consider themselves fluent in bash but fail to understand even these most basic concepts.  As a result, they create programs that can inflict
-    extensive damage to unsuspecting users and systems.  <em>Don't be that person</em>.</p>
+    <p>之前已曾提及，bash 会等待你发出指令，然后尽它所能去执行他们。为了最大程度地用好 bash，同时，也为了避免因 bash 错误理解你的意图而损害系统，你一定要对 bash shell 语言的基础概念和用法特别留意。有非常多自以为熟悉 bash 的人，其实对最基本的概念都理解有误。结果就是，他们编写的程序可能会对毫无戒备的用户及系统造成严重损害。<em>不要做这样的人</em>。</p>
 
-    <h2>So what are bash commands?</h2>
+    <h2>那么什么是 bash 命令？</h2>
 
-    <p>At the core of the bash shell language are its commands.  Your commands tell bash what you need it to do, step-by-step, command-by-command.</p>
+    <p>Bash shell 语言的核心就是命令。你发出的命令会一步步、逐条告诉 bash 你想让它做什么。</p>
 
-    <p>Bash generally takes one command from you at a time, executes the command, and when completed returns to you for the next command.  We call this <dfn>synchronous</dfn> command execution.  It is important to understand that while bash is busy with a command that you give it, you cannot interact with bash directly: you'll have to wait for it to be ready with executing its command and return to the script.  For most commands, you'll barely notice this: they get executed so fast bash
-    will be back for the next command before you realize.</p>
+    <p>bash 通常每次从你那接收一条命令，执行它，结束后返回等待你的下一条命令。我们将这种模式称为 <dfn>同步</dfn> 执行命令（synchronous command execution）。一定要理解，当 bash 忙于执行你的某条命令时，你将暂时无法再和它直接交互，需等它执行完当前命令后返回继续待命。对于绝大多数命令，你其实根本不会注意到这点，因为 bash 执行命令的速度如此之快，远在你察觉前它就已经返回等待下一条命令了。</p>
 
-    <p>Some commands can take a long time to complete, though.  In particular, commands that start other programs with which you can interact.  For instance, a command might start a file editor.  While you're interacting with the file editor, bash takes a back-seat and waits for the file editor to end (which generally means you quit it). When the file editor program stops running, the command ends and bash resumes operation by
-    asking you for the next thing to do.  You'll notice that while your editor is running, you are no longer at the bash prompt.  As soon as your editor exits, your bash prompt re-appears:</p>
+    <p>不过，有一些命令的执行时间会比较长，特别是启动其他程序与你交互的命令。例如，某条命令可能会启动一个文档编辑器。当你与这个文档编辑器交互的时候，bash 就会退居幕后，等待它结束运行（通常意味着你从中退出）。当文本编辑器停止运行后，意味着该条命令执行结束，bash 将返回等待你下一步操作的命令。你还会注意到，在文档编辑器运行的时候，bash 提示符就消失不见了；一旦你退出编辑器，bash 提示符又会再次出现：</p>
 
 <pre lang="bash">
-<span class="prompt">$ </span><kbd>ex</kbd><em>bash command to run the "ex" program.</em>
-: <kbd>i</kbd><em>ex command to "insert" some text.</em>
+<span class="prompt">$ </span><kbd>ex</kbd><em>启动 “ex” 程序的 bash 命令</em>
+: <kbd>i</kbd><em>ex 命令，表示“插入”（insert）文本</em>
 <kbd>Hello!
-.</kbd><em>A line with just a dot tells ex to stop inserting text.</em>
-: <kbd>w greeting.txt</kbd><em>ex command to "write" the text to a file.</em>
+.</kbd><em>如果一行内只有一个 . ，ex 会停止文本插入</em>
+: <kbd>w greeting.txt</kbd><em>ex 命令，将文本“写入”（write）文档</em>
 "greeting.txt" [New] 1L, 7C written
-: <kbd>q</kbd><em>ex command to "quit" the program.</em>
-<span class="prompt">$ </span><kbd>cat greeting.txt</kbd><em>And now we're back in bash!</em>
-Hello!<em>The "cat" program shows the contents of the file.</em>
+: <kbd>q</kbd><em>ex 命令，表示“退出”</em>
+<span class="prompt">$ </span><kbd>cat greeting.txt</kbd><em>从 ex 又回到 bash！</em>
+Hello!<em>“cat“ 程序会显示文档内容</em>
 <span class="prompt">$ </span>
 </pre>
 
-    <p>Notice how in this session, we started out by giving bash the command to start the <kbd>ex</kbd> file editor.  After issuing this command, our prompt changed: any text we enter now is sent to ex, not to bash.  While ex is running, bash is aslumber waiting for your ex session to end.  When you quit ex using the <kbd>q</kbd> command, the <code>ex</code> bash command ends and bash is ready to receive a new command.  To tell you this, it shows you its prompt again, allowing
-    you to enter the next bash command.  We finish the example with a <kbd>cat greetings.txt</kbd> bash command which tells bash to run the cat program.  The cat program is great for outputting file contents (its name is short for con<em>cat</em>enate, because its purpose is to output the contents of all the files you give it, one after the other, effectively concatenating the contents in its output).  The cat command in the example is used to find out what is in our
-    <code>greetings.txt</code> file after we're done editing it with the ex program.</p>
+    <p>注意看上面这部分，我们首先向 bash 发出启动<kbd>ex</kbd>文档编辑器这条命令。命令发出后，我们终端内显示的提示符就发生了变化：此时我们输入的任何文本都是发送给 ex 程序的，而非 bash。当 ex 运行的时候，bash 就进入休眠，等待直到 ex 结束。当你使用<kbd>q</kbd>命令退出 ex，第一条<code>ex</code>bash 命令终结束运行，bash 又开始等待接收新的命令。为了让你知道它又回来待命了，bash 提示符会再次出现，使你可以键入下一条命令。在上面例子中，我们最后以<kbd>cat greetings.txt</kbd>这条 bash 命令作结，让 bash 启动 cat 程序。cat 程序非常利于输出文件内容（它是 con<em>cat</em>enate 的缩写，因为它的目的就是一个接一个地连缀输出你给它的所有文件的内容）。在这个例子中，cat命令是用来查看并显示我们用ex程序编辑过的<code>greetings.txt</code>文档内的内容。</p>
 
     <footer>
-    A bash command is the smallest unit of code that bash can independently execute.  While executing a command, you cannot interact with the bash shell.  As soon as bash is done executing a command, it returns to you for the next command to execute.
+    Bash 命令是bash可以独立运行的最小代码单元。在 bash 执行命令期间，你将不能和 bash shell 交互。一旦它完成执行，就会返回等待你的下一条命令。
     </footer>
 
-    <h2>How do I give bash a command?</h2>
+    <h2>我要如何向 bash 发送命令？</h2>
 
-    <p>We've been showing quite a few examples now of running commands in bash, so you probably already have a good idea about how one issues basic commands in bash at the prompt.</p>
+    <p>因为前面我们已给出一些 bash 命令的示例，所以关于如何向 bash 发送基本的指令，你很可能已有正确的认识。</p>
 
-    <p>Bash is mostly a line-based language.  Accordingly, when bash reads your commands, it does so line-by-line.  Most commands will only constitute one line and, unless the syntax of your bash command explicitly indicates that your command is not yet complete, as soon as you end that line, bash will immediately consider that to be the end of the command.  As a result, typing a line of text and hitting the <kbd title="enter/return">⏎</kbd> key will generally cause bash to start
-    performing the command described by your line of text.</p>
+    <p>Bash 是一种基于行（line-based）的语言。相应地，当 bash 读取你的命令时，它也是一行一行地读。绝大多数命令都只占据一行，除非你 bash 命令的语法在行末明确表明该行命令还未完结会延续至下一行，否则 bash 就会立即将行末理解为命令输入的终止点。因此，输入一行文本并按下<kbd title="enter/return">⏎</kbd>的行为，通常就会引发bash 启动执行你这行文本所表述的命令。</p>
 
-    <p>Some commands however, span multiple lines.  These are usually block commands or commands with quotes in them:</p>
+    <p>然而，有一些命令确实会跨越多行，他们通常都是命令块（block commands）或是命令中含有引号：</p>
 
 <pre lang="bash">
-<span class="prompt">$ </span><kbd>read -p "Your name? " name</kbd><em>This command is complete and can be started immediately.</em>
+<span class="prompt">$ </span><kbd>read -p "Your name? " name</kbd><em>这条命令是完整的，可以立即被执行</em>
 Your name? <kbd>Maarten Billemont</kbd>
-<span class="prompt">$ </span><kbd>if [[ $name = $USER ]]; then</kbd><em>The "if" block started but wasn't finished.</em>
+<span class="prompt">$ </span><kbd>if [[ $name = $USER ]]; then</kbd><em>"if"块开始但尚未结束</em>
 &gt; <kbd>    echo "Hello, me."</kbd>
 &gt; <kbd>else</kbd>
 &gt; <kbd>    echo "Hello, $name."</kbd>
-&gt; <kbd>fi</kbd><em>Now the "if" block ends and bash knows enough to start the command.</em>
+&gt; <kbd>fi</kbd><em>到此“if”块结束，bash知道要开始执行命令了</em>
 Hello, Maarten Billemont.
 </pre>
 
-    <p>Logically, bash cannot execute a command until it has enough information to do its job.  The first line of the <code>if</code> command in the example above (we'll cover what these commands do in more detail later on) doesn't contain enough information for bash to know what to do if the test succeeds or if it fails.  As a result, bash shows a special prompt: <code>&gt;</code>.  This prompt essentially means: <q>the command you gave me is not yet at an end</q>.  We keep on
-    providing extra lines for the command, until we reach the <code>fi</code> construct.  When we end that line, bash knows that you're done providing conditional result cases.  It immediately begins running all the code in the entire block, from <code>if</code> to <code>fi</code>.  We will soon see the different kinds of commands defined in bash's grammar, but the <code>if</code> command we just saw is called a <dfn>Compound Command</dfn>, because it compounds a bunch of
-    basic commands into a larger logical block.</p>
+    <p>逻辑上，如果 bash 对于它要做的事尚未掌握全部信息，那么它是无法执行一条命令的。在上面例子中（我们后面还会更具体地介绍这些命令在做什么），<code>if</code> 命令的首行没有包含足够完整的信息，bash 不知道如果测试通过了或是如果测试失败了，接下来要做什么。因此，bash 显示了一个特殊的提示符：<code>&gt;</code>。这个提示符其实就是在说：<q>你给我的命令尚未完结</q>。我们后面又为这条命令输入了更多行的字符，直到抵达<code>fi</code>。当我们结束那一行的输入，bash 终于知道你已完整给出了条件结果案例。bash 就会立即开始执行整个命令块中的代码，从<code>if</code>到<code>fi</code>。我们很快就会看到 bash 语法中定义的不同种类的命令，前面例子中的<code>if</code>命令被称作<dfn> 复合命令（Compound Command）</dfn>，因为它将一组基本的指令复合成为一个更大的逻辑组块。</p>
 
-    <p>In each of these cases, we're passing our commands to an interactive bash session.  As we explained before, bash can also run in non-interactive mode where it reads commands from a file or stream rather than asking you for them.  In non-interactive mode, bash doesn't have a prompt.  Aside from that, it operates pretty much the same.  We could copy the bash code from the example above and put it in a text file instead:</p>
+    <p>在以上示例中，我们都是把命令发送给一个交互式的 bash。正如前面解释过的，bash 也能以非交互式的模式从文件或流中读取命令，而无需向你索要。在非交互模式下，bash 没有命令提示符。除此之外，它的操作与交互模式基本相同。例如，我们就可以把上面例子中的代码复制到一个文件中：</p>
 
 <pre lang="bash">
 <kbd>read -p "Your name? " name
@@ -89,19 +78,18 @@ else
 fi</kbd>
 </pre>
 
-    <p>It doesn't matter much what you name the file in which you save the code.  Let's say you saved it in a file called <code>hello.txt</code>, we can now run the commands from that file using bash without it having to ask us for instructions:</p>
+    <p>至于你如何命名这个文件，并不重要。假设你将上面这些代码保存在<code>hello.txt</code>文件中，现在我们就可以使用 bash 直接运行文件中的命令，无需再向我们索要：</p>
 
 <pre lang="bash">
-<span class="prompt">$ </span><kbd>bash hello.txt</kbd><em>This starts a new "bash" process.</em>
+<span class="prompt">$ </span><kbd>bash hello.txt</kbd><em>启动一个新的 “bash” 进程</em>
 Your name? <kbd>Maarten Billemont</kbd>
-Hello, Maarten Billemont.<em>Our new "bash" process ends when there is no code left in the file.</em>
-<span class="prompt">$ </span><em>Now that the "bash" command is done, our interactive bash comes back.</em>
+Hello, Maarten Billemont.<em>当文件中没有余下未执行的代码后，新启动的 “bash” 进程就结束</em>
+<span class="prompt">$ </span><em>bash 命令执行结束后，交互式 bash 再次返回</em>
 </pre>
 
-    <p>Notice that two bash processes are involved in this example.  The bash process we start off from is our regular interactive shell.  We tell that bash process to run a command which will cause it to start a new bash process.  This second bash process will execute all the commands it finds in the file <code>hello.txt</code>, non-interactively.  When it's done (there are no commands left in the file), the non-interactive bash process ends and the interactive bash process is
-    ready with your <kbd>bash hello.txt</kbd> command; it shows a new prompt asking you for the next command to run.</p>
+    <p>注意上面这个例子中有两个 bash 进程。开始时，我们先启动了常用的交互式 bash shell。然后我们让这个 bash 进程执行一条命令，从而启动了一个新的 bash 进程。第二个进程将会以非交互式的方式执行它在<code>hello.txt</code>文件中读取到的所有命令。执行结束后（即文件中没有余下未执行的命令），非交互式的 bash 进程终止，交互式的 bash 进程完成了它对<kbd>bash hello.txt</kbd>命令的执行，进而提示符再次出现，等待运行你的下一条命令。</p>
 
-    <p>It's only a small step from a file with a list of commands in it to a veritable <dfn>bash script</dfn>.  Open your <code>hello.txt</code> file again using your favourite text editor and add a <dfn>hashbang</dfn> to the top of it, as the first line of the script: <kbd>#!/usr/bin/env bash</kbd></p>
+    <p>从包含一列命令的文档到一份真正意义上的<dfn>bash 脚本（descript）</dfn>，只需再迈出一小步。使用你喜欢的编辑器，再次打开<code>hello.txt</code>文档，在它的最上端添加一个 <dfn>hashbang</dfn> 作为脚本的首行：<kbd>#!/usr/bin/env bash</kbd></p>
 
 <pre lang="bash">
 <kbd><ins>#!/usr/bin/env bash</ins></kbd>
@@ -113,247 +101,238 @@ else
 fi
 </pre>
 
-    <p>Congratulations!  You've created your first bash script.  What's a bash script?  It's a file with bash code in it that can be executed by the kernel just like any other program on your computer.  In essence, it is a program in itself, although it does need the bash interpreter to do the work of translating the bash language into instructions the kernel understands.  That's where this "hashbang" line we've just added to the file comes in:  It tells the kernel what interpreter
-    it needs to use to understand the language in this file, and where to find it.  We call it a "hashbang" because it always begins with a "hash" <code>#</code> followed by a "bang" <code>!</code>. Your hashbang must then specify an absolute pathname to any program that understands the language in your file and can take a single argument.  Our hashbang is a little special, though:  We reference the program <code>/usr/bin/env</code>, which isn't really a program that understands the
-    bash language.  It's a program that can find and start other programs.  In our case, we use an argument to tell it to find the <code>bash</code> program and use that for
-    interpreting the language in our script.  Why do we use this "inbetween" program called <code>env</code>?  It has everything to do with what comes before the name: the path.  We know with relative certainty that the <code>env</code> program lives in the <code>/usr/bin</code> path.  Given the large variety of operating systems and configurations, however, we don't have any good certainty about where the <code>bash</code> program is installed.  Which is why we use the
-    <code>env</code> program to find it for us.  That was a little complicated!  But now, what's the difference between our file before and after adding the hashbang?</p>
+    <p>祝贺你！你已创建了自己的第一份bash脚本。什么是bash脚本？就是其中含有bash代码的文档，系统内核可以像执行电脑中其他程序那样执行它。本质上，它就是一个程序，不过需要bash解释器将bash语言翻译为系统内核可以理解的指令。这就是为什么我们要在文档首行插入“hashbang”：它告诉系统内核需要用哪种解释器来理解并翻译这份文档中的语言，以及在哪里可以找到这种解释器。我们之所以称呼为“hashbang”是因为，bash脚本总是从一个“hash”开始，后面紧跟着一个“bang” <code>!</code>。之后你的hashbang必须指定一条绝对路径，指向能理解、翻译文档中语言的程序，并且可以接受一个参数。我们这里的hashbang有些特殊：我们指向的程序<code>/usr/bin/env</code>，其实并不是一个可以理解bash语言的程序。它实际是一个可以找到并启动其他程序的程序。在这个例子中，我们通过使用一个参数（argument）告诉这个程序去找到<code>bash</code>程序，并用它来解释翻译我们脚本中的语言。那为什么要使用这样一个叫做<code>env</code>的中间程序呢？全部的原因都在于这个名字前面的东西：路径（path）。我们很有把握地知道<code>env</code>这个程序生活在<code>/usr/bin</code>路径下，但是考虑到整个操作系统以及配置的庞杂，我们很可能不清楚<code>bash</code>这个程序被安装在哪里。这就是为什么我们会使用<code>env</code>这个程序来帮助我们找到它。有些复杂是吧！那么在加上hashbang之前与之后，我们的文档有什么不同吗？</p>
 
 <pre lang="bash">
-<span class="prompt">$ </span><kbd>chmod +x hello.txt</kbd><em>Mark hello.txt as an e<strong>x</strong>ecutable program.</em>
-<span class="prompt">$ </span><kbd>./hello.txt</kbd><em>Tell bash to start the hello.txt program.</em>
+<span class="prompt">$ </span><kbd>chmod +x hello.txt</kbd><em>将 hello.txt 标识为可被执行（e<strong>x</strong>ecutable）的程序</em>
+<span class="prompt">$ </span><kbd>./hello.txt</kbd><em>让 bash 启动 hello.txt 程序</em>
 </pre>
 
-    <p>Most systems require you to mark a file as <dfn>executable</dfn> before the kernel is willing to allow you to run it as a program.  Once we do that, we can start the <code>hello.txt</code> program like we would any other program.  The kernel will look inside the file, find the hashbang, use that to track down the bash interpreter, and finally use the bash interpreter to start running the instructions in the file.  You have your first real bash program!</p>
+    <p>在内核允许将某个文档作为程序执行之前，绝大多数的系统都要求你首先将这个文档标识为 <dfn>可执行（executable）</dfn>。如此操作之后，我们就可以像启动其他程序那样启动 <code>hello.txt</code>。内核会读取这份文档，找到 hashbang，通过它找到 bash 解释器，最终使用 bash 解释器运行文档中的指令。现在你就有了自己的第一个 bash 程序！</p>
 
     <footer>
-    Bash gets commands by reading lines.  As soon as it's read enough lines to compose a complete command, bash begins running that command.  Usually, commands are just a single line long.  An interactive bash session reads lines from you at the prompt.  Non-interactive bash processes read their commands from a file or stream.  Files with a <dfn>hashbang</dfn> as their first line (and the <dfn>executable</dfn> permission) can be started by your system's kernel like any other
-    program.
+    bash以行的方式读取命令。一旦它读取完构成完整命令的全部行代码，就会开始执行命令。通常，命令都只有一行的长度。交互模式下的bash从提示符开始读取你的行命令。非交互式bash进程则从文档或流中读取命令。 以 <dfn>hashbang</dfn> 为首行起始（且获得 <dfn>可执行</dfn> 许可）的文档，就会像你电脑中的其他程序那样被系统内核启动。
     </footer>
 
 </section>
 
 <section>
-    <h1>Learning to speak "bash"</h1>
+    <h1>学习说“bash”</h1>
 
-    <p>If you've been paying close attention to the previous sections, you've got a pretty good introduction to what bash is, where and how it operates within the system and how you use it.</p>
+    <p>如果你有认真阅读前面部分的内容，那应该对bash是什么、在系统的哪个位置、如何工作，以及如何使用它，都已有清楚的认识。</p>
 
-    <p>Time to start speaking "bash".  We're going to get introduced to the bash shell language's grammar, and with that, this guide is going to start getting a bit more technical.  Don't worry, focus and you won't get left behind.  If you get a feeling of unease and uncertainty, re-read the section before moving on to avoid getting completely lost.  We'll try and cover all the how's and why's of new concepts.  If anything remains unclear, we encourage you to get in touch so that we can improve this guide for you and your
-    fellow students.  Our contact information is at the beginning of the guide.</p>
+    <p>
+    现在是时候开始学说“bash”了。接下来我们会介绍bash shell 语言的语法，因此这份指南会变得更有技术性（technical）。但是不要担心，保持专注，你不会掉队的。如果觉得不安或不踏实，可以重读前面的内容再看后续的部分，以防彻底迷失。我们会尽可能覆盖新概念相关的所有“如何”（how's）或“为什么”（why's）的问题。如果仍有任何不清楚的地方，也欢迎你联系我们，这样我们就能为你以及之后其他学生改进这篇指南。我们的联系信息在指南的篇首。</p>
 
-    <h2>About intentions and ambiguity</h2>
+    <h2>关于意图与模糊性</h2>
 
-    <p>The biggest difference with speaking to a computer as opposed to speaking to a human is that computer programs are generally terrible at placing your requests in context and figuring out what your intention is.  Those that try are usually called "smart" for being able to take ambiguous input and going to lengths to figure out what the intended result was.  In this context, "smart" is unfortunately not quite in line with what we'd expect from smart humans: the kinds of
-    assumptions computer programs make based on our ambiguous input tend to be miles off and often lead to terrible or even disastrous results.</p>
+    <p>相比和人类对话，与计算机对话最大的不同在于，计算机程序通常都不擅长把你的需求放在一个背景下去揣摩你的意图是什么。那些尝试去做，且真的能够基于模糊的输入、费尽周折搞清楚预期结果的程序，通常会被称为“聪明”。不幸的是，这种情况下的“聪明”，与我们对“聪明”人的期待是不同的：基于我们含糊不清的输入，计算机程序作出的推测常与实际相差甚远，并经常导致糟糕甚至灾难性的结果。</p>
 
-    <p>Sadly, we, as humans, are used to speaking in ambiguity: we rely on the receiver to understand the context of our requests and figure out what the most likely desirable action is.  When we ask our partner to get the salt, we don't expect her to return with a handful of salt: we expect her to understand that our intention is to use the salt container to sprinkle some salt on our dish and we need them to bring the container to us, filled with at least a minimum amount of
-    salt.</p>
+    <p>麻烦地是，我们人类却习惯于模糊不清地讲话：我们依赖于接收者能理解我们所提需求的背景（context），清楚我们最期待的行动是什么。当我们向伴侣要盐的时候，并不是真地要他们给我们一勺盐：而是期待他们理解我们的实际意图是让他们往饭菜中加一点盐，期待当他们把饭菜端给我们的时候，上面至少洒了一点点盐。
+    </p>
 
-    <p>It is important to recognize the ambiguity in our language and requests before we start talking to computer programs, because we need to learn to get rid of that ambiguity in our language.  If you have little experience with doing this, it will likely be your biggest challenge going forward.  It takes practice to think in such literal terms.  It helps to imagine we're talking to a three-year old and showing them for the first time, each time, how to do the thing you need them to
-    do.  When <q>Bring the animals book</q> doesn't yet cut it, we need to teach them the steps: <q>Look around, do you see the books behind you?</q>, <q>Great!  Can you find the book with the lion and the cow on it?</q>, <q>That's the one, grab it for me!</q>, <q>Good boy, now bring it to daddy!  Come here, you.</q>, <q>Hi!  Look at you.  Give me the book and sit down, let's read it together.</q>; in a way, writing a bash script is similar to teaching your system how to do a task.
-    The difference is your three year old will recognize previous experiences in new requests by himself, your system won't: you'll need to explicitly specify and run previously written job descriptions.</p>
+    <p>在开始与计算机程序对话之前，首先要认识到我们日常语言以及需求中的模糊性，进而在之后学习消除这种模糊性。如果你对此缺少经验，这很可能就是你前进过程中最大的挑战。按字面意思思考是需要练习的。下面这个技巧应该有用：想象我们是在和一个三岁大的小朋友讲话，每一次都要像第一次那样，教他们做你想让他们做的事。当只是说<q>把那本动物书拿过来</q> 还不够的时候，我们需要分步骤教他们：<q>向四周看看，看到你身后的书了吗？</q>，<q>棒！你能找到那本封面上有狮子和牛的书吗？</q>，<q>就是那本，把它拿给我！</q>，<q>好孩子，把它拿给爸爸！过来这边。</q>，<q>嗨，你真棒，把书给我，坐下吧，我们一起来阅读。</q>。一定程度上，写bash脚本就像是在教你的系统执行某项任务。区别在于，你三岁大的孩子自己就能在新的需求中辨识出过去习得的经验，但你的系统不会，每次你都需要明确指定它重复运行之前编写的任务描述代码。</p>
 
-    <p>Some language interpreters (an interpreter is a program, like bash, that can understand a language) try to compensate for this problem by being extremely strict with their grammar and syntax.  The idea is to weed out the ambiguity in your language so as to avoid accidentally doing the wrong thing.  The interpreter enforces correctness to a certain degree: this tends to be a relatively successful strategy and generally results in the least buggy programs.</p>
+    <p>一些语言解释器（类似bash，解释器是一种可以理解语言的程序），试图通过严格地限定自己的语法来规避以上问题。背后的理念就是去除你语言中的模糊不清来避免系统不小心做错什么。解释器强制性地将表达的准确性限定到一定程度。这是一种相对成功的策略，通常会产出bug最少的程序。</p>
 
-    <p>Sadly, bash is not a strict interpreter.<br>
-    In fact, bash's latitude is largely at fault for the general ineptitude toward bash scripting with most anyone introduced to the language, novice and professional alike.  The result is not dissimilar to the state of the web around the turn of the century: many pages were written so badly that their ability to render properly on any kind of standards-compliant browser was sufficiently compromised to force these browsers to implement all sorts of "smart" hacks in an attempt
-    to render the pages as they might have been intended to render, rather than what they were written to render.  Similarly, the gross part of the scripts you are going to run into <em>will be buggy</em>.  Sometimes subtly so, often to the point where simply using it with a file whose name is somewhat unexpected may cause irreversible damage to your system.</p>
-    <p><strong>Don't be that person.</strong><br>
-    This guide exists to teach you to write good bash code.  It will empower you to convey your true intentions and have a computer solve your problems.  Since bash is a lax interpreter, <em>the responsibility of discipline lays with you</em>.  If you're not up to honoring this prerequisite, I recommend you stop reading now and find a strict interpreter instead.  There is too much bad bash code in the world, and this guide will not be responsible for empowering people to write
-    more.</p>
+    <p>可惜的是，bash不是一个严格的解释器。<br>
+    实际上，bash的宽容在很大程度上导致大多数编写bash 脚本的人能力都不合格，无论是新手还是专业技术人员。结果就与世纪之交网站开发的状态非常相似：许多网页的代码都写得极为糟糕，以至于严重限制他们在任一种标准浏览器内的正常渲染，这就倒逼浏览器使用各种所谓“聪明”的手段，努力以网页开发者期待的效果去渲染，而不是严格遵从他们实际写下的代码。类似地，你即将遇到的大多数bash 脚本都是<em>有bug的（buggy）</em>。有些是轻微的，但经常能到这种程度：仅仅将它用在一个名字稍不太寻常的文件上，就可能对你的系统造成不可逆的破坏。</p>
+    <p><strong>不要做这样的人。</strong><br>
+    这份指南的存在是要教你写出好的bash代码。它将赋能你准确传达自己的真实意图，并让计算机解决你的问题。既然 bash 是一种松懈的解释器，<em>纪律的责任就在你</em>。如果你不打算尊重这个前提，我建议你现在就停止阅读，另找一种严格的解释器。世界上已经有太多糟糕的bash代码，这份指南拒绝帮助人贡献更多。</p>
 
     <footer>
-    Bash is a lax language interpreter, which means it will permit you to write ambiguous commands.  Its syntax will not prevent you from writing commands that do things that are not what they seem.  It is solely your responsibility to learn the syntax adequately, recognize the pitfalls and pick up the discipline to stick to the practices that avoid buggy code consistently.
+    Bash 是一种宽松的语言解释器，这就意味着它允许你写模糊不清的命令。它的语法不会阻止你编写命令，使计算机做出非你本意要它做的事。因此，责任全都在你，要充分学习bash的语法，识别陷阱，练习过程中严于律己，尽可能地减少代码中的bug。
     </footer>
 
-    <h2>The basic grammar of a bash command</h2>
+    <h2>bash 命令的基本语法</h2>
 
-    <p>At the highest level, there are a few different kinds of commands.  We'll explain each type, give a brief example and go more in depth on each command type in a later section.  Don't worry too much about the syntax of these commands yet:  that'll become clear when we focus on the different command types later on.  What you should take away from this is a high-level understanding that bash commands come in different shapes and sizes, and a rough understanding of different
-    syntaxes.</p>
+    <p>在最高水平上，bash有几类不同的命令。我们接下来会解释每一种类型，给出一个简单的示例，然后在后续部分更深入地介绍每一类命令。现在不要太担心这些命令的语法，当我们之后专注到每种命令类型时，他们就会变得清晰。当前你只需要对bash命令的多种类型、规模以及不同语法，形成初步整体性的理解。</p>
 
     <dl>
-        <dt>Simple Commands</dt>
+        <dt>简单命令（Simple Commands）</dt>
         <dd>
-            <p>This is the most common kind of command.  It specifies the name of a command to execute, along with an optional set of <dfn>arguments</dfn>, <dfn>environment variables</dfn> and <dfn>file descriptor redirections</dfn>.</p>
+            <p>这是最常见的命令类型。命令中会指定要执行的命令名称，后面跟着可选的 <dfn>参数（arguments）</dfn>，<dfn>环境变量（environment variables）</dfn>， <dfn>文件描述符重定向（file descriptor redirections）</dfn>。
+            </p>
 
 <pre class="syntax">
     [ <var>var</var><strong>=</strong><var>value</var> ... ] <var>name</var> [ <var>arg</var> ... ] [ <var>redirection</var> ... ]
+    [ <var>变量</var><strong>=</strong><var>值</var> ... ] <var>名称</var> [ <var>参数</var> ... ] [ <var>重定向</var> ... ]
 
-<samp><u title="name">echo</u> <u title="arg #1">"Hello world."</u></samp>
-<samp><u title="var #1">IFS=,</u> <u title="name">read</u> <u title="arg #1">-a</u> <u title="arg #2">fields</u> <u title="redirection #1">&lt; file</u></samp>
+<samp><u title="名称（name）">echo</u> <u title="参数 #1（arg #1）">"Hello world."</u></samp>
+<samp><u title="变量 #1（var #1）">IFS=,</u> <u title="名称（name）">read</u> <u title="参数 #1（arg #1）">-a</u> <u title="参数 #2（arg #2）">fields</u> <u title="重定向 #1（redirection #1）">&lt; file</u></samp>
 </pre>
 
-<aside><p>As this is the first time we're introducing syntax, let's note how the guide represents the different elements of a syntax block.  Every word in the syntax you'll be replacing with your own code, such as the command's <var>name</var> above, is formatted <var>like this</var>.  Literal characters in the syntax that you must type exactly as written are bolded, such as the equals (<code>=</code>) in <code><var>var</var><strong>=</strong><var>value</var></code>.</p>
-    <p>This guide is very intent on teaching by practice, and will include examples along with every new concept.  Examples will often include <u title="Annotations have a short text to help you understand the element's context.">underlined annotations</u> to help you understand key parts of the example.  You should be able to hover over these underlined parts and get a short explanation.  Give it a try on the underlined parts of the examples above and find out what each annotation says about
-    its element.
+<aside><p>因为这是我们第一次介绍语法，就先说明一下在这篇指南中我们如何标识一个语法组块中的不同元素。语法中的每一个单词你之后会用自己实际的代码替换，如上面示例命令中的<var>名称（name）</var>以<var>这种方式</var>标识。语法中你之后必须原样输入的字符会加粗显示，如<code><var>变量（var）</var><strong>=</strong><var>值（value）</var></code>中的 (<code>=</code>) 。</p>
+<p>这篇指南非常注重通过实践教学，因此会在每个新概念之后附上一些例子。例子中通常会包括<u title="简短的文字注释会帮助你理解元素的性质">下划线标注</u>的部分，帮助你理解关键内容。当你把鼠标悬停在下划线标注的内容上时，会出现一个简短的解释。试试看这种操作，看看每个注释都说了什么。</p>
 <pre>
-<samp>This is what <u title="And this is an annotation in the example.">an example</u> looks like.</samp>
-<samp>And this is a second example of an example.</samp></pre></p>
-    <p>In the syntax block, we use square brackets (<code>[ ]</code>) around parts of the syntax that are optional.  You'll notice the first code example doesn't contain a <code><var>var</var><strong>=</strong><var>value</var></code> part but the second example does.  This part of the syntax is available to you if you need it, but can be omitted if you don't.
-    Finally, when an element of the syntax can be repeated as many times as you might need it, we indicate this with three dots (<code>...</code>).  For instance, the above syntax allows you to optionally specify as many <var>redirection</var>s as you might need.</p></aside>
+<samp><u title="这是对例子的注释">例子</u>就像这个样子</samp>
+<samp>这是例子的第二个示例</samp></pre></p>
+<p>在语法块中，我们使用方括号（<code>[ ]</code>）包住的部分是可选性的。你会看到第一个例子中的命令内就没有 <code><var>变量（var）</var><strong>=</strong><var>值（value）</var></code> 这个部分，但是第二个例子中有。如果你需要就用它，不需要就省略。最后，语法中根据你的需要可以重复使用多次的元素，用三个点（<code>...</code>）标识。例如，上面的语法就允许你根据需要选择性地标识任意多的 <var>重定向</var></p></aside>
 
-            <p>Before the command's name you can <em>optionally</em> put a few <var>var</var> assignments.  These variable assignments apply to the environment of this one command only.  We'll go more in depth on variables and environment later on.</p>
-            <p>The command's <var>name</var> is the first word (after the optional assignments).  Bash finds the command with that name and starts it.  We'll learn more about what kind of named commands there are and how bash finds them later on.</p>
-            <p>A command's name is optionally followed by a list of <var>arg</var> words, the command arguments.  We'll soon learn what arguments and their syntax are.</p>
-            <p>Finally, a command can also have a set of <var>redirection</var> operations applied to it.  If you recall our explanation of file descriptors in an earlier section, redirections are the operations that change what the file descriptor plugs point to.  They change the streams that connect to our command processes.  We'll learn about the power of redirections in a future section.</p>
+            <p>在命令的名称之前，你可以 <em>选择性</em> 赋值一些 <var>变量（var）</var>。这些变量仅适用于这一次命令的执行环境。关于变量和环境，后面我们还会深入介绍。</p>
+            <p>命令的 <var>名称（name）</var> 是第一个单词（在选择性的变量赋值之后）。bash 会找到这个名称对应的命令并启动它。我们后面还会介绍被命名的命令都有哪些种类，以及bash如何找到他们。</p>
+            <p>命令的名称后面可以选择性地接一列 <var>参数（arg）</var> ，我们很快就会学习什么是参数，以及他们的语法。</p>
+            <p>最后，命令中也可以有一组施加于它的 <var>重定向（redirection）</var> 设置。还记得我们前面对文件描述符的解释吗，重定向就是改变文件描述符插件指向的操作。他们会改变与命令进程相连接的流（stream）。在后面章节中我们会学习到重定向的作用。
+            </p>
         </dd>
-        <dt>Pipelines</dt>
+        <dt>管道（Pipelines）</dt>
         <dd>
-            <p>Bash comes with a lot of "syntax sugar" to make common tasks easier to perform than by using just the basic syntax.  Pipelines are an example of sugar that you'll be using a lot.  They are a convenient way of "connecting" two commands by way of linking the first process' standard output to the second process' standard input.  This is the most common way for terminal commands to talk to one another and convey information.</p>
+            <p>相比使用基本语法，bash 有很多“语法糖（syntax sugar）”，使一般任务执行起来更为轻松。管道就是一种你经常会用到的语法糖。通过将第一个进程的标准输出与第二个进程的标准输入相连，它可以很方便地将两个命令连接在一起。这是终端命令最常用的与其他命令对话并传递信息的方法。</p>
 
 <pre class="syntax">
     [<strong>time</strong> [<strong>-p</strong>]] [ <strong>!</strong> ] <var>command</var> [ [<strong>|</strong>|<strong>|&</strong>] <var>command2</var> ... ]
+    
+    [<strong>time</strong> [<strong>-p</strong>]] [ <strong>!</strong> ] <var>命令</var> [ [<strong>|</strong>|<strong>|&</strong>] <var>命令2</var> ... ]
 
 <samp><u title="command #1">echo Hello</u> | <u title="command #2">rev</u></samp>
 <samp>! <u title="command #1">rm greeting.txt</u></samp>
 </pre>
         
-            <p>We rarely use the <code>time</code> keyword, but it is convenient for finding out how long it takes to run our commands.</p>
-            <p>The <code>!</code> keyword is a little odd at first, and just like the time keyword it doesn't have much to do with connecting commands.  We'll learn about what it does when we discuss conditionals and testing the success of commands.</p>
-            <p>The first <code>command</code> and the second <code>command2</code> can be any type of command from this section.  Bash will create a <dfn>subshell</dfn> for each command and set up the first command's standard output file descriptor such that it points to the second command's standard input file descriptor.  The two commands will run simultaneously and bash will wait for both of them to end.  We'll explain what exactly these "subshells" are in a later chapter.</p>
-            <p>Inbetween the two commands goes the <code>|</code> symbol.  This is also called the "pipe" symbol, and it tells bash to connect the output of the first to the input of the second command.  Alternatively, we can use the <code>|&amp;</code> symbol inbetween the commands to indicate that we want not only the standard output of the first command, but also its standard error to be connected to the second command's input.  This is usually undesirable since the standard
-            error file descriptor is normally used to convey messages to the user.  If we send those messages to the second command rather than the terminal display, we need to make sure the second command can handle receiving these messages.</p>
+            <p>我们基本不用 <code>time</code> 关键词，但是对于了解执行命令所需的时间,使用它还是很方便的。</p>
+            <p>感叹号<code>!</code>这个关键词初看可能有些奇怪，和time关键词类似，它和连接命令也没多大关系。当我们讨论条件及测试命令是否执行成功时,会再介绍它的作用。</p>
+            <p>语法中的第一个命令<code>command</code>与第二个命令<code>command2</code>可以是任何类型。bash会分别为他们创建一个<dfn>subshell</dfn>，并将第一个命令的标准输出文件描述符设置为指向第二个命令的标准输入文件描述符。这两个命令会同时运行，而bash会等待他们全部执行结束。我们在后面的章节中会解释“subshell”究竟指什么。</p>
+            <p>在两个命令之间，有这样一个符号 <code>|</code>。这个也被称作“管道”符，它会告诉bash将第一个命令的输出与第二个命令的输入相连。此外，在两个命令之间也可以使用 <code>|&amp;</code> 符号，意思是除了标准输出外，把第一个命令的标准错误输出也与第二个命令的输入相连。但最好不要这样做，因为标准错误文件描述符通常用来传递消息给用户。如果我们把这些消息传给第二个命令而不是终端显示器，需确保第二个命令可以处理接收到的这些消息。</p>
         </dd>
-        <dt>Lists</dt>
+        <dt>列表（Lists）</dt>
         <dd>
-            <p>A list is a sequence of other commands.  In essence, a script is a command list: one command after another.  Commands in lists are separated by a control operator which indicates to bash what to do when executing the command before it.</p>
+            <p>列表就是一组命令序列。本质上，脚本就是一个命令列表：一个接一个的命令。列表中的命令用控制运算符分开，而控制运算符会示意bash应该如何执行它前面的命令。</p>
 
 <pre class="syntax">
     <var>command</var> <var>control-operator</var> [ <var>command2</var> <var>control-operator</var> ... ]
 
-<samp>cd music<u title="sequential control operator">;</u> mplayer *.mp3</samp>
-<samp>rm hello.txt <u title="conditional control operator 'OR'">||</u> echo "Couldn't delete hello.txt." &gt;&amp;2</samp>
+    <var>命令</var> <var>控制运算符</var> [ <var>command2</var> <var>控制运算符</var> ... ]
+
+<samp>cd music<u title="序列（sequential）控制运算符">;</u> mplayer *.mp3</samp>
+<samp>rm hello.txt <u title="条件（conditional）控制运算符“OR”">||</u> echo "Couldn't delete hello.txt." &gt;&amp;2</samp>
 </pre>
         
-            <p>The command can be any of the other types of commands from this section.</p>
-            <p>After the command comes the <dfn>control operator</dfn> which tells bash how the command should be executed.  The simplest control operator is just starting a new line, which is equivalent to <code>;</code> and tells bash to just run the command and wait for it to end before advancing to the next command in the list.  The second example uses the <code>||</code> control operator which tells bash to run the command before it as it normally would, but after finishing
-            that command move to the next command <em>only if the command before it failed</em>.  If the command before it didn't fail, the <code>||</code> operator will make bash skip the command after it.  This is useful for showing error messages when a command fails.  We'll go more in depth on all the control operators in later sections.</p>
-            <p>Notice that since a script is essentially a list of commands on separate lines, it is effectively a command list that uses newlines as the control operators between all the commands.</p>
+            <p>语法中的命令可以是这部分介绍的其他任何命令类型。</p>
+            <p>命令之后的 <dfn>控制运算符</dfn> 会告诉bash应该如何执行这条命令。最简单的控制运算符就是换行，等价于<code>;</code>，用来告诉bash运行这条命令，等待结束，然后执行列表中的下一命令。第二个例子使用了 <code>||</code> 这个控制运算符，它用来告诉bash正常运行在它前面的命令，但是运行结束后，<em>只有当前面那条命令运行失败</em> 才需要继续运行后面第二条命令。如果前面那条命令运行成功，<code>||</code> 会让bash跳过它后面的那条命令。这对于命令运行失败后显示错误信息非常有用。在后面章节中，我们会深入了解所有的控制运算符。</p>
+            <p>注意，因为bash脚本本质上是一个由多行命令组成的列表，所以它是一个有效的命令列表，即在所有命令之间使用换行作为控制运算符。</p>
         </dd>
-        <dt>Compound Commands</dt>
+        <dt>复合命令（Compound Commands）</dt>
         <dd>
-            <p>Compound commands are commands with special syntax inside them.  They can do a lot of different things but behave as a single command in a command list.  The most obvious example is a block of commands: The block itself behaves as a single big command but inside it are a bunch of "sub" commands.  There are a lot of different kinds of compound commands and we will cover them all in-depth later.</p>
+            <p>复合命令指的是命令中包含特殊语法。他们可以做很多不同的事，但在命令列表中整体作为一条命令行事。最明显的例子就是命令块：组块本身就像单独一个命令，但是内部还含有一些构成命令（sub commands）。复合命令的种类也有很多，我们后面还会深度介绍他们。</p>
 
 <pre class="syntax">
     <strong>if</strong> <var>list</var> [ <strong>;</strong>|<strong>&lt;newline&gt;</strong> ] <strong>then</strong> <var>list</var> [ <strong>;</strong>|<strong>&lt;newline&gt;</strong> ] <strong>fi</strong>
     <strong>{</strong> <var>list</var> <strong>;</strong> <strong>}</strong>
 
-<samp><u title="start of compound command 'if'">if</u> ! rm hello.txt; then echo "Couldn't delete hello.txt." &gt;&amp;2; exit 1; <u title="end of compound command 'if'">fi</u></samp>
-<samp>rm hello.txt || <u title="start of 'group' compound command">{</u> echo "Couldn't delete hello.txt." &gt;&amp;2; exit 1; <u title="end of 'group' compound command">}</u></samp>
+<samp><u title="复合命令“if”的起始">if</u> ! rm hello.txt; then echo "Couldn't delete hello.txt." &gt;&amp;2; exit 1; <u title="复合命令“if”的终止">fi</u></samp>
+<samp>rm hello.txt || <u title="复合命令“组”的起始">{</u> echo "Couldn't delete hello.txt." &gt;&amp;2; exit 1; <u title="复合命令“组”的终止">}</u></samp>
 </pre>
         
-            <p>Both examples perform the same operation.  The first example is a compound command, the second is a compound command in a command list.  We discussed the <code>||</code> operator briefly before:  The command on the right side of it is skipped unless the command before it fails.  This is a good example to illustrate an important property of compound commands: they behave as one command in a command list.  The compound command in the second example begins at
-            <code>{</code> and continues until the next <code>}</code>, as a result everything inside the braces is considered a single command, meaning we have a command list of two commands: the <code>rm</code> command followed by the <code>{ ... }</code> compound.  If we were to forget the braces, we would get a command list of <em>three</em> commands: the <code>rm</code> command followed by the <code>echo</code> command, followed by the <code>exit</code> command.  The difference is mainly important to
-            the <code>||</code> operator in deciding what to do when the preceding <code>rm</code> command is successfully completed.  If the <code>rm</code> succeeds, <code>||</code> will skip the command after it, which, if we leave out the braces, would be only the <code>echo</code> command.  The braces combine the <code>echo</code> and <code>exit</code> commands into a single compound command, allowing <code>||</code> to skip both of them when <code>rm</code> succeeds.</p>
+            <p>上面这两个例子中的命令完成的是相同的操作。第一个例子是一个复合命令，第二个例子是一个命令列表中含有一个复合命令。前面已简单提及<code>||</code>运算符：除非它前面的命令运行失败，否则它右边的命令会被bash跳过不执行。这个例子很好地展示了复合命令的一个重要特点：他们行事就像命令列表中的单独一项命令。在第二个例子中，复合命令从左侧大括号<code>{</code>开始，一直到右侧大括号<code>}</code>结束，括号内部的所有代码被整体当作一个命令执行。也就是说，在第二个例子中，我们有一个包含两条命令的命令列表：<code>rm</code>命令后面跟着<code>{ ... }</code>这条复合命令。如果去掉大括号，就是包含 <em>three</em> 命令的命令列表：<code>rm</code>命令后面跟着<code>echo</code>命令，再然后是<code>exit</code>命令。有或是没有大括号主要会影响<code>||</code>运算符，它需要决定如果前面<code>rm</code>命令运行成功接下来要做什么。如果<code>rm</code>成功，<code>||</code>会使bash跳过它后面的命令。假设没有大括号，它后面就只有<code>echo</code>这一条命令需要跳过；而大括号将<code>echo</code>与<code>exit</code>命令合并为一个复合命令，在<code>rm</code>运行成功后，<code>||</code>运算符会使bash同时跳过这两个命令。</p>
         </dd>
-        <dt>Coprocesses</dt>
+        <dt>协作进程</dt>
         <dd>
-            <p>A coprocess is some more bash syntax sugar: it allows you to easily run a command asynchronously (without making bash wait for it to end, also said to be "in the background") and also set up some new file descriptor plugs that connect directly to the new command's input and output.  You won't be using coprocesses too often, but they're a nice convenience for those times you're doing advanced things.</p>
+            <p>协作进程不过就是更多的语法糖：它使你可以轻松地异步（asynchronously）运行命令（不需要等待命令结束，也可以说是“在后台运行”），还能设置新的文件描述符插件来直接连接新命令的输入与输出。你不会经常用到协作进程，但是当你做一些高级复杂的任务时，使用他们会非常方便。</p>
 
 <pre class="syntax">
     <strong>coproc</strong> [ <var>name</var> ] <var>command</var> [ <var>redirection</var> ... ]
+
+    <strong>coproc</strong> [ <var>名称</var> ] <var>命令</var> [ <var>重定向</var> ... ]
 
 <samp>coproc auth { tail -n1 -f /var/log/auth.log; }
 read latestAuth &lt;&amp;"${auth[0]}"
 echo "Latest authentication attempt: $latestAuth"</samp>
 </pre>
         
-            <p>The example starts an asynchronous <code>tail</code> command.  While it runs in the background, the rest of the script continues.  First the script reads a line of output from the coprocess called <code>auth</code> (which is the first line the <code>tail</code> command output).  Next, we write a message showing the latest authentication attempt we read from the coprocess.  The script can continue and each time it reads from the coprocess pipe, it will get the next line from the
-            <code>tail</code> command.</p>
+            <p>上面这个例子中，启动了一个异步命令 <code>tail</code>。当它在后台运行时，其他的脚本命令持续运行。首先，脚本会从协作进程 <code>auth</code>的输出中读取一行结果（也就是<code>tail</code> 命令的第一行输出）。接下来我们编写一条消息，显示从协作进程中读取的最近一次认证尝试。这个脚本可以持续运行，每一次它都会从协作管道中读取信息，<code>tail</code> 命令会使它换行。</p>
         </dd>
-        <dt>Functions</dt>
+        <dt>函数（Functions）</dt>
         <dd>
-            <p>When you declare a function in bash, you're essentially creating a temporary new command which you can invoke later in the script.  Functions are a great way to group a list of commands under a custom name for convenience when you repeat the same task more than once in your script.</p>
+            <p>当你在bash中声明一个函数时，本质上你在创建一个临时的新命令，在后面的脚本中还可以再次召唤它。函数是一种非常好的方式，用来将一列命令结合成组并自定义命名，以便你在脚本中重复执行某个任务。</p>
 
 <pre class="syntax">
     <var>name</var> <strong>()</strong> <var>compound-command</var> [ <var>redirection</var> ]
+
+    <var>名称</var> <strong>()</strong> <var>复合命令</var> [ <var>重定向</var> ]
 
 <samp>exists() { [[ -x $(type -P "$1" 2&gt;/dev/null) ]]; }
 exists gpg || echo "Please install GPG." &lt;&amp;2</samp>
 </pre>
                             
-            <p>You begin by specifying a <code>name</code> for your function.  This is the name of your new command, you'll be able to run it later on by writing a simple command with that name.</p>
-            <p>After the command name go the <code>()</code> parentheses.  Some languages use these parentheses to declare the arguments the function accepts: <strong>bash does not</strong>.  The parentheses should always be empty.  They simply denote the fact that you're declaring a function.</p>
-            <p>Next comes the compound command that will be executed each time you run the function.</p>
-            <p>To change the file descriptors of the script for the duration of running the function, you can optionally specify the function's custom file redirections.</p>
+            <p>首先需为你的函数指定一个<code>名称（name）</code>，这就是你新命令的名称，之后只需用它写一句简单命令就可以运行。</p>
+            <p>在命令的名称之后是一对括号 <code>()</code>。有些语言会使用括号来声明函数接受的参数，但  <strong>bash does not</strong>。这对括号的内部应该始终为空。他们只是用来标注你在声明一个函数而已。</p>
+            <p>之后跟着的是你每次运行这个函数时将会被执行的复合命令。</p>
+            <p>如果运行函数期间要改变脚本的文件描述符，可以选择性指定函数的自定义文件重定向。</p>
         </dd>
     </dl>
 
     <footer>
-    Bash commands tell bash to perform a certain unit of work.  These units of work cannot be subdivided: bash needs to know the whole command to be able to execute it.  There are different kinds of commands for different types of operations.  Some commands group other commands into blocks or test their result.  Many command types are syntax sugar: their effect can be achieved differently, but they exist to make the job easier.
+        bash命令会让bash执行特定单元的任务。这些单元任务不能再被拆分，也就是说bash需要知道完整的命令单元才能执行它。对于不同类型的操作有不同种类的命令。一些命令将其他命令组成块或者测试他们的执行结果。许多命令类型其实都是语法糖：即他们的效果可以不同方式实现，但他们的存在会使任务的执行简便很多。
     </footer>
 
 </section>
 
 <section>
-    <h1>Simple commands: The foundation of every bash command</h1>
+    <h1>简单命令（simple commands）：所有bash命令的基础</h1>
 
-    <p>Phew!  That was a lot all at once.  Most of this might have gone over your head - that's fine.  We'll get back to the simple stuff and let you build up your knowledge with a thorough understanding.  But it's important to take away that bash has different kinds of commands, and most of the syntax is actually pretty similar:  Most commands take <dfn>redirections</dfn>, <dfn>control operators</dfn> and accept "subcommands" somehow.  We'll explain these concepts, but first
-    let's make sure we understand <dfn>simple commands</dfn> well.</p>
+    <p>哇，一下子好多内容是吧。前面讲的绝大多数东西肯定都已从你脑袋里溜走，但是没有关系。我们接下来将重返最简单的内容，帮助你基于透彻的理解逐渐构建自己的知识。重要的是记住bash有不同种类的命令，而且绝大多数的语法实际都很相似：大多数命令都包括 <dfn>重定向</dfn>，<dfn>控制运算符</dfn>，某种程度上也都接受子命令（subcommand）。后续我们还会解释这些概念，当下先确保我们已很好地理解 <dfn>简单命令</dfn>。</p>
 
-    <p>It is vital that you understand simple commands well because they are the foundation of everything you will do in bash.  You might have noticed in the previous section that all other bash commands are composed of at least one simple command: they merely take simple commands and perform special operations with them.</p>
+    <p>你是否充分理解简单命令非常关键，因为这是你之后在bash中做任何事的基础。在前面的介绍中，你或许已经注意到，所有其他bash命令都由至少一条简单命令构成。他们仅仅是把简单命令拿来并对其做了一些特殊操作罢了。</p>
 
-    <h2>Command names and running programs</h2>
+    <h2>命令名称与运行程序</h2>
 
 <pre class="syntax">
     [ <var>var</var><strong>=</strong><var>value</var> ... ] <mark><var>name</var></mark> [ <var>arg</var> ... ] [ <var>redirection</var> ... ]
+
+    [ <var>变量</var><strong>=</strong><var>值</var> ... ] <mark><var>名称</var></mark> [ <var>参数</var> ... ] [ <var>重定向</var> ... ]
 </pre>
 
-    <p>Let's have another look at the definition of a simple command.  We're going to take it step by step, because although the definition seems short, there's a lot going on here.<br>
-    We're first going to focus on the command's name.  The name tells bash what the job is that you want this command to perform.  To figure out what you want your command to do, bash performs a <em>search</em> to find out what to execute.  In order, bash uses the <code>name</code> to try and find a:</p>
+    <p>再来看看简单命令的定义。我们会一步步地拆解它，因为虽然看起来很短，其实涉及很多内容。<br>我们首先聚焦命令的名称。名称（name）会告诉bash你这条命令是想让它做什么事。因此，为了理解并按你的意图行事，bash会先执行<em>搜索（search）</em> 以找出具体要执行的任务。按顺序，bash依据命令的<code>名称（name）</code>会做如下搜索：</p>
 
     <dl>
-        <dt><dfn>function</dfn></dt>
-        <dd>Functions are previously declared blocks of commands that were given a name.  You briefly saw how we declare a function in the previous section.  All declared functions are put in a list and bash searches this list to see if any of them have the same name as the name of the command it's trying to execute.</dd>
-        <dt><dfn>builtin</dfn></dt>
-        <dd>Builtins are tiny procedures built into bash.  They are small operations that were programmed into bash and bash doesn't need to run a special program to be able to perform them.  We will look into what builtins bash provides, along with their names and what their effect is.</dd>
-        <dt><dfn>program</dfn>, also called an <dfn>external command</dfn></dt>
-        <dd>Your system has a great many programs installed, some of them do little tasks, some of them do big tasks.  Some of them run in the terminal, some of them run invisibly, others run in your graphical interface.  Bash finds programs by looking into your system's configured <code>PATH</code> (which we'll explain in a moment).</dd>
+        <dt><dfn>函数（function）</dfn></dt>
+        <dd>函数就是预先已被声明并命名的命令块。在前文你已大致看到我们如何声明一个函数。所有已声明的函数都被放在一个列表内，而bash会搜索这个列表来查看其中是否有和你要执行的命令同名的函数。</dd>
+        <dt><dfn>内建命令（builtin）</dfn></dt>
+        <dd>内建命令（builtin）是bash内部内置的微小程序。他们是编写在bash内部的小的操作，bash不需要启动特别的程序去运行他们。我们之后会深入介绍bash提供的内建命令，以及他们的名称和作用。</dd>
+        <dt><dfn>程序（program）</dfn>也被称作<dfn>外部命令（also called an external command）</dfn></dt>
+        <dd>你的系统内安装了非常多的程序，有些负责小的任务，有些则执行大的任务。有些运行在终端内，有些运行的时候不可见，还有一些运行在你的图形界面内。bash 会通过你系统配置的<code>PATH</code>查找这些程序。
+        </dd>
     </dl>
 
-    <p>If bash finds no way to execute a command by the name you gave it, your command will result in an error and bash will show an error message:</p>
+    <p>如果bash根据你的命令名称找不到可运行的程序，那么就会产生错误，bash会把这个错误以如下消息形式报告给你：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>buy beer</kbd>
 bash: buy: command not found
 </pre>
 
-    <p>I'll make only brief mention of <dfn>aliases</dfn>: before bash performs this search, it first checks if you've declared any aliases by the name of the command.  If you did, it will replace the name by the value of the alias before proceeding.  Aliases are only rarely useful, only work in interactive sessions and are almost completely superseded by functions.  You should avoid using them in almost all cases.</p>
+    <p>在此简单提一下 <dfn>别名（alias）</dfn>。在bash执行搜索之前，它首先会查看你是否曾将该命令的名称设置为别名。如果设置过，它会在执行前用别名对应的值替换命令名称。别名基本没什么用，仅仅在交互模式下有些作用，而且基本完全可以用函数替代。因此绝大多数情况下，你应该避免使用他们。</p>
 
     <footer>
-    To run a command, bash uses the name of your command and performs a search for how to execute that command.  In order, bash will check whether it has a <dfn>function</dfn> or <dfn>builtin</dfn> by that name.  Failing that, it will try to run the name as a program.  If bash finds no way to run your command, it will output an error message.
+        运行命令时，bash会使用你的命令名称去搜索该如何执行它。按顺序，bash会依次确认是否有一个 <dfn>函数（function）</dfn> 或 <dfn>内建命令（builtin）</dfn> 与你的命令名称一致。如果没有，它就会尝试把它作为一个程序去运行。如果bash没有任何办法运行你的命令，它就会输出一条报错消息。
     </footer>
 
-    <h2>The <code>PATH</code> to a program</h2>
+    <h2>程序的<code>路径（PATH）</code></h2>
 
-    <p>We have all sorts of programs installed on our computer.  Different programs are installed in different places.  Some programs shipped with our OS, others were added by our distribution and yet others were installed by us or our systems administrator.  On a standard UNIX system, there are <a href="http://refspecs.linuxfoundation.org/fhs.shtml">a few standardized locations</a> for programs to go.  Some programs will be installed in <code>/bin</code>, others in <code>/usr/bin</code>,
-    yet others in <code>/sbin</code> and so on.  It would be a real bother if we had to remember the exact location of our programs, especially since they may vary between systems.  To the rescue comes the <code>PATH</code> <dfn>environment variable</dfn>.  Your <code>PATH</code> variable contains a set of directories that should be searched for programs.</p>
+    <p>我们电脑里安装了各种程序，且不同程序安装在不同的位置。一些程序是我们操作系统预装的，一些是我们的发行版添加的，还有一些是我们自己或系统管理员安装的。在一个标准的UNIX系统内，<a href="http://refspecs.linuxfoundation.org/fhs.shtml">有一些安装程序的标准位置</a>。有的程序安装在<code>/bin</code>内，有的在<code>/usr/bin</code>，有的在<code>/sbin</code>，等等。如果我们要完全记住所有这些程序的安装位置简直就太费劲了，特别是他们可能还会因不同的系统而变化。于是<dfn>环境变量</dfn> <code>PATH</code>前来拯救我们了。你的 <code>PATH</code> 变量内包含了一组可以用来搜索程序的路径。</p>
 
 <pre>
 <span class="prompt">$ </span><kbd>ping 127.0.0.1</kbd>
 
     <strong>PATH=</strong>/bin<strong>:</strong>/sbin<strong>:</strong>/usr/bin<strong>:</strong>/usr/sbin
            │     │
-           │     ╰──▶ <mark>/sbin</mark>/ping ?  <strong>found!</strong>
-           ╰──▶ <mark>/bin</mark>/ping ?  not found.
+           │     ╰──▶ <mark>/sbin</mark>/ping ?  <strong>找到啦！</strong>
+           ╰──▶ <mark>/bin</mark>/ping ?  没找到
 </pre>
-    <p>Bash honors this variable by looking through its listed directories whenever you try to to start a program it doesn't yet know the location of.  Say you're trying to start the <code>ping</code> program which is installed at <code>/sbin/ping</code>.  If your <code>PATH</code> is set to <code>/bin:/sbin:/usr/bin:/usr/sbin</code> then bash will first try to start <code>/bin/ping</code>, which doesn't exist.  Failing that, it will try <code>/sbin/ping</code>.  It finds the
-    <code>ping</code> program, records its location in case you need <code>ping</code> again in the future and goes ahead and runs the program for you.</p>
+    <p>每当你要启动一个程序而bash不知道它在哪里时，就会去查看PATH变量下存储的这些路径。例如，假设你要启动安装在<code>/sbin/ping</code>的<code>ping</code>程序，如果你的<code>PATH</code>变量被设置为<code>/bin:/sbin:/usr/bin:/usr/sbin</code>，那么bash首先会尝试启动<code>/bin/ping</code>，结果不存在。接下来它就会尝试<code>/sbin/ping</code>，如此就找到了<code>ping</code>程序，然后bash会记住这个位置以便你之后要再次运行<code>ping</code>，剩下的就是为你运行找到的程序了。</p>
 
-    <p>If you're ever curious about exactly where bash finds the program to run for a command name, you can use the <code>type</code> built-in to find out:</p>
+    <p>如果你好奇bash根据命令名称到底在哪里找到要执行的程序的话，可以使用内建命令<code>type</code>查看：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>type ping</kbd>
 ping is /sbin/ping
-<span class="prompt">$ </span><kbd>type -a echo</kbd><em>The -a switch tells type to show us all the possibilities</em>
-echo is a shell builtin<em>If we just run 'echo', bash will use the first possibility</em>
-echo is /bin/echo<em>We have an echo built-in but also a program called echo!</em>
+<span class="prompt">$ </span><kbd>type -a echo</kbd><em> -a 会告诉type向我们返回所有可能性</em>
+echo is a shell builtin<em>I如果我们运行'echo'，bash就会执行第一种可能</em>
+echo is /bin/echo<em>但内建变量'echo'之外，还有一个程序也叫echo！</em>
 </pre>
 
-    <p>Remember from the previous section how bash has some functionality built into it?  One of those is the functionality of the <code>echo</code> program.  If you run the <kbd>echo</kbd> command in bash, even before bash tries a <code>PATH</code> search, it will notice there's a built-in by that name and use it.  <code>type</code> is a great way to visualize this lookup process.  Note that it's much faster to execute a command that's built-in than it is to start an extra program.  But if
-    you're ever in need of <code>echo</code>'s functionality without being in bash, you'll be able to use the <code>echo</code> program instead.</p>
+    <p>还记得前面说过bash有一些内建命令吗？其中一种就是<code>echo</code>程序。如果你在bash中运行<kbd>echo</kbd>命令，甚至在bash尝试<code>PATH</code>搜索之前，它就会根据名字注意到这是一个内建命令，进而使用它。<code>type</code>是一种非常好用的将查询过程视觉化的方法。注意：bash运行内建命令的速度远远快于启动外部程序。但如果你需要的是bash之外的<code>echo</code>功能，你也可以运行外部<code>echo</code>程序。</p>
 
-    <p>Sometimes you'll need to run a program that isn't installed in any of the <code>PATH</code> directories.  In that case, you'll have to manually specify the path to where bash can find the program, rather than just its name:</p>
+    <p>有时你可能需要运行一个安装位置不在<code>PATH</code>路径下的程序，这种情况下，除命令名称外，你还需手动指明程序所在的路径，以便bash找到这个程序：</p>
     
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>/sbin/ping -c 1 127.0.0.1</kbd>
@@ -363,40 +342,40 @@ PING 127.0.0.1 (127.0.0.1): 56 data bytes
 --- 127.0.0.1 ping statistics ---
 1 packets transmitted, 1 packets received, 0.0% packet loss
 round-trip min/avg/max/stddev = 0.075/0.075/0.075/0.000 ms
-<span class="prompt">$ </span><kbd>./hello.txt</kbd><em>Remember our hello.txt script?</em>
-Your name? <em>We use the path "." which means "our current directory"</em>
+<span class="prompt">$ </span><kbd>./hello.txt</kbd><em>还记得我们的hello.txt脚本吗？</em>
+Your name? <em>路径“.”表示“我们当前的路径”</em>
 </pre>
 
-    <aside>Bash only performs a <code>PATH</code> search on command names that do not contain a <kbd title="slash">/</kbd> character.  Command names with a slash are always considered direct pathnames to the program to execute.</aside>
+    <aside>bash只会对命令名称中不含有<code>PATH</code>符号的命令进行<code>PATH</code>搜索。包含<kbd title="slash">/</kbd>符号的命令名称会被理解为执行程序的直接路径名。</aside>
 
-    <p>You can add more directories to your <code>PATH</code>.  A common practice is to have a <code>/usr/local/bin</code> and a <code>~/bin</code> (where <code>~</code> represents your user's home directory).  Remember that <code>PATH</code> is an <dfn>environment variable</dfn>: you can update it like this:</p>
+    <p>你还可以添加更多的路径到<code>PATH</code>中。通常的做法是加入<code>/usr/local/bin</code>和<code>~/bin</code>（<code>~</code>表示你这个用户的主目录（home directory））。记住<code>PATH</code>是一个<dfn>环境变量</dfn>，你可以按照下面的方法更新它：</p>
     
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>PATH=~/bin:/usr/local/bin:/bin:/usr/bin</kbd>
 <span class="prompt">$ </span>
 </pre>
 
-    <p>This will change the variable in your current bash shell.  As soon as you close the shell, the change will be lost, though.  We'll go more in-depth on how environment variables work and how you should configure them in a later section.</p>
+    <p>以上操作会改变你当前bash shell内的变量。一旦你关闭退出这个shell，这次修改就会失效。在后面的章节中，我们会深入介绍环境变量的工作原理以及如何设置他们。</p>
 
     <footer>
-    When bash needs to run a program, it uses the command name to perform a search.  Bash searches the directories in your <code>PATH</code> <dfn>environment variable</dfn>, one by one, until it finds a directory that contains a program with the name of your command.  To run a program that is not installed in a <code>PATH</code> directory, use the path to that program as your command's name.
+        当bash运行程序时，它会使用命令名称先执行搜索。它会在你<code>PATH</code> <dfn>环境变量</dfn>内存储的路径中依次搜索，直到找到一个与你命令名称同名的程序。如果要运行的程序没有安装在<code>PATH</code>存储的路径中，则需要使用程序的路径名作为你命令的名称。
     </footer>
 
-    <h3 id="path_ex">Exercises!</h3>
+    <h3 id="path_ex">练习时间!</h3>
 
-    <h4>PATH.1. Run the <code>ls</code> program.</h4>
+    <h4>PATH.1. 运行 <code>ls</code> 程序。</h4>
 <pre lang="bash" class="exercise"><samp>$ <kbd>ls</kbd></samp></pre>
 
-    <h4>PATH.2. Find out where bash will find the <code>ls</code> program.</h4>
-<pre lang="bash" class="exercise"><samp>$ <kbd>type ls</kbd><em>Both 'type' and 'command' are acceptable here.  The 'which' program is not.
-ls is /bin/ls</em></samp></pre>
+    <h4>PATH.2. 找出bash会从哪里找到 <code>ls</code> 程序</h4>
+<pre lang="bash" class="exercise"><samp>$ <kbd>type ls</kbd><em>这里使用“type”或“command”都可以，“which”不对
+ls 是 /bin/ls</em></samp></pre>
 
-    <h4>PATH.3. Show your system's <var>PATH</var>.</h4>
+    <h4>PATH.3. 显示你系统的 <var>PATH</var>.</h4>
 <pre lang="bash" class="exercise"><samp>$ <kbd>echo "$PATH"</kbd>
 /bin:/sbin:/usr/bin:/usr/sbin</samp></pre>
 
-    <h4>PATH.4. Create a script in your home directory, add it to your <var>PATH</var> and then run the script as an ordinary command.</h4>
-<pre lang="bash" class="exercise"><samp>$ <kbd>ex</kbd><em>You can substitute your favorite editor here.</em>
+    <h4>PATH.4. 在你的主目录下创建一个脚本，把它添加到你的 <var>PATH</var> 中，然后像一般命令那样运行它</h4>
+<pre lang="bash" class="exercise"><samp>$ <kbd>ex</kbd><em>这里可以用你自己喜欢的编辑器替代</em>
 : <kbd>i</kbd>
 <kbd>#!/usr/bin/env bash
 echo "Hello world."
@@ -409,41 +388,38 @@ echo "Hello world."
 <span class="prompt">$ </span><kbd>myscript</kbd>
 Hello world.</samp></pre>
 
-    <h2>Command arguments and quoting literals</h2>
+    <h2>命令参数与引用文字</h2>
 
 <pre class="syntax">
     [ <var>var</var>=<var>value</var> ... ] <var>name</var> <mark>[ <var>arg</var> ... ]</mark> [ <var>redirection</var> ... ]
+
+    [ <var>变量</var>=<var>值</var> ... ] <var>名称</var> <mark>[ <var>参数</var> ... ]</mark> [ <var>重定向</var> ... ]
 </pre>
 
-    <p>Now that you understand how bash finds and runs your command, let's learn how to pass our instructions to those commands.  These instructions tell our command what exactly it needs to do.  We might run the <code>rm</code> command to delete a file, or the <code>cp</code> command to copy a file, we might run the <code>echo</code> command to output a string or the <code>read</code> command to read a line of text.  But these commands generally can't do much without more
-    details, more context.  We need to tell <code>rm</code> what file to delete, <code>cp</code> what file to copy and where to put the copy.  <code>echo</code> wants to know what you want it to output and <code>read</code> can be told where to put the line of text it's read.  We provide this kind of context using arguments.</p>
+    <p>鉴于你已理解bash如何查找并运行你的命令，现在我们来学习如何将指令传达给命令，这些指令会告诉命令具体需要做什么。我们可能会运行<code>rm</code>命令来删除某个文件，使用<code>cp</code>命令复制文件，使用<code>echo</code>命令输出一个字符串，或是<code>read</code>命令读取一行文本。但是如果没有更多的细节信息，这些命令基本就很难做什么。我们需要告诉<code>rm</code>命令删除哪个文件，告诉<code>cp</code>复制什么文件以及复制后放在哪里。<code>echo</code>需要知道你想让它输出什么信息，而<code>read</code>需被告知它读取的文本要放在哪里。因此我们使用参数来提供这些信息。</p>
 
-    <aside>It is important that you pay close attention to the following information.  <strong>The gross part of all bugs in bash shell scripts are the direct result of their authors not properly understanding command arguments.</strong>  Reliance on intuition rather than an understanding of the rules is usually to blame.</aside>
+    <aside>请你一定注意以下信息： <strong>Bash shell 脚本中的绝大多数bug都是他们的作者没有正确理解命令参数直接导致的。</strong> 罪魁祸首通常都是：依赖直觉行事，而非遵照对规则的理解。</aside>
 
-    <p>As you can see from the command syntax, arguments come after the command's <var>name</var>.  They are <dfn>words</dfn> separated by blank space.  <strong>When we say <dfn>words</dfn> in the context of bash, we do NOT mean linguistic words.</strong>  In bash, a word is defined as <em>a sequence of characters considered as a single unit by the shell.</em>  A <dfn>word</dfn> is also known as a <dfn>token</dfn>.  A bash word can contain <em>many</em> linguistic words, in
-    fact it could contain prose.  For sake of clarity, the rest of this guide will use the term <dfn>arguments</dfn> wherever applicable to avoid the ambiguity of the term <dfn>words</dfn>.  What's important is that the word or argument is a single unit to the shell: it could be a filename, a variable name, the name of a program or the name of a person:</p>
+    <p>在上面的语法中可以看到，参数紧随命令的<var>名称（name）</var>之后，他们是被空格隔开的单词。<strong>在bash语境下，当我们提到单词的时候，并不是指通常语言中的单词概念。</strong> 在bash中，单词被定义为 <dfn>可以被当作一个独立单元对待的一串字符序列</dfn>。<dfn>单词</dfn> 也被称为 <dfn>token</dfn>。一个bash单词中可以包含<em>许多</em>语言性的词汇，事实上，甚至可以包含散文。为了表述的清晰，这篇指南在接下来会统一全部使用 <dfn>参数</dfn> 概念来避免 <dfn>单词</dfn> 含义的模糊性。无论是称为单词还是参数，重要的是他们对于shell来说是一个独立单元：可以是文件名，变量名，程序名或人名：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>rm <mark>hello.txt</mark></kbd>
 <span class="prompt">$ </span><kbd>mplayer <mark>'05 Between Angels and Insects.ogg'</mark> <mark>'07 Wake Up.ogg'</mark></kbd>
 </pre>
 
-    <p>In the above examples, the words are highlighted.  Notice how they aren't linguistic words, but meaningful units.  In this case, they all refer to file names.  To separate multiple arguments we use blank space.  That can be either or both spaces and tabs.  Usually you will use a single space between arguments.</p>
+    <p>在上面的例子中，单词被高亮出来了。注意看他们并不是语言性的单词，但是是有意义的单元，都是文件名称。为了分隔多个参数，我们在其间使用空白，可以是空格或制表位。通常你会在参数之间使用一个空格。</p>
 
-    <aside>To the bash shell, <dfn>blank space</dfn> is syntax just like anything else.  It means: <q>break the previous apart from the next thing</q>.  Bash calls this: <dfn>word splitting</dfn>.</aside>
+    <aside>对于 bash shell 来说，<dfn>空白</dfn> 同样也是语法。它表示的是：<q>将前面的部分与下一部分隔断</q>。bash将其称为：<dfn>单词分割（word splitting）</dfn>。</aside>
 
-    <p>A problem now arises: we have a space after <code>05</code>, separating it from <code>Between</code>.  How should the shell know that you mean for your filename to be <code>05 Between Angels and Insects.ogg</code> and not <code>05</code>?  How do we tell the shell that the blank space after <code>05</code> is <dfn>literal</dfn> and not intended as <dfn>syntax</dfn> for "split the word now"?  Our intention is for the whole file name to remain "together".  That is:
-    <em>the blank spaces in it should not split it into separate arguments</em>.  What we need is a way to tell the shell that it should treat something
-    literally; meaning, use it as-is, ignoring any syntactical meaning.  If we can make the spaces literal, they will no longer tell bash to split the <code>05</code> from the <code>Between</code>, and bash will use it as a normal ordinary space character.</p>
+    <p>一个问题由此产生：上面例子中，在<code>05</code>的后面我们使用了一个空格，将它与 <code>Between</code>分开。shell怎么知道你的文件名称是<code>05 Between Angels and Insects.ogg</code>而非<code>05</code>呢？我们如何告诉shell<code>05</code>后面的空格是 <dfn>字面意义</dfn> 的而不是分割单词的 <dfn>语法</dfn>？我们的意图是要保全文件名称的整体性，也就是说，<em>名称内的空格不能将他们拆分为多个参数</em>。我们需要一种方式来告诉shell，它应该按字面意义对待某些单词，即按他们原本整体的样子使用，忽略任何语法意义。如果我们可以使这些空格成为字面性的，他们就不会让bash分割<code>05</code>和<code>Between</code>，bash只会把空格当作普通的字符。</p>
 
-    <p>There are two ways in bash to make characters literal: <dfn>quoting</dfn> and <dfn>escaping</dfn>.  Quoting is the practice of wrapping <kbd title="double quote">"</kbd> or <kbd title="single quote">'</kbd> characters around the text that we want to make literal.  Escaping is the practice of placing a single <kbd title="backslash">\</kbd> character in front of the character that we want to make literal.  The example above uses quotes to make the entire filename
-    literal, but not the space inbetween the filenames.  We strongly recommend you use quotes over escaping, since it results in much clearer and more readable code.  More importantly: escaping makes it much more difficult to tell exactly which parts of your code are literal and which aren't.  It also becomes more precarious to edit the literal text later on without introducing mistakes.  Using escaping rather than quoting, our example would look like this:</p>
+    <p>bash中有两种方法使字符成为字面性的：<dfn>引用（quoting）</dfn> 和 <dfn>转义（excaping）</dfn>。引用指的是用双引号<kbd title="双引号">"</kbd>或单引号<kbd title="单引号">'</kbd>前后包裹我们想要使之保留字面意义的文本。转义是指在保留字面意义的字符前放置单个字符<kbd title="反斜杠">\</kbd>。上面例子中使用了单引号将整个文件名称字面化（literal），但不包括文件名之间的那个空格。我们强烈建议你使用引用而非转义，这样代码会更清晰可读。更重要的是，转义的使用会使人极为难以区分你代码中的哪些部分是字面性的，哪些不是。此外，如果后续想要编辑字面性的文本内容同时不产生错误，也非常困难。如果使用转义而非引用，上面的例子就会成为这样：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>mplayer <mark>05\ Between\ Angels\ and\ Insects.ogg</mark> <mark>07\ Wake\ Up.ogg</mark></kbd>
 </pre>
 
-    <p>Quoting is one of the most important skills you will need to master as a bash user.  Its importance cannot be overstated.  The nice thing about quotes is that while it is sometimes unnecessary, it is rarely ever wrong to quote your data.  These are both perfectly valid:</p>
+    <p>作为bash用户，引用是你需要掌握的最重要的技能之一。它的重要性怎么强调都不为过。引用特别好的一点是，即使有时并非必需，引用你的数据基本不会出错。下面这两种方式都完全有效：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>ls -l <mark>hello.txt</mark></kbd>
@@ -453,17 +429,17 @@ Hello world.</samp></pre>
 <span class="prompt">$ </span><kbd>ls -l <mark>'05 Between Angels and Insects.ogg'</mark> <mark>'07 Wake Up.ogg'</mark></kbd>
 </pre>
 
-    <p>So, if in doubt: quote your data.  And never remove quotes in an attempt to make something work.</p>
+    <p>因此，如果有任何犹疑，引用你的数据。此外，绝对不要试图通过移除引号来使代码工作。</p>
 
-    <p>You should use <mark>"<dfn>double quotes</dfn>"</mark> for any argument that contains expansions (such as <code>$variable</code> or <code>$(command)</code> expansions) and <mark>'<dfn>single quotes</dfn>'</mark> for any other arguments.  Single quotes make sure that everything in the quotes remains literal, while double quotes still allow some bash syntax such as expansions:</p>
+    <p>对于任何含有扩展（例如<code>$variable</code>或<code>$(command)</code>）的参数，你应该使用 <mark>"<dfn>双引号</dfn>"</mark>；其他任何参数，使用 <mark>'<dfn>单引号</dfn>'</mark> 。单引号内的一切字符都会是字面性的，双引号则允许某些bash语法，如扩展，依然生效：</p>
 
 <pre lang="bash">
-echo <mark>"Good morning, $USER."</mark><em>Double quotes allow bash to expand <code>$USER</code></em>
-echo <mark>'You have won SECOND PRIZE in a beauty contest.'</mark> \<em>Single quotes prevent even the <code>$</code>-syntax</em>
-     <mark>'Collect $10'</mark><em>from triggering expansion.</em>
+echo <mark>"Good morning, $USER."</mark><em>双引号允许bash扩展 <code>$USER</code></em>
+echo <mark>'You have won SECOND PRIZE in a beauty contest.'</mark> \<em>单引号甚至阻止<code>$</code>语法触发扩展</em>
+     <mark>'Collect $10'</mark>
 </pre>
 
-    <p>Don't be caught off-guard!  This is definitely not correct:</p>
+    <p>千万不要放松警惕！下面这样是绝对错误的：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>ls -l <mark>05</mark> <mark>Between</mark> <mark>Angels</mark> <mark>and</mark> <mark>Insects.ogg</mark></kbd>
@@ -474,21 +450,20 @@ ls: Insects.ogg: No such file or directory
 ls: and: No such file or directory
 </pre>
 
-    <p>You will not have these handy yellow markers in your shell.  Try to make a habit of mentally picturing them so that you keep yourself from making mistakes.  You definitely won't be the first to have accidentally destroyed all the files in their home directory as a result of a stray or unquoted space character.</p>
+    <p>你的shell中不会有这些黄色高亮标识。试着养成习惯，自己在头脑中标识他们，从而避免犯错。你绝不会是第一个因一个游离或未加引号的空格字符而不小心毁掉主目录下全部文件的人。</p>
 
-    <p>You'll find it good practice to develop a sense of pragmatism with regards to quoting: for any glance upon a block of bash code, unquoted arguments should immediately jump out at you, and you should feel a compulsion to resolve these before you can allow yourself to proceed with anything else.  Quoting issues are at the core of at least nine out of ten bash problems, and the vast majority of causes for issues people seek help with.  Seeing as quoting is actually very easy,
-    a disciplined quoter has that much less to worry about.</p>
+    <p>你会发现，针对引用，养成一种实用主义的意识是很好的习惯：只要瞥一眼bash代码，未加引用的参数应该能立马跃入你眼前，而你在继续向下做任何事之前，感到有鼓强烈的冲动需先改正他们。人们寻求帮助的绝大多数bash问题，至少十分之九的核心问题都在引用上。看到就引用其实非常简单，而一个严于律己的引用规范用者会少去非常多麻烦。</p>
 
     <aside class="rule">
-        <p>The golden rule on quoting is very simple:<br>
-        <q>If there is whitespace or a symbol in your argument, you <strong>must</strong> quote it.<br>
-        If there isn't, quotes are usually optional, but you can still quote it to be safe.</q></p>
+        <p>关于引用的黄金规则其实很简单：<br>
+        <q>如果你的参数中有空格或符号，那么你 <strong>必须</strong> 引用它。<br>
+        如果没有，引用则是可选的，但是安全起见，还是可以引用它。</q></p>
 
-        <p>It is <strong>extremely rare</strong> for arguments to <em>require</em> no quoting, primarily inside <code>[[</code> tests and around <code>${..+..}</code> expansions.  Do not remove or omit quotes from your arguments to try and make something work in any other case; you are much more likely to introduce a terrible and difficult to detect bug instead.</p>
+        <p><em>要求</em> 无引用的参数 <strong>极其罕见</strong>，主要是在<code>[[</code>测试中以及<code>${..+..}</code>扩展周围。其他任何情况下，都不要试图通过移除或省略参数中的引用来使代码工作；如果这样做，你更可能引发严重且难以发现的bug </p>
     </aside>
 
     <aside class="warn">
-        <p>The dangers of missing quotes are many, but as a very simple example, consider what happens when you <em>accidentally</em> put a space in front of your input:</p>
+        <p>引用缺失导致的危险有很多，作为一个非常简单的示例，请看下面如果你 <em>不小心</em> 在输入中添加一个空格会发生什么：</p>
 
 <pre lang="bash" class="bad">
 <span class="prompt">$ </span><kbd>read -p 'Which user would you like to remove from your system? ' username</kbd>
@@ -504,8 +479,7 @@ removed directory: '/home'
 rm: cannot remove 'lhunath': No such file or directory
 </pre>
 
-<p>What happened here, is that on input, because you accidentally put a <code>space</code> character before the name of the user to delete, the <code>rm</code> command expanded into <code>rm -vr <mark>/home/</mark> <mark>lhunath</mark></code>, which resulted in a situation that is likely to upset both Victor and Bob: the <code>rm</code> command is now first deleting the entire <mark>/home/</mark> directory, including everything in it, and subsequently it will remove the <mark>lhunath</mark>
-file.  If you had quoted the <code>rm</code> command properly, the bad input would have resulted in an error message and no damage instead:</p>
+<p>这里的问题是，在输入中，你不小心在要删除的用户名前加了一个<code>空格</code>，<code>rm</code> 命令因此扩展为<code>rm -vr <mark>/home/</mark> <mark>lhunath</mark></code>，由此同时危及了不相关的Victor和Bob。<code>rm</code>命令这下子首先删除了整个<mark>/home/</mark>路径，然后将移除<mark>lhunath</mark>文件。如果在<code>rm</code>命令中正确使用了引用，那么最坏的结果也只是返回一条错误消息，而不会有任何损失：</p>
 
 <pre lang="bash" class="good">
 <span class="prompt">$ </span><kbd>rm -vr "/home/$username"</kbd>
@@ -514,21 +488,20 @@ rm: cannot remove '/home/ lhunath': No such file or directory
     </aside>
 
     <footer>
-    To tell a command what to do, we pass it <dfn>arguments</dfn>.  In bash, arguments are <dfn>tokens</dfn>, also called <dfn>words</dfn>, that are separated from each other by blank space.  To include blank space in an argument's value, you need to either <dfn>quote</dfn> the argument or <dfn>escape</dfn> the blank space within.  Failing that, bash will break your argument apart into multiple arguments at its blank space.  Quoting arguments also prevents other symbols in it from
-    being accidentally interpreted as bash code, such as <code>'$10 USD'</code> (variable expansions), <code>"*** NOTICE ***"</code> (filename expansions), etc.
+    为了告诉命令做什么，我们会传递 <dfn>参数</dfn> 给它。bash中，参数就是 <dfn>tokens</dfn>，也被称作 <dfn>单词（words）</dfn>，相互之间用空白隔开。为了将空白也作为参数的值纳入，你需要对参数做 <dfn>引用</dfn> 或是 <dfn>转义</dfn>  其内的空白。如果没有这样做，bash就会根据空白把你的一个参数分割为多个参数。引用参数还可以防止其他符号被错误解释为bash代码，例如<code>'$10 USD'</code>（变量扩展），<code>"*** NOTICE ***"</code>（文件名扩展）等。
     </footer>
 
-    <h2>Managing a command's input and output using redirection</h2>
+    <h2>使用重定向管理命令的输入与输出</h2>
 
 <pre class="syntax">
     [ <var>var</var>=<var>value</var> ... ] <var>name</var> [ <var>arg</var> ... ] <mark>[ <var>redirection</var> ... ]</mark>
+
+    [ <var>变量</var>=<var>值</var> ... ] <var>名称</var> [ <var>参数</var> ... ] <mark>[ <var>重定向</var> ... ]</mark>
 </pre>
 
-    <p>We've already been briefly introduced to the concept of <dfn>file descriptors</dfn> and how they can be used to connect processes to each other.  Let's find out how that's done in bash.</p>
+    <p>我们已简单介绍过 <dfn>文件描述符</dfn> 的概念，以及如何使用他们来连接进程。现在我们来看看如何在bash中实现这些操作。</p>
 
-    <p>Recall that processes use file descriptors to connect to streams.  Each process will generally have three standard file descriptors: <dfn>standard input</dfn> (FD 0), <dfn>standard output</dfn> (FD 1) and <dfn>standard error</dfn> (FD 2).  When bash starts a program, it sets up a set of file descriptors for that program first.  It does this by looking at its own file descriptors and setting up an identical set of descriptors for the new process: we say new processes
-    "<strong>inherit</strong>" bash's file descriptors.  When you open your terminal to a new bash shell, the terminal will have set bash up by connecting bash's input and output to the terminal.  This is how the characters from your keyboard end up in bash and bash's messages end up in your terminal window.  Each time bash starts a program of its own, it gives that program a set of file descriptors that match its own.  This way, a bash command's messages end up on your terminal
-    as well and your keyboard input ends up with the program (the command's output and input is connected to your terminal):</p>
+    <p>回顾一下，进程使用文件描述符与流连接。每一个进程通常都有三种标准文件描述符： <dfn>标准输入（FD 0）</dfn>，<dfn>标准输出（FD 1）</dfn> 和 <dfn>标准错误输出（FD 2）</dfn>。当bash启动一个程序，它首先会为程序设置一组文件描述符。这组文件描述符与bash自己的完全一样，即这个新的进程“<strong>继承</strong>”了bash的文件描述符。当你打开终端进入一个新的bash shell，终端会将bash的输入和输出与自己相连。这样一来你键盘上输入的字符才进入到bash中，而来自bash的消息最终会显示在你的终端窗口内。每次bash启动一个程序，它就会为这个程序设置一组与自己相同的文件描述符。如此一来，bash命令的消息最终也会传到你的终端内，你键盘上的输入也会传送到程序中去（即命令的输出和输入与你的终端相连）。</p>
 
 <pre>
                  ╭──────────╮
@@ -536,9 +509,9 @@ rm: cannot remove '/home/ lhunath': No such file or directory
                  │         2┝╾─┘
                  ╰──────────╯
 
-<span class="prompt">$ </span><kbd>ls -l a b</kbd><em>Imagine we have a file called "a", but not a file called "b".</em>
-ls: b: No such file or directory<em>Error messages are emitted on FD 2</em>
--rw-r--r--  1 lhunath  staff  0 30 Apr 14:43 a<em>Results are emitted on FD 1</em>
+<span class="prompt">$ </span><kbd>ls -l a b</kbd><em>想象我们有一个文件“a”，但没有文件“b“</em>
+ls: b: No such file or directory<em>错误消息会发送至FD 2</em>
+-rw-r--r--  1 lhunath  staff  0 30 Apr 14:43 a<em>结果会发送至FD 1</em>
 
                  ╭──────────╮
     Keyboard ╾┬─╼┥0  bash  1┝╾─┬─╼ Display
@@ -551,9 +524,9 @@ ls: b: No such file or directory<em>Error messages are emitted on FD 2</em>
                  ╰──────────╯
 </pre>
 
-    <p>When <code>bash</code> starts an <code>ls</code> process, it first looks at its own file descriptors.  It then creates file descriptors for the <code>ls</code> process, connected to the same streams as its own: FD 1 and FD 2 leading to the <code>Display</code>, FD 0 coming from the <code>Keyboard</code>.  As a result, <code>ls</code>' error message (emitted on FD 2) and its regular output (emitted on FD 1) both end up on your terminal display.</p>
+    <p>当<code>bash</code> 启动<code>ls</code>进程，它首先查看自己的文件描述符，然后再为<code>ls</code> 进程创建，并连接至与自己完全相同的流：即与<code>显示（Display）</code>相连的FD1、FD2，以及与<code>键盘（keyboard）</code>相连的FD 0。结果，<code>ls</code>的错误消息（输出至FD 2）与它常规的输出（传递至FD 1）最终都会显示在你的终端窗口内。</p>
 
-    <p>If we want to gain control over where our commands connect to, we need to employ <dfn>redirection</dfn>: it is the practice of changing the source or destination of a file descriptor.  One thing we could do with redirection is write <code>ls</code>' result to a file instead of to the terminal display:</p>
+    <p>如果我们想要控制决定命令连接到哪里，就需要用到 <dfn>重定向（redirection）</dfn>，使用这一操作会改变文件描述符的来源或终点。使用重定向我们可以将<code>ls</code>的结果写入一个文件内，而不再传至终端显示：</p>
 
 <pre>
 
@@ -562,8 +535,8 @@ ls: b: No such file or directory<em>Error messages are emitted on FD 2</em>
                  │         2┝╾─┘
                  ╰──────────╯
 
-<span class="prompt">$ </span><kbd>ls -l a b <mark>&gt;myfiles.ls</mark></kbd><em>We redirect FD 1 to the file "myfiles.ls"</em>
-ls: b: No such file or directory<em>Error messages are emitted on FD 2</em>
+<span class="prompt">$ </span><kbd>ls -l a b <mark>&gt;myfiles.ls</mark></kbd><em>我们将FD 1重定向至文档“myfiles.ls”</em>
+ls: b: No such file or directory<em>错误消息发送至FD 2</em>
 
                  ╭──────────╮
     Keyboard ╾┬─╼┥0  bash  1┝╾─┬─╼ Display
@@ -575,14 +548,13 @@ ls: b: No such file or directory<em>Error messages are emitted on FD 2</em>
                  │         2┝╾─┘
                  ╰──────────╯
 
-<span class="prompt">$ </span><kbd>cat myfiles.ls</kbd><em>The cat command shows us the contents of a file</em>
--rw-r--r--  1 lhunath  staff  0 30 Apr 14:43 a<em>The result is now in myfiles.ls</em>
+<span class="prompt">$ </span><kbd>cat myfiles.ls</kbd><em>cat命令可以向我们展示文件内容</em>
+-rw-r--r--  1 lhunath  staff  0 30 Apr 14:43 a<em>结果现存在myfiles.ls</em>
 </pre>
 
-    <p>You've just performed file redirection by redirecting the command's standard output to a file.  Redirecting standard output is done using the <code>&gt;</code> operator.  Envision it as an arrow sending output from the command to the file.  This is by far the most common and useful form of redirection.</p>
+    <p>通过将命令的标准输出重定向至一个文件，你刚完成了一次文件重定向操作。标准输出的重定向是通过使用<code>&gt;</code>控制运算符实现的。可以将它想象为一个箭头，把输出从命令传送至文件。这是目前最常见也是最有用的重定向方式。</p>
 
-    <p>Another common thing redirection is used for is hiding error messages.  You'll notice that our redirected <code>ls</code> command is still displaying an error message.  Usually this is a good thing.  Sometimes, though, we might find that error messages produced by some commands in our scripts are unimportant to the user and should be hidden.  To do this, we can use file redirection again, in a similar fashion as redirecting standard output caused <code>ls</code>' result to
-    disappear:</p>
+    <p>此外，重定向还常被用来隐藏错误消息。你会注意到我们重定向之后的<code>ls</code>命令仍然显示错误消息，通常这是好事。但有的时候，我们可能会觉得脚本中一些命令产生的报错消息对于用户来说是不重要的，应该被隐藏。为此，我们可以再次使用文件重定向，以相似的方式重定向标准输出，使<code>ls</code>的结果消失：</p>
 
 <pre>
 
@@ -591,8 +563,8 @@ ls: b: No such file or directory<em>Error messages are emitted on FD 2</em>
                  │         2┝╾─┘
                  ╰──────────╯
 
-<span class="prompt">$ </span><kbd>ls -l a b <mark>&gt;myfiles.ls</mark> <mark>2&gt;/dev/null</mark></kbd><em>We redirect FD 1 to the file "myfiles.ls"</em>
-<em>and FD 2 to the file "/dev/null"</em>
+<span class="prompt">$ </span><kbd>ls -l a b <mark>&gt;myfiles.ls</mark> <mark>2&gt;/dev/null</mark></kbd><em>我们将FD 1重定向至“myfiles.ls”</em>
+<em>将FD 2重定向至文档"/dev/null"</em>
 
                  ╭──────────╮
     Keyboard ╾┬─╼┥0  bash  1┝╾─┬─╼ Display
@@ -604,23 +576,22 @@ ls: b: No such file or directory<em>Error messages are emitted on FD 2</em>
                  │         2┝╾───╼ /dev/null
                  ╰──────────╯
 
-<span class="prompt">$ </span><kbd>cat myfiles.ls</kbd><em>The cat command shows us the contents of a file</em>
--rw-r--r--  1 lhunath  staff  0 30 Apr 14:43 a<em>The result is now in myfiles.ls</em>
-<span class="prompt">$ </span><kbd>cat /dev/null</kbd><em>The /dev/null file is empty?</em>
+<span class="prompt">$ </span><kbd>cat myfiles.ls</kbd><em>cat命令会向我们展示文档内容</em>
+-rw-r--r--  1 lhunath  staff  0 30 Apr 14:43 a<em>结果现存在myfiles.ls中</em>
+<span class="prompt">$ </span><kbd>cat /dev/null</kbd><em>/dev/null文档是空的？</em>
 <span class="prompt">$ </span>
 </pre>
 
-    <p>Notice how you can redirect any FD by prefixing the <code>&gt;</code> operator with the number of the FD.  We used <code>2&gt;</code> to redirect FD 2 to <code>/dev/null</code> while <code>&gt;</code> still redirects FD 1 to <code>myfiles.ls</code>.  If you omit the number, output redirections default to redirecting FD 1 (standard output).</p>
+    <p>注意看，通过在<code>&gt;</code>控制运算符的前面注明FD 编号，你可以重定向任何FD。我们使用<code>2&gt;</code>将FD 2重定向至<code>/dev/null</code>，使用<code>&gt;</code> 将FD 1仍旧重定向至<code>myfiles.ls</code>。如果你省略了编号，输出重定向的默认项是FD 1（标准输出）。</p>
 
-    <p>Our <code>ls</code> command no longer showed an error message and the results were properly stored in <code>myfiles.ls</code>.  Where has the error message gone?  We've written it to the file <code>/dev/null</code>.  But when we show the contents of that file, we don't see our error message.  Did something go wrong?</p>
+    <p>我们的<code>ls</code>命令不再显示错误消息，结果也被保存在<code>myfiles.ls</code>。那么错误消息到哪里去了呢？我们已经将它写入文件<code>/dev/null</code>。但是当我们显示该文件内容时，并没有看到错误消息。难道出了什么错？</p>
 
-    <p>The clue for this little mystery is in the directory name.  The file <code>null</code> is in the <code>/dev</code> directory:  This is a special directory for <dfn>device files</dfn>.  Device files are special files that represent devices in our system.  When we write to or read from them, we're communicating directly with those devices through the kernel.  The <code>null</code> device is a special device that is always empty.  Anything you write to it will be lost
-    and nothing can be read from it.  That makes it a very useful device for discarding information.  We stream our unwanted error message to the <code>null</code> device and it disappears.</p>
+    <p>解开这个小小谜团的线索在于路径名称。文件<code>null</code>位于<code>/dev</code>路径下：这是一个存放 <dfn>设备文件</dfn> 的特殊路径。设备文件是一种特殊文件，他们用来代表系统内的设备。当我们从中读取或向内写入数据时，是通过内核与他们直接交流。那个<code>null</code>设备是一个总是为空的特殊设备。你向其中写入的任何东西都会遗失，从中也不能读取任何信息。因此，对于丢弃信息来说它是一个非常好用的设备。我们将不想要的错误消息流向这个<code>null</code>设备，他们就遗失不见了。</p>
 
-    <p>What if we wanted to save all the output that would normally appear on the terminal to our <code>myfiles.ls</code> file; both the results and error messages?  Intuition might suggest:</p>
+    <p>如果我们想把通常显示在终端窗口内的所有输出，包括命令执行结果以及错误消息，都保存在<code>myfiles.ls</code>呢？直觉可能会是这样：</p>
 
 <pre lang="bash" class="bad">
-<span class="prompt">$ </span><kbd>ls -l a b <mark>&gt;myfiles.ls</mark> <mark>2&gt;myfiles.ls</mark></kbd><em>Redirect both file descriptors to myfiles.ls?</em>
+<span class="prompt">$ </span><kbd>ls -l a b <mark>&gt;myfiles.ls</mark> <mark>2&gt;myfiles.ls</mark></kbd><em>将两个文件描述符都重定向至myfiles.ls？</em>
 
                  ╭──────────╮
     Keyboard ╾┬─╼┥0  bash  1┝╾─┬─╼ Display
@@ -632,18 +603,18 @@ ls: b: No such file or directory<em>Error messages are emitted on FD 2</em>
                  │         2┝╾───╼ myfiles.ls
                  ╰──────────╯
 
-<span class="prompt">$ </span><kbd>cat myfiles.ls</kbd><em>Contents may be garbled depending on how streams were flushed</em>
+<span class="prompt">$ </span><kbd>cat myfiles.ls</kbd><em>取决于两条流如何抵达并交汇，内容很可能是错乱的</em>
 -rw-r--r--  1 lhunath  stls: b: No such file or directoryaff  0 30 Apr 14:43 a
 </pre>
 
-    <p>But you'd be <strong>wrong!</strong>  Why is this not correct?  Upon inspection of the <code>myfiles.ls</code> it may appear as though things worked out, but there is actually something very dangerous going on here.  If you're lucky, you'll see the output of the file isn't exactly as you might expect: it might be a little garbled, out of order, or it might even be just right.  The problem is, you can't predict and no less guarantee the result of this command.</p>
+    <p>如果你这样想就<strong>错了！</strong>为什么不对呢？乍一看<code>myfiles.ls</code>似乎没问题，但实际可能会很危险。如果你足够幸运，会看到文档内的输出结果与你期待的不太一致，内容可能有些混乱、无序，甚至还有可能完全正确。但问题是，你不能预测也不能保证命令的结果。</p>
 
-    <p>What's going on here?  The problem is that both file descriptors now have their own stream to the file.  This is problematic because of the way streams work internally, a topic which is out-of-scope for this guide, but suffice it to say that when both streams are merged into the file, the results are an arbitrary mix-together of the streams.</p>
+    <p>这里到底发生了什么？问题出在两个文件描述符现在都将他们的流连接至这个文档。因为流内部的工作方式，这种操作是有问题的，不过这个话题已超出本指南的讨论范围，总之就是当两条流被融合到一个文件后，其结果会是两条流任意随机地混合。</p>
 
-    <p>To solve this problem, you need to send both your output and error bytes on the same stream.  And to do that, you're going to need to know how to <dfn>duplicate file descriptors</dfn>:</p>
+    <p>为了解决这个问题，你需要将输出与错误消息都发送到同一条流内，进而你需要知道如何 <dfn>复制文件描述符</dfn>：</p>
 
 <pre lang="bash" class="good">
-<span class="prompt">$ </span><kbd>ls -l a b <mark>&gt;myfiles.ls</mark> <mark>2&gt;&amp;1</mark></kbd><em>Make FD 2 write to where FD 1 is writing</em>
+<span class="prompt">$ </span><kbd>ls -l a b <mark>&gt;myfiles.ls</mark> <mark>2&gt;&amp;1</mark></kbd><em>使FD 2 写入FD 1 所写之处</em>
 
                  ╭──────────╮
     Keyboard ╾┬─╼┥0  bash  1┝╾─┬─╼ Display
@@ -660,43 +631,43 @@ ls: b: No such file or directory
 -rw-r--r--  1 lhunath  staff  0 30 Apr 14:43 a
 </pre>
 
-    <p>Duplicating file descriptors, otherwise referred to as "copying" file descriptors, is the act of copying one file descriptor's stream connection to another file descriptor.  As a result, both file descriptors are connected to the same stream.  We use the <code>&gt;&amp;</code> operator, prefixing it with the file descriptor we want to change and following it with the file descriptor whose stream we need to "copy".  You will use this operator fairly frequently, and in most
-    cases it'll be to copy FD 1 to FD 2 as is done above.  You can translate the syntax <code>2&gt;&amp;1</code> as <q>Make FD <code>2</code> write(<code>&gt;</code>) to where FD(<code>&amp;</code>) <code>1</code> is currently writing.</q></p>
+    <p>复制文件描述符，就是将一个文件描述符的流连至另一个文件描述符。如此一来，两个文件描述符就与同一条流相连。我们会使用<code>&gt;&amp;</code>控制运算符，在它前面是我们想要改变的文件描述符，后面跟着我们想要复制进而连入同一条流的文件描述符。之后你会经常用到这个控制运算符，并且在绝大多数应用场景中都是像上面例子那样将FD 1复制为FD 2。你可以把语法<code>2&gt;&amp;1</code>理解为 <q>使FD <code>2</code> 写入（<code>&gt;</code>）FD（<code>&amp;</code>）<code>1</code>正在写入的地方</q>。</p>
 
-    <p>We've seen quite a few redirection operations now, and we've even combined them.  Before you go wild, there is one more important rule you need to understand:  redirections are evaluated from left to right, conveniently the same way as we read them.  This might seem obvious, but neglect for this has caused many of your predecessors to make this mistake:</p>
+    <p>到此，我们已见到不少重定向操作，甚至已经会结合使用他们。在你自由驰骋之前，还有一条重要规则需要理解：重定向是从左至右评估执行的，和我们阅读的顺序是一致的。这看起来似乎没什么特别的，但是忽略这个规则已导致你前面许多人犯过如下错误：</p>
 
 <pre lang="bash" class="bad">
-    $ <kbd>ls -l a b <mark>2&gt;&amp;1</mark> <mark>&gt;myfiles.ls</mark></kbd><em>Make FD 2 go to FD 1 and FD 1 go to myfiles.ls?</em>
+    $ <kbd>ls -l a b <mark>2&gt;&amp;1</mark> <mark>&gt;myfiles.ls</mark></kbd><em>使FD 2连至FD 1，FD 1连至myfiles.ls?</em>
 </pre>
 
-    <p>Somebody who writes this code might assume that since FD 2's output is going to FD 1, and FD 1 is going to <code>myfiles.ls</code>, errors should end up in the file.  The logical error in their reasoning is the assumption that <code>2&gt;&amp;1</code> sends FD 2's output to FD 1.  <strong>It does NOT.</strong>  It sends FD 2's output to the <strong><em>stream</em></strong> FD 1 is connected to, which at the time is probably the <strong>terminal</strong> and not the file, because FD 1 hasn't been
-    redirected yet.  The result of the above command might frustrate, because it will appear as though the redirection of standard error isn't taking effect, when in reality, you've merely redirected standard error to the terminal (standard output's target), which is where it was already pointing before.</p>
+    <p>写下如上代码的人可能认为FD 2的输出连至FD 1，而FD 1又会输出至<code>myfiles.ls</code>，进而错误消息最终会在这个文档中。他们这种推理的逻辑错误在于认为<code>2&gt;&amp;1</code>会将FD 2的输出发送至FD 1。<strong>但并非如此。</strong> 它会将FD 2的输出发送至FD 1连接的 <strong><em>流</em></strong>，此时可能是 <strong>终端</strong>而非那个文档，因为FD 1尚未被重定向。上面命令的结果可能会让人沮丧，因为看起来似乎是标准错误的重定向没有生效，但实际上，你仅仅是把标准错误重定向到终端（标准输出的目的地），而这正是之前它已被指向的地方。</p>
 
-    <p>If we fix the order of the redirections:</p>
+    <p>如果我们修正重定向的顺序：</p>
 
 <pre lang="bash" class="good">
-    $ <kbd>ls -l a b <mark>&gt;myfiles.ls</mark> <mark>2&gt;&amp;1</mark></kbd><em>Make FD 1 target myfiles.ls and FD 2 target FD 1's target</em>
+    $ <kbd>ls -l a b <mark>&gt;myfiles.ls</mark> <mark>2&gt;&amp;1</mark></kbd><em>使FD 1输出至myfiles.ls，同时将FD 2设置为相同目的地</em>
 </pre>
 
-    <p>We now first change FD 1's target to stream to <code>myfiles.ls</code>.  Then, we make FD 2 target the same stream FD 1 is currently using, which is the new stream to <code>myfiles.ls</code>.  Both file descriptors are now targeting <code>myfiles.ls</code> and any output written by <code>ls</code> on either FD 1 or FD 2 will end up in the file.</p>
+    <p>现在我们将FD 1的输出流至<code>myfiles.ls</code>，然后将FD 2指向FD 1当前使用的流，即<code>myfiles.ls</code>。两个文件描述符就都以<code>myfiles.ls</code>为目标，命令<code>ls</code>的任何输出，无论是写入FD 2还是FD 1，最终都会存至该文档。</p>
 
-    <p>There are quite a few other redirection operators, but they aren't all as useful as the ones you've just learned.  What <em>has</em> certainly proven useful is for people to learn to read their command redirections as plain English.  I'm going to enumerate bash's redirection operators now, along with a short description and a sentence you can use to translate the operation into plain English.</p>
+    <p>此外还有很多其他重定向控制运算符，但都不如我们以上学习的这些有用。对于人们来说，<em>已</em>被证明肯定有用的是，学习像阅读英文那样阅读命令的重定向。接下来我会逐个列举bash的重定向命令运算符，每个都附上一段简短的描述，以及你可以用来将操作命令翻译为日常英语的一句话。</p>
 
     <dl>
-        <dt><dfn>File redirection</dfn></dt>
+        <dt><dfn>文件重定向（File redirection）</dfn></dt>
         <dd>
 <pre class="syntax">
     [<var>x</var>]<strong>&gt;</strong><var>file</var>, [<var>x</var>]<strong>&lt;</strong><var>file</var>
+
+    [<var>x</var>]<strong>&gt;</strong><var>文件</var>, [<var>x</var>]<strong>&lt;</strong><var>文件</var>
 
 <samp>echo Hello <mark>&gt;~/world</mark></samp>
 <samp>rm file <mark>2&gt;/dev/null</mark></samp>
 <samp>read line <mark>&lt;file</mark></samp>
 </pre>
-        Make FD <var>x</var> write to / read from <var>file</var>.
-        <p>A stream to <var>file</var> is opened for either writing or reading and connected to file descriptor <var>x</var>.  When <var>x</var> is omitted, it defaults to FD 1 (standard output) when writing and FD 0 (standard input) when reading.</p>
+        使FD <var>x</var> 写入或读取<var>文件（file）</var>。
+        <p>为写入或读取，打开通向<var>文件（file）</var>的流，并连接至文件描述符<var>x</var>。如果省略<var>x</var>，默认设置是FD 1（标准输出）写入，FD 0（标准输入）读取。</p>
         </dd>
 
-        <dt><dfn>File descriptor copying</dfn></dt>
+        <dt><dfn>文件描述符复制（File descriptor copying）</dfn></dt>
         <dd>
 <pre class="syntax">
     [<var>x</var>]<strong>&gt;&amp;</strong><var>y</var>, [<var>x</var>]<strong>&lt;&amp;</strong><var>y</var>
@@ -704,11 +675,11 @@ ls: b: No such file or directory
 <samp>ping 127.0.0.1 &gt;results <mark>2&gt;&amp;1</mark></samp>
 <samp>exec <mark>3&gt;&amp;1</mark> &gt;mylog; echo moo; exec <mark>1&gt;&amp;3</mark> 3&gt;&amp;-</samp>
 </pre>
-        Make FD <var>x</var> write to / read from FD <var>y</var>'s stream.
-        <p>The connection to the stream used by FD <var>y</var> is copied to FD <var>x</var>.  The second example is quite advanced: to understand it you need to know that <code>exec</code> can be used to change the file descriptors of bash itself (rather than those of a new command) and if you use an <var>x</var> that doesn't yet exist, bash will create a new file descriptor ("plug") for you with that number.</p>
+        使FD <var>x</var>写入或读取 FD <var>y</var>的流 。
+        <p>将FD <var>x</var>连接至FD <var>y</var>的流。第二个例子很复杂：为了理解它你需要知道<code>exec</code>可以用来改变bash自身的文件描述符（而不是一个新命令的），而且，如果你使用尚不存在的<var>x</var>，bash会使用这个编号为你创建一个新的文件描述符。</p>
         </dd>
 
-        <dt><dfn>Appending file redirection</dfn></dt>
+        <dt><dfn>追加文件重定向（Appending file redirection）</dfn></dt>
         <dd>
 <pre class="syntax">
     [<var>x</var>]<strong>&gt;&gt;</strong><var>file</var>
@@ -716,40 +687,40 @@ ls: b: No such file or directory
 <samp>echo Hello &gt;~/world
 echo World <mark>&gt;&gt;~/world</mark></samp>
 </pre>
-        Make FD <var>x</var> append to the end of <var>file</var>.
-        <p>A stream to <var>file</var> is opened for writing in append mode and is connected to file descriptor <var>x</var>.  The regular file redirection operator <code>&gt;</code> empties the file's contents when it opens the file so that only your bytes will be in the file.  In append mode (<code>&gt;&gt;</code>), the file's existing contents is left and your stream's bytes are added to the end of it.</p>
+        使FD <var>x</var> 追加至<var>文件（file）</var>末尾。  
+        <p>在追加模式下，连接<var>文件（file）</var>且供写入用的流会打开，连向文件描述符<var>x</var>。使用常规文件重定向控制运算符<code>&gt;</code> 会首先清空文档内之前存储的全部内容，然后写入本次重定向输出过去的内容。在追加模式下（<code>&gt;&gt;</code>），文档内原有内容仍会保留，流只会把本次输出内容添加在原有内容的末尾。</p>
         </dd>
 
-        <dt><dfn>Redirecting standard output and standard error</dfn></dt>
+        <dt><dfn>重定向标准输出与标准错误输出</dfn></dt>
         <dd>
 <pre class="syntax">
     <strong>&amp;&gt;</strong><var>file</var>
 
 <samp>ping 127.0.0.1 <mark>&amp;&gt;results</mark></samp>
 </pre>
-        Make both FD 1 (standard output) and FD 2 (standard error) write to <var>file</var>.
-        <p>This is a convenience operator which does the same thing as <code>&gt;<var>file</var> 2&gt;&amp;1</code> but is more concise.  Again, you can append rather than truncate by doubling the arrow: <code>&amp;&gt;&gt;<var>file</var></code></p>
+        将FD 1（标准输出）与FD 2（标准错误输出）都写入<var>文件（file）</var>
+        <p>这是和<code>&gt;<var>file</var> 2&gt;&amp;1</code> 效果相同，但是更精简方便的控制运算符。同样的，可以使用双箭头<code>&amp;&gt;&gt;<var>file</var></code>实现追加写入效果。</p>
         </dd>
 
-        <dt><dfn>Here Documents</dfn></dt>
+        <dt><dfn>Here 文档</dfn></dt>
         <dd>
 <pre class="syntax">
     <strong>&lt;&lt;</strong>[<strong>-</strong>]<var>delimiter</var>
         <var>here-document</var>
     <var>delimiter</var>
 
-<samp>cat <mark>&lt;&lt;.<em>We choose <code>.</code> as the end delimiter.</em>
-Hello world.
-Since I started learning bash, you suddenly seem so much bigger than you were before.
-.</mark><em>Our previously chosen <code>.</code> ends the here-document.</em></samp>
+<samp>cat <mark>&lt;&lt;.</mark> <em>我们选择 <code>.</code> 作为终止定界符</em>
+<mark>Hello world.</mark>
+<mark>Since I started learning bash, you suddenly seem so much bigger than you were before.</mark>
+<mark>.</mark><em>我们前面选择了 <code>.</code> 这个字符标识here文档的结束</em></samp>
 </pre>
-        Make FD 0 (standard input) read from the string between the <var>delimiter</var>s.
-        <p>Here documents are a great way to feed large blocks of text to a command's input.  They begin on the line after your delimiter and end when bash encounters a line with <em>just</em> your delimiter on it.  It is important to remember that your terminating delimiter cannot be indented, because then it is no longer <em>just</em> your delimiter on that line.</p>
-        <e>You can prefix your initial delimiter declaration with a <code>-</code>, this will tell bash to ignore any tabs you put in front of your heredoc.  That way, you can indent the heredoc without the indenting showing in your input string.  It also allows you to indent the terminating delimiter with tabs.</p>
-        <p>Finally, it is possible to put <dfn>variable expansions</dfn> within the here document's string.  This allows you to inject variable data into the here document.  We'll learn more about variables and expansions later on, but suffice it to say that if expansion is not desired, you need to put quotes around your <code>'<var>delimiter</var>'</code>'s initial declaration.</p>
+        使FD 0（标准输入）读取<var>定界符（delimiter）</var>之间的字符串。   
+        <p>Here文档是将大块文本内容喂给命令作输入的非常好用的方式。他们起始于你选用的定界符之后，终止于bash遇到一行<em>只</em>含有该定界符的命令。一定要记得你的终止定界符前不能有缩进，因为如此一来这一行中就不仅有定界符了（还有空白）。</p>
+        <p>在你的起始定界符前可以放置<code>-</code>,这样bash就会忽略你添加在heredoc前的所有制表符（tab）。这样，你就可以缩进heredoc但作为输入的字符串不会显示缩进。同样，终止定界符前也因此可以使用tab缩进。</p>
+        <p>最后要说的是，也可以在here文档的字符串中使用 <dfn>变量扩展（variable expansions）</dfn>，这样你就可以在文档中置入变量数据。关于变量和扩展，后面我们还会学习更多，这里你只需要知道如果要回避使用扩展，你需要在首次声明<code>'<var>定界符</var>'</code>时为它加上引号。</p>
         </dd>
 
-        <dt><dfn>Here Strings</dfn></dt>
+        <dt><dfn>Here字符串（Here Strings）</dfn></dt>
         <dd>
 <pre class="syntax">
     <strong>&lt;&lt;&lt;</strong><var>string</var>
@@ -757,33 +728,33 @@ Since I started learning bash, you suddenly seem so much bigger than you were be
 <samp>cat <mark>&lt;&lt;&lt;"Hello world.
 Since I started learning bash, you suddenly seem so much bigger than you were before."</mark></samp>
 </pre>
-        Make FD 0 (standard input) read from the <var>string</var>.
-        <p>Here strings are very similar to here documents but more concise.  They are generally preferred over here documents.</p>
+        使FD 0（标准输入）从<var>字符串</var>中读取。
+        <p>Here字符串与here文档非常相似但是更精简，因此更推荐使用。</p>
         </dd>
 
-        <dt><dfn>Closing file descriptors</dfn></dt>
+        <dt><dfn>关闭文件描述符</dfn></dt>
         <dd>
 <pre class="syntax">
     <var>x</var><strong>&gt;&amp;-</strong>, <var>x</var><strong>&lt;&amp;-</strong>
 
 <samp>exec 3&gt;&amp;1 &gt;mylog; echo moo; exec 1&gt;&amp;3 <mark>3&gt;&amp;-</mark></samp>
 </pre>
-        Close FD <var>x</var>.
-        <p>The stream is disconnected from file descriptor <var>x</var> and the file descriptor is removed from the process.  It cannot be used again until it is recreated.  When <var>x</var> is omitted, <code>&gt;&amp;-</code> defaults to closing standard output and <code>&lt;&amp;-</code> defaults to closing standard input.  You will rarely use this operator.</p>
+        关闭FD <var>x</var>.
+        <p>断开文件描述符<var>x</var>与流的连接，并将它从进程中移除。除非被再次创建，否则这个文件描述符不能再被使用。当<var>x</var>省略的时候，<code>&gt;&amp;-</code>默认会关闭标准输出，而<code>&lt;&amp;-</code>默认会关闭标准输入。你基本不会用到这个运算控制符。</p>
         </dd>
 
-        <dt><dfn>Moving file descriptors</dfn></dt>
+        <dt><dfn>移动文件描述符</dfn></dt>
         <dd>
 <pre class="syntax">
     [<var>x</var>]<strong>&gt;&amp;</strong><var>y</var><strong>-</strong>, [<var>x</var>]<strong>&lt;&amp;</strong><var>y</var><strong>-</strong>
 
 <samp>exec <mark>3&gt;&amp;1-</mark> &gt;mylog; echo moo; exec <mark>&gt;&amp;3-</mark></samp>
 </pre>
-        Replace FD <var>x</var> with FD <var>y</var>.
-        <p>The file descriptor at <var>y</var> is copied to <var>x</var> and <var>y</var> is closed.  Effectively, it replaces <var>x</var> with <var>y</var>.  It is a convenience operator for <code>[<var>x</var>]&gt;&amp;<var>y</var> <var>y</var>&gt;&amp;-</code>.  Again, you will rarely use this operator.</p>
+        用FD <var>y</var> 替换FD <var>x</var>。
+        <p>文件描述符<var>y</var>复制到<var>x</var>然后关闭<var>y</var>，即用<var>y</var>替换<var>x</var>。也是<code>[<var>x</var>]&gt;&amp;<var>y</var> <var>y</var>&gt;&amp;-</code>的简便操作。同样的，你基本也不会用到它。</p>
         </dd>
 
-        <dt><dfn>Reading and writing with a file descriptor</dfn></dt>
+        <dt><dfn>使用文件描述符读取或写入</dfn></dt>
         <dd>
 <pre class="syntax">
     [<var>x</var>]<strong>&lt;&gt;</strong><var>file</var>
@@ -794,14 +765,13 @@ Host: ifconfig.me
 " &gt;&amp;5
 cat &lt;&amp;5</samp>
 </pre>
-        Open FD <var>x</var> for both reading and writing to <var>file</var>.
-        <p>The file descriptor at <var>x</var> is opened with a stream to the file that can be used for writing as well as reading bytes. Usually you'll use two file descriptors for this. One of the rare cases where this is useful is when setting up a stream with a read/write device such as a network socket. The example above writes a few lines of HTTP to the <code>ifconfig.me</code> host at port <code>80</code> (the standard HTTP port) and subsequently reads the bytes coming
-        back from the network, both using the same file descriptor <code>5</code> set up for this by <code>exec</code>.</p>
+        为读取和写入<var>文档（file）</var>，打开FD <var>x</var>。
+
+        <p>文件描述符<var>x</var>被打开，并通过流与可以读取和写入字节的文档相连。通常为实现这一目的，你会使用两个文件描述符。但在一些罕见情况下，像是要将流与读/写设备如网络插口（network socket）相连时，这种方式会很有用。上面例子就将数行HTTP写入端口80（标准HTTP端口）的<code>ifconfig.me</code> host，并读取网络返回的数据，使用的都是<code>exec</code>为此配置的相同的文件描述符<code>5</code>。</p>
         </dd>
     </dl>
 
-    <p>As a final note about redirections, I'd like to point out that for simple commands the redirection operators can appear anywhere in the simple command.  That is, they don't need to appear at the end of it.  While it is a good idea to keep them at the end of your commands if mainly for consistency and to avoid surprise or missing the operator in long commands, there are cases where some people make a habit of placing the redirection operator elsewhere.  In particular, placing
-    the redirection operator after the <code>echo</code> or <code>printf</code> command name is often done, especially when there is a sequence of them, in the interest of readability:</p>
+    <p>作为关于重定向最后的说明，我想要指出的是对于简单命令，重定向控制运算符可以出现在命令中的任何位置，也就是说，他们不一定是在命令的末尾出现。虽然出于一致性以及在长命令中避免出现意外或遗漏运算符的考虑，将重定向控制元素符放在命令末尾是一个好主意，但是有些情况下，一些人习惯性将他们放在其他位置。特别是将重定向控制运算符放在<code>echo</code>或<code>printf</code>命令名称后，尤其当有一序列这样的命令时，为了可读性，会习惯这样做：</p>
 
 <pre lang="bash">
 echo &gt;&amp;2 "Usage: exists name"
@@ -814,42 +784,42 @@ echo &gt;&amp;2 "   Success if the program exists in the user's PATH and is exec
     <p>&nbsp;</p>
 
     <footer>
-    By default, new commands inherit the shell's current file descriptors.  We can use <dfn>redirections</dfn> to change where a command's input comes from and where its output should go to.  File redirection (e.g. <code>2&gt;errors.log</code>) allows us to stream file descriptors to files.  We can copy file descriptors (e.g. <code>2&gt;&amp;1</code>) to make them share a stream.  There are also many other more advanced redirection operators.
+    默认地，新的命令会继承shell当前的文件描述符。我们可以使用 <dfn>重定向</dfn> 改变命令输入的来源以及输出的走向。文档重定向（如<code>2&gt;errors.log</code>）允许我们将文件描述符的流引向文档。我们可以复制文件描述符（如<code>2&gt;&amp;1</code>）使他们共享同一个流。此外还有很多其他更高级的重定向运算符。
     </footer>
 
-    <h3 id="redir_ex">Exercises!</h3>
+    <h3 id="redir_ex">练习时间！</h3>
 
-    <h4>REDIR.1. Run a command that produces a message on standard output.</h4>
+    <h4>REDIR.1. 执行一条命令，在标准输出处生成一条消息</h4>
 <pre lang="bash" class="exercise"><samp>$ <kbd>ls /bin/bash</kbd>
 /bin/bash*</samp></pre>
 
-    <h4>REDIR.2. Run a command that produces a message on standard error.</h4>
+    <h4>REDIR.2. 执行一条命令，在标准错误输出处生成一条消息</h4>
 <pre lang="bash" class="exercise"><samp>$ <kbd>ls /bob/bash</kbd>
 ls: /bob/bash: No such file or directory</samp></pre>
 
-    <h4>REDIR.3. Run a command that produces messages on both standard output and standard error.</h4>
+    <h4>REDIR.3. 执行一条命令，同时在标准输出与标准错误输出处各生成一条消息</h4>
 <pre lang="bash" class="exercise"><samp>$ <kbd>ls /bin/bash /bob/bash</kbd>
 ls: /bob/bash: No such file or directory
 /bin/bash*</samp></pre>
 
-    <h4>REDIR.4. Send only the last command's standard error messages to a file called <code>errors.log</code>.  Then show the contents of <code>errors.log</code> on the terminal.</h4>
+    <h4>REDIR.4. 将上一条命令的标准错误消息发送至一个名为<code>errors.log</code>的文档，并在终端内显示该文档的内容</h4>
 <pre lang="bash" class="exercise"><samp>$ <kbd>ls /bin/bash /bob/bash 2&gt;errors.log</kbd>
 /bin/bash*
 <span class="prompt">$ </span><kbd>cat errors.log</kbd>
 ls: /bob/bash: No such file or directory</samp></pre>
 
-    <h4>REDIR.5. Append the last command's standard output and error messages to the file called <code>errors.log</code>.  Then show the contents of <code>errors.log</code> on the terminal again.</h4>
+    <h4>REDIR.5. 将上一条命令的标准输出与标准错误输出消息追加至名为<code>errors.log</code>的文档，然后再次在终端内显示该文档的内容</h4>
 <pre lang="bash" class="exercise"><samp>$ <kbd>ls /bin/bash /bob/bash &gt;&gt;errors.log 2&gt;&amp;1</kbd>
 <span class="prompt">$ </span><kbd>cat errors.log</kbd>
 ls: /bob/bash: No such file or directory
 ls: /bob/bash: No such file or directory
 /bin/bash*</samp></pre>
 
-    <h4>REDIR.6. Use a here-string to show the string <kbd>Hello world.</kbd> on the terminal.</h4>
+    <h4>REDIR.6. 使用here字符串在终端内显示字符<kbd>Hello world.</kbd></h4>
 <pre lang="bash" class="exercise"><samp>$ <kbd>cat &lt;&lt;&lt; 'Hello world.'</kbd>
 Hello world.</samp></pre>
 
-    <h4>REDIR.7. Fix this command so that the message is properly saved into the <code>log</code> file and such that FD 3 is properly closed afterwards: <kbd>exec 3&gt;&amp;2 2&gt;log; echo 'Hello!'; exec 2&gt;&amp;3</kbd></h4>
+    <h4>REDIR.7. 修改后面的命令，使得消息可以被正确保存在<code>log</code>文档内，之后关闭FD 3：<kbd>exec 3&gt;&amp;2 2&gt;log; echo 'Hello!'; exec 2&gt;&amp;3</kbd></h4>
 <pre lang="bash" class="exercise"><samp>$ <kbd>exec 3&gt;&amp;1 &gt;log; echo 'Hello!'; exec 1&gt;&amp;3 3&gt;&amp;-</kbd></samp></pre>
 
 </section>
