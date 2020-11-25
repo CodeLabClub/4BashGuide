@@ -2,29 +2,41 @@
 id: variables
 layout: chapter
 chapter: 3
-title: Variables and Expansions
-subtitle: How do I store and work with data?
+title: 变量与扩展
+subtitle: 我要如何存储和使用数据？
 status: alpha
 description: >-
-  Bash parameters and variables; environment variables, special parameters and
-  array parameters; expanding parameters, expansion operators, command
-  substitution and process substitution; pathname expansion, tilde expansion and
-  brace expansion.
+  Bash 参数与变量；环境变量，特殊参数与数组参数；扩展参数，扩展运算符，命令替换以及进程替换；路径名扩展，波浪号扩展以及花括号扩展。
 published: true
 ---
 
+<!--
+    ! 前面一章中作者提到过学习计算机语言时，清晰去模糊的重要性。这也体现在这本指南的写作目的与风格中，我在这里厘清了很多概念究竟指的是什么，比如这一章中解决掉的环境及环境变量概念。
+-->
+
+<!--
+    ! argument 是实参（actual parameter），parameter是形参（formal parameter）
+-->
+
+<!--
+    ? python 中有对应 bash 内的扩展用法吗？扩展虽然很强大，但是记忆本身有负担，smalltalk那些没有这样用的语言如何实现扩展的功能但是语法又更容易？
+-->
 
 <section>
-    <h1>What is expansion?</h1>
+    <h1>什么是扩展？</h1>
+<!--
+    ! access to resources，这里至少包含两个值得深思的问题。
+    ! 1) resources，关于资源。系统内有哪些资源，是不是公开共享的，是不是被大家知道的，我作为个人是否清楚这些资源的存在
+    ! 2) 触达/获取资源的方式或手段。
+    ! 讲资源，想到的会是实体的物质资源或经济资源。但计算机系统好的隐喻性体现在可以以它为参照去思考很多领域的问题，这里同样适用语言与认知。语言可以理解为触达认知资源的途径。能明确称呼（名称name的重要性），就能抵达调用。
+-->
+    <p>我们已知道如何使用 bash 编写和管理简单命令，这些命令使我们直抵系统内众多强有力的功能。我们已学习命令如何让 bash 为其他程序新建进程从而运行他们。我们已理解何为命令参数，以及如何将信息传递给命令，从而让他们完成我们需要做的事。</p>
 
-    <p>We now know how to use bash for writing and managing simple commands.  These commands give us access to many powerful operations on our system.  We've learned how commands tell bash to execute programs by creating new processes for them.  We understand command arguments and how to pass information to our command in order to make them do the things we need done.</p>
+    <p>基于以上所有这些知识，我们已开始体验到shell成事的力量。现在，我们几乎就像是用一种全新的语言直接与系统交流，命令就是任务，而参数是关于任务该如何被执行的具体指令。</p>
 
-    <p>And with all of this knowledge, we begin to taste the power of what can be done with the shell.  It's almost like we're communicating directly with our system in a brand new language where commands are tasks and arguments are the specific instructions on how those tasks should be performed.</p>
+    <p>现在，我们面临的一个主要局限是，以参数的形式、如此明确具体地向命令传递信息其实非常受限。如果我们需要拼写出每个待操作文件的名称、每一个要在屏幕上显示或被程序操纵的字节，这就意味着，如果我们对于要做的事没有绝对清晰的认识，我们是无法编写程序的。因此我们需要找到一种方式，使命令更加动态（dynamic），成为执行某种操作的类似模板的东西，这样我们就可以时不时地复用他们。</p>
 
-    <p>One of the main limitations at this point is the fact that passing information to commands as arguments so explicitly is very limiting.  To have to spell out every single file name on which to operate and every bit of data that should be shown on the screen or handled by a program means that we can only write programs when we have a perfect picture of what exactly needs to be done.  What we need is a way of making our commands more dynamic, turning them into a sort of template for how
-    to perform actions that we can re-use time and time again.</p>
-
-    <p>Say we want to delete the files in our <code>Downloads</code> directory.  With the knowledge we've gathered so far, we can look at what files are there and delete them:</p>
+    <p>假设我们现在想要删除<code>下载（Downloads）</code>目录中的所有文件。基于现有知识，可以先查看目录下当前都有什么，然后再删除他们：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>cd ~/Downloads</kbd>
@@ -38,16 +50,21 @@ removed '07 Wake Up.ogg'
 <span class="prompt">$ </span>
 </pre>
 
-    <p>Brilliant.  Our <code>ls</code> command gives no more output, that means our directory is empty.<br>
-    But wouldn't it be nice if we didn't have to be quite so explicit about everything?  After all, our <em>intention</em> was to empty our <code>Downloads</code> directory.  And to do so, we had to manually go there, find out which files were present, and issue an <code>rm</code> command enumerating each filename.  Let's improve on this workflow and make our code a little more <em>dynamic</em>.  What we want to achieve is a sort of template for doing a job that we can use again and
-    again.  A job description that describes a way of executing our intent regardless of the specific situation we are currently in.</p>
+<!--
+    ! 昨天还在惊叹作者对内容的绝对控制，这里作者就在谈论如果不需要全知岂不是更好？对照Smalltalk，这个问题值得思考。
 
-    <p>To do this, we need to remove all of the situational specifics from our code.  In the example above, the situational specifics are the exact names of the files which we are trying to delete.  Emptying our downloads won't mean deleting these two files every time we do it.  What we want to do, is to delete <em>every file in the <code>Downloads</code> directory</em>, regardless of what their actual names are.  The example above only worked because we had an intermediary step where
-    we, a human, had to look at the names of the files in the directory and re-write them as arguments into an <code>rm</code> command.  How can we automate this process?</p>
+    ! 想要并列对照理解bash、python 与 smalltalk
 
-    <h2>Pathname Expansion</h2>
+    * 关于抽象概括、模式归纳，类与实例，以及分别与动态灵活、具体僵硬的对应关系
+-->
+    <p>真棒。我们的<code>ls</code> 命令没有再返回任何结果，说明当前目录已为空。<br>
+    但是，如果我们不需要全知一切岂不是很好？毕竟我们的<em>意图</em>只是清空<code>下载（Downloads）</code>目录罢了。为了实现这一目的，当前我们需要手动进入目录下，找出所有文件，下达<code>rm</code>命令，通过列举所有文件名进而清空目录。现在让我们来改进一下这个流程，使代码再<em>动态（dynamic）</em>一些。我们想要实现的是获得一种可重复使用的、执行某任务（job）的模板。该任务模板描述出一种实现我们意图的方式，且这种方式不受当前实际所处的具体情境限制。</p>
 
-    <p>The answer comes in the first of many forms of expansion bash provides us with.  Welcome to <dfn>Pathname Expansion</dfn>:</p>
+    <p>为了做到这一点，我们就需要把代码中涉及具体情境的部分全部移除。上面例子中，与之对应的就是我们想要删除的所有文件的具体名称。每次清空我们的下载目录，并不意味着都是要删除这两个文件。我们想要做的是，无论文件名称是什么，删除<em><code>下载（Downloads）</code>目录下的所有文件</em>。上面例子中的方法之所以管用，是因为有中间一步，作为人类的我们，要去看目录中文件的名称，并把他们作为参数写入 <code>rm</code> 命令中。如何能使这个过程自动化呢？</p>
+
+    <h2>路径名扩展（Pathname Expansion）</h2>
+
+    <p>在 bash 为我们提供的众多扩展形式中，答案就随第一种而来。欢迎来到<dfn>路径名扩展</dfn>：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>cd ~/Downloads</kbd>
@@ -58,147 +75,146 @@ removed '07 Wake Up.ogg'
 <span class="prompt">$ </span>
 </pre>
 
-    <p>What happened to the filenames we wanted to delete?  We've replaced them with a pattern that tells bash to <em>expand the pathnames for us</em>.  <dfn>Expansion</dfn> is the practice of replacing a part of our command code with a situationally specific piece of code.  In this case, we want to replace <code>*</code> with the pathname of every single file in our downloads directory.  Replacing patterns with pathnames is therefore known as
-    pathname expansion.</p>
+    <p>那些我们想要删除的文件名称呢，发生了什么？我们已用一种模式替换了他们，这种模式会使 bash 自动<em>为我们扩展路径名</em>。<dfn>扩展（expansion）</dfn>指的是用具体情境相关的代码替换我们命令中的部分代码。当前例子中，我们会想用下载目录内每一个文件的路径名替换命令中的<code>*</code>。用路径名替换模式因此就被称为路径名扩展。</p>
 
-    <p>In our example above, bash notices that you have put a pathname pattern on the command line in the place where it would expect to see arguments.  It has then taken this pathname pattern, and went looking on the file system for every pathname that it could find which matches this pattern of ours.  It so happens, that the pattern <code>*</code> matches the name of every single file in the current directory.  As a result, bash replaces the pattern in our command line with the pathname of every
-    single file in the current directory.  We don't have to do the work ourselves anymore!  Once bash replaces our <code>*</code> with <code>'05 Between Angels and Insects.ogg' '07 Wake Up.ogg'</code>, bash proceeds to invoke the <code>rm</code> command with the full set of arguments: <code>-v '05 Between Angels and Insects.ogg' '07 Wake Up.ogg'</code>.  As a result, our downloads directory is emptied as intended.  Brilliant.</p>
+    <p>在上面例子中，bash 会注意到在命令行内它期待看到参数的位置上，现在出现的是一种路径名模式。于是它会采用这种路径名模式，继续去文件系统中寻找所有它能找到的、与这个模式匹配的路径名。结果就是，<code>*</code>这种模式与当前目录内所有的文件名都匹配。因此 bash 会用当前路径下的每一个文件名替换我们命令行中的模式。我们自己就什么都不用做啦！一旦 bash 用 <code>'05 Between Angels and Insects.ogg' '07 Wake Up.ogg'</code> 替换掉我们的 <code>*</code>，它就会用完整的参数 <code>-v '05 Between Angels and Insects.ogg' '07 Wake Up.ogg'</code>唤醒 <code>rm</code>命令起来工作。结果就是我们的下载目录如愿被清空。棒极了。</p>
 
     <aside>
-        <p>It is important to understand that while we see an apparent <code>*</code> argument in our code to <code>rm</code>, we are <em>not actually passing <code>*</code> to <code>rm</code></em>.  In fact, the <code>rm</code> command will never even see our pathname expansion pattern.  The pattern is evaluated and expanded by bash well before <code>rm</code> is even started.  As far as <code>rm</code> knows, it simply receives a <code>-v</code> argument followed by the exact and full name of
-        every single file in the directory.  Expansion is always performed by <em>bash</em> itself, and always <em>before</em> actually running the command!</p>
+        <p>一定要理解，虽然我们的代码中 <code>rm</code> 有一个明显的 <code>*</code> 参数，但我们 <em>其实并没有真的把 <code>*</code> 传递给 <code>rm</code> </em>。实际上， <code>rm</code> 命令甚至根本都不会看到我们的路径名扩展模式。早在 <code>rm</code> 被启动之前，bash 就已对模式进行了评估与扩展。据 <code>rm</code> 所知，它仅仅接收到一个 <code>-v</code> 参数，后面跟着路径下每一个文件的全称。扩展工作都是 <em>bash</em> 自己完成的，且永远在实际运行命令 <em>之前</em> ！</p>
     </aside>
 
-    <p>Bash can perform all sorts of pathname expansions for us.  To perform a pathname expansion, we simply write a syntactical <dfn>glob pattern</dfn> in the place where we want to expand pathnames.  A glob is the name of the type of pattern supported by the bash shell.  Here are the various basic glob patterns supported by the bash shell:</p>
+    <p>Bash 可以为我们执行各种路径名扩展，我们仅需要在想要扩展路径名的位置上，写下一个句法性的 glob 模式。Glob 是 bash shell 支持的一种模式类型的名字。下面是 bash shell 支持的多种基础性 glob 模式：</p>
 
     <table>
         <tr>
             <th>Glob</th>
-            <th>Meaning</th>
+            <th>意义</th>
         </tr>
         <tr>
             <th><code class="syntax"><strong>*</strong></code></th>
-            <td>A star or asterix matches any kind of text, even no text at all.</td>
+            <td>星号匹配任何类型的文本，甚至包括空。</td>
         </tr>
         <tr>
             <th><code class="syntax"><strong>?</strong></code></th>
-            <td>A question mark matches any one single character.</td>
+            <td>问号匹配任何单个的字符。</td>
         </tr>
         <tr>
             <th><code class="syntax"><strong>[</strong><var>characters</var><strong>]</strong></code></th>
-            <td>A set of characters within rectangular braces matches a single character, only if it's in the given set.</td>
+            <td>方括号内的一组字符匹配内含其中的单个字符。</td>
         </tr>
         <tr>
             <th><code class="syntax"><strong>[[:</strong><var>classname</var><strong>:]]</strong></code></th>
-            <td>When there is a set of colons directly inside the rectangular braces, you can specify the name of a class of characters instead of having to enumerate each character yourself.<br>
-                Bash knows about various kinds of character classes.  For example, if you use the <code>[[:<var>alnum</var>:]]</code> pattern, bash will match it against a character only if it is alphanumeric.  Supported character classes include:<br>
-                <var>alnum</var>, <var>alpha</var>, <var>ascii</var>, <var>blank</var>, <var>cntrl</var>, <var>digit</var>, <var>graph</var>, <var>lower</var>, <var>print</var>, <var>punct</var>, <var>space</var>, <var>upper</var>, <var>word</var>, <var>xdigit</var></td>
+            <td>当方括号内直接含有一组冒号的时候，你将无需再一一列举所有字符，而是直接指定这一类字符的类名。<br>
+                Bash 知道很多种字符类。例如，如果你使用 <code>[[:<var>alnum</var>:]]</code> 模式，bash 就只会与字母数字型的字符做匹配。Bash 支持的字符类包括：<br>
+                <var>alnum</var>，<var>alpha</var>，<var>ascii</var>，<var>blank</var>，<var>cntrl</var>，<var>digit</var>，<var>graph</var>，<var>lower</var>，<var>print</var>，<var>punct</var>，<var>space</var>，<var>upper</var>，<var>word</var>，<var>xdigit</var></td>
         </tr>
     </table>
 
-    <p>We can combine these glob patterns together to describe all sorts of pathname combinations.  We can also combine it with literal characters to tell bash that part of the pattern should include exact text:</p>
+    <p>结合使用上述 glob 模式，我们就可以描述各种可能的路径名组合。我们也可以将 glob 模式与表示字面含义的字符结合使用，告诉 bash 模式的某部分要严格包含什么文本：</p>
 
 <pre lang="bash">
-<span class="prompt">$ </span><kbd>ls</kbd><em>Without arguments, <code>ls</code> simply lists the full contents of a directory.</em>
+<span class="prompt">$ </span><kbd>ls</kbd><em>没有参数，<code>ls</code> 就列出某路径下的全部内容。</em>
 myscript.txt
 mybudget.xsl
 hello.txt
 05 Between Angels and Insects.ogg
 07 Wake Up.ogg
-<span class="prompt">$ </span><kbd>ls *</kbd><em>While the effect is the same, this command actually enumerates every single file</em>
-myscript.txt<em>in the directory to the <code>ls</code> in its arguments!</em>
+<span class="prompt">$ </span><kbd>ls *</kbd><em>虽然效果相同，但这个命令实际上在 <code>ls</code> 的参数中</em>
+myscript.txt<em>列举了路径下每一个文件的名称</em>
 mybudget.xsl
 hello.txt
 05 Between Angels and Insects.ogg
 07 Wake Up.ogg
-<span class="prompt">$ </span><kbd>ls *.txt</kbd><em>When we include the literal string <code>.txt</code>, the only pathnames that still match the pattern</em>
-myscript.txt<em>are those that start with any kind of text and end with the literal string <code>.txt</code>.</em>
+<span class="prompt">$ </span><kbd>ls *.txt</kbd><em>当模式中包含了字面性字符串 <code>.txt</code> 后，仍与模式匹配的是</em>
+myscript.txt<em>那些以任意文本起始但以字面性字符串<code>.txt</code>结束的路径名</em>
 hello.txt
-<span class="prompt">$ </span><kbd>ls 0<mark class="green">?</mark>' '<mark class="blue">*</mark>.ogg</kbd><em>Here we're combining patterns, looking for any pathname start starts with a <code>0</code>,</em>
-0<mark class="green">5</mark> <mark class="blue">Between Angels and Insects</mark>.ogg<em>followed by any single character, followed by a <strong>literal</strong> space, ending in <code>.ogg</code>.</em>
+<span class="prompt">$ </span><kbd>ls 0<mark class="green">?</mark>' '<mark class="blue">*</mark>.ogg</kbd><em>这里我们将模式结合使用，要找的是这样的路径名，以 <code>0</code> 开始，</em>
+0<mark class="green">5</mark> <mark class="blue">Between Angels and Insects</mark>.ogg<em>后面跟一个任意的字符，之后是一个 <strong>字面性的</strong> 空格, 最终以 <code>.ogg</code> 结束</em>
 0<mark class="green">7</mark> <mark class="blue">Wake Up</mark>.ogg
-<span class="prompt">$ </span><kbd>ls <mark>[0-9]</mark>*</kbd><em>In a character set, we can use <code>-</code> to indicate a range of characters.  This will match</em>
-<mark>0</mark>5 Between Angels and Insects.ogg<em>a pathname starting with one character between <code>0</code> and <code>9</code> followed by any other text.</em>
+<span class="prompt">$ </span><kbd>ls <mark>[0-9]</mark>*</kbd><em>在一个字符集合中，我们可以使用 <code>-</code> 表示字符的范围</em>
+<mark>0</mark>5 Between Angels and Insects.ogg<em>这个模式匹配的路径名需以 <code>0</code> 至 <code>9</code> 中的任一字符起始，后面可跟任意文本</em>
 <mark>0</mark>7 Wake Up.ogg
-<span class="prompt">$ </span><kbd>ls <mark>[[:digit:]][[:digit:]]</mark>*</kbd><em>Character classes are really nice because they speak for us: they tell us exactly</em>
-<mark>05</mark> Between Angels and Insects.ogg<em>what our intent here is.  We want any pathname that start with two digits.</em>
+<span class="prompt">$ </span><kbd>ls <mark>[[:digit:]][[:digit:]]</mark>*</kbd><em>字符类是真的好，因为他们替我们说话：在此他们完全表达出了我们的意图</em>
+<mark>05</mark> Between Angels and Insects.ogg<em>即我们想要任何以两位数字起始的路径名</em>
 <mark>07</mark> Wake Up.ogg
-<span class="prompt">$ </span><kbd>ls [[:digit:]][[:digit:]]</kbd><em>Your pattern needs to be complete!  None of our filenames is only just a single digit.</em>
+<span class="prompt">$ </span><kbd>ls [[:digit:]][[:digit:]]</kbd><em>你的模式一定要完整！我们没有任何仅为两位数字的路径名</em>
 <span class="prompt">$ </span>
 </pre>
 
-    <p>It is also important to understand that these globs will never jump into subdirectories.  They only match against file names in their own directory.  If we want a glob to go looking at the pathnames in a different directory, we need to explicitly tell it with a literal pathname:</p>
+<!--
+    ! 目前在指南中发现两个问题，一个是命令指南中，pre syntax框内，注释没有显示出来，通过修改css，将z-index从-1改为1，解决了这个问题；第二个就是上面的 `ls [[:digit:]][[:digit:]]`，应该是没有任何路径名仅为两位数字，注释中作者写的是一位数字。
+-->
+
+    <p>另外需要理解的是这些 glob 永远不会跳进子路径（subdirectory）中去。他们只会匹配当前路径下的文件名。如果我们想让某个 glob 去查看另一目录下的路径名，就需要明确告诉它这个路径名：</p>
 
 <pre lang="bash">
-<span class="prompt">$ </span><kbd>ls ~/Downloads/*.txt</kbd><em>Enumerate all pathnames in <code>~/Downloads</code> that end with <code>.txt</code>.</em>
+<span class="prompt">$ </span><kbd>ls ~/Downloads/*.txt</kbd><em>列举 <code>~/Downloads</code> 目录下所有以 <code>.txt</code> 结尾的路径名</em>
 /Users/lhunath/Downloads/myscript.txt
 /Users/lhunath/Downloads/hello.txt
-<span class="prompt">$ </span><kbd>ls ~/*/hello.txt</kbd><em>Globs can even search through many directories!  Here bash will search</em>
-/Users/lhunath/Documents/hello.txt<em>through <strong>all directories</strong> in our home directory for a file that's called <code>hello.txt</code>.</em>
+<span class="prompt">$ </span><kbd>ls ~/*/hello.txt</kbd><em>Glob 甚至可以在许多路径下搜索！这里 bash 就会搜索</em>
+/Users/lhunath/Documents/hello.txt<em>主目录下 <strong>所有的路径</strong>，寻找一个叫做 <code>hello.txt</code> 的文件</em>
 /Users/lhunath/Downloads/hello.txt
 </pre>
 
-    <p>Pathname expansion is an incredibly powerful tool to avoid having to specify exact pathnames in our arguments, or to go looking through our file system for the files we need.</p>
+    <p>路径名扩展是一种强有力的工具，使我们无需在参数中具体声明确切的路径名称，也不用去文件系统中查找搜寻我们需要的文件。</p>
 
-    <p>Finally, bash has also built support in for more advanced glob patterns.  These globs are called: <dfn>extended globs</dfn>.  By default, support for them is disabled, but we can easily enable it in our current shell with the command:</p>
+    <p>最后，bash 还内置对一些高级 glob 模式的支持。这些 glob 被称作：<dfn>扩展（extended） glob</dfn>。默认状态下，对他们的支持是被关闭的，但是我们很容易就可以通过命令开启他们：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>shopt -s extglob</kbd>
 </pre>
 
-    <p>Once extended globs are enabled, the above table of glob pattern operators is extended with the following additional operators:</p>
+    <p>一旦开启扩展 glob，前面列表中的 glob 模式运算符就得到了下面这些新增运算符的扩展：</p>
 
     <table>
         <tr>
-            <th>Extended Glob</th>
-            <th>Meaning</th>
+            <th>扩展 Glob</th>
+            <th>意义</th>
         </tr>
         <tr>
             <th><code class="syntax"><strong>+(</strong><var>pattern</var>[ <strong>|</strong> <var>pattern</var> ... ]<strong>)</strong></code></th>
-            <td>Matches when any of the patterns in the list appears, once or many times over.  Reads: <q>at least one of ...</q>.</td>
+            <td>列表内的任一种模式出现一次或多次，即为匹配。读作：<q>至少有一个 ...</q>。</td>
         </tr>
         <tr>
             <th><code class="syntax"><strong>*(</strong><var>pattern</var>[ <strong>|</strong> <var>pattern</var> ... ]<strong>)</strong></code></th>
-            <td>Matches when any of the patterns in the list appears, once, <em>not at all</em>, or many times over.  Reads: <q>however many of ...</q>.</td>
+            <td>列表内的任一种模式出现一次，或 <em>没出现</em>，或出现多次，都为匹配。读作：<q>无论多少次...</q> </td>
         </tr>
         <tr>
             <th><code class="syntax"><strong>?(</strong><var>pattern</var>[ <strong>|</strong> <var>pattern</var> ... ]<strong>)</strong></code></th>
-            <td>Matches when any of the patterns in the list appears, once or not at all.  Reads: <q>maybe one of ...</q>.</td>
+            <td>列表内的任一种模式出现一次或没出现，即为匹配。读作：<q>或许有一个...</q></td>
         </tr>
         <tr>
             <th><code class="syntax"><strong>@(</strong><var>pattern</var>[ <strong>|</strong> <var>pattern</var> ... ]<strong>)</strong></code></th>
-            <td>Matches when any of the patterns in the list appears just once.  Reads: <q>one of ...</q>.</td>
+            <td>列表内的任一种模式出现仅一次，即为匹配。读作：<q>一个 ...</q></td>
         </tr>
         <tr>
             <th><code class="syntax"><strong>!(</strong><var>pattern</var>[ <strong>|</strong> <var>pattern</var> ... ]<strong>)</strong></code></th>
-            <td>Matches only when none of the patterns in the list appear.  Reads: <q>none of ...</q>.</td>
+            <td>只有当列表内任一种模式都没有出现，才算匹配。读作：<q>没有一个 ...</q></td>
         </tr>
     </table>
 
-    <p>These operators are at first a little more confusing to understand, but they are a great way of adding logic to patterns:</p>
+    <p>这些运算符乍看起来可能会让人有些困惑，但他们其实是给模式增加逻辑性的一种非常好的方式：</p>
 
 <pre lang="bash">
-<span class="prompt">$ </span><kbd>ls <mark>+([:digit:])</mark>' '*.ogg</kbd><em>Filenames that start with one or more digits.</em>
+<span class="prompt">$ </span><kbd>ls <mark>+([:digit:])</mark>' '*.ogg</kbd><em>文件名以一位或多位数值起始</em>
 <mark>05</mark> Between Angels and Insects.ogg
 <mark>07</mark> Wake Up.ogg
-<span class="prompt">$ </span><kbd>ls *.jp<mark>?(e)</mark>g</kbd><em>Filenames that end either in <code>.jpg</code> or <code>.jpeg</code>.</em>
+<span class="prompt">$ </span><kbd>ls *.jp<mark>?(e)</mark>g</kbd><em>文件名以 <code>.jpg</code> 或 <code>.jpeg</code> 结束</em>
 img_88751.jp<mark></mark>g
 igpd_45qr.jp<mark>e</mark>g
-<span class="prompt">$ </span><kbd>ls *.<mark>@(jpg|jpeg)</mark></kbd><em>Same thing, perhaps written more clearly!</em>
+<span class="prompt">$ </span><kbd>ls *.<mark>@(jpg|jpeg)</mark></kbd><em>效果与前面相同，但这样表达可能更清楚！</em>
 img_88751.<mark>jpg</mark>
 igpd_45qr.<mark>jpeg</mark>
-<span class="prompt">$ </span><kbd>ls !(my*).txt</kbd><em>All the <code>.txt</code> files that do <strong>not</strong> begin with <code>my</code>.</em>
+<span class="prompt">$ </span><kbd>ls !(my*).txt</kbd><em>所有 <strong>不是</strong>以 <code>my</code> 起始的 <code>.txt</code> 文件 </em>
 hello.txt
-<span class="prompt">$ </span><kbd>ls !(my)*.txt</kbd><em>Can you guess why this one matches <code>myscript.txt</code>?</em>
+<span class="prompt">$ </span><kbd>ls !(my)*.txt</kbd><em>你能猜到为什么这个会匹配到  <code>myscript.txt</code> 文件吗？</em>
 myscript.txt
 hello.txt
 </pre>
 
-    <p>Extended glob patterns can be extremely useful at times, but they can also be confusing and misleading.  Let's focus on the last example: why does <code>!(my)*.txt</code> expand the pathname <code>myscript.txt</code>?  Isn't <code>!(my)</code> supposed to only match when the pathname does <em>not</em> have a <code>my</code> in this position?  You are correct, it is!  And yet, bash expands a pathname that begins with <code>my</code>!</p>
+    <p>扩展 glob 模式有时会极为有用，但同时也可能使人困惑或误解。让我们专注来看最后一个例子：为什么 <code>!(my)*.txt</code> 会扩展出路径名 <code>myscript.txt</code> ？ 难道 <code>!(my)</code> 匹配的不该是 <em>不</em> 包括 <code>my</code> 的路径名吗？没错，的确是这样！但是，bash 确实又扩展出了一个以 <code>my</code> 起始的路径名！</p>
 
-    <p>The answer here is that bash will happily match this part of the pattern against the <code>m</code> at the beginning (which is not the same as <code>my</code>) or even empty space at the start of the filename.  This means that in order for the pathname to still be eligible for expansion, the <em>rest of our pattern</em> needs to match against the remainder of
-    our pathname.  And it so happens that we have a <code>*</code> glob right after the <code>!(my)</code> glob which will happily match the entirety of the filename.  In this situation, the <code>!(my)</code> part matches against
-    the <code>m</code> character in the beginning of the name, the <code>*</code> matches against the <code>yscript</code> part, and the <code>.txt</code> suffix of the pattern matches against the trailing <code>.txt</code> of our pathname.  The pattern matches the name, so the name is expanded!  When we include the <code>*</code> inside the <code>!()</code> pattern, this no longer works and the match fails against this pathname:</p>
+    <p>这里的解释是 bash 首先会将以 <code>m</code> 起始（并非 <code>my</code> ）、甚至是以空格起始的文件名判断为与blob 的部分模式匹配。接下来，只要我们路径名的剩余部分匹配 <em> 模式的余下部分 </em>，这个路径名就是符合扩展结果的。余下部分也的确匹配，因为 <code>!(my)</code> 模式之后紧跟的是 <code>*</code> glob， 如此就能匹配剩下全部的文件名。所以在这个例子中，<code>!(my)</code> 部分匹配文件名首字母 <code>m</code> 字符， <code>*</code> 匹配 <code>yscript</code> 部分，<code>.txt</code> 匹配路径名的 <code>.txt</code> 后缀。 因此文件路径名与模式是匹配的，所以被 bash 扩展！如果我们将 <code>*</code> 放在 <code>!()</code> 模式的括号内，这个路径名将不再与之匹配：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>ls <mark class="green">!(my)</mark><mark class="blue">*</mark>.txt</kbd>
@@ -208,29 +224,29 @@ hello.txt
 <mark>hello</mark>.txt
 </pre>
 
-    <h2>Tilde Expansion</h2>
+    <h2>波浪号扩展（Tilde Expansion）</h2>
 
-    <p>There is a different kind of expansion which we have been silently using in this guide without explicitly explaining it.  It's called the <dfn>Tilde Expansion</dfn> and it involves replacing a tilde (<code>~</code>) in a pathname with the path to the current user's home directory:</p>
+    <p>有一种不同类型的扩展我们已在这份指南里悄悄地使用，但尚未明确解释它。它就是 <dfn>波浪号扩展</dfn>，也就是用当前用户的主目录路径替换路径名中的波浪号（ <code>~</code> ）：</p>
 
 <pre lang="bash">
-<span class="prompt">$ </span><kbd>echo 'I live in: ' ~</kbd><em>Note that expansions must not be quoted or they will become <strong>literal</strong>!</em>
+<span class="prompt">$ </span><kbd>echo 'I live in: ' ~</kbd><em>注意扩展一定不能被引用，否则他们就会成为 <strong>字面性</strong> 的字符！</em>
 I live in: /Users/lhunath
 </pre>
 
-    <p>Tilde expansion is slightly special in bash, compared to pathname expansion, since it happens especially early in the parser phase.  This is merely a detail, but it is important to note that tilde expansion is different from pathname expansion.  We are not performing a search and trying to match filenames against glob patterns.  We are simply replacing a tilde with an explicit pathname.</p>
+    <p>相比路径名扩展，波浪号扩展在 bash 中稍有些特殊，因为它在解析阶段很早期的时候发生。这是一个很小的细节，重要的是要知道波浪号扩展与路径名扩展不同。我们并不会执行搜索，试图将文件名与glob 模式匹配。我们仅仅是用确切的路径名替换波浪号。</p>
 
-    <p>In addition to simple tildes, we can also expand the home directory of another user by putting the user's name right after the tilde:</p>
+    <p>除了简单的波浪号，我们也可以通过将其他用户的用户名紧放在波浪号之后，来扩展他们的主目录：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>echo 'My boss lives in: ' ~root</kbd>
 My boss lives in: /var/root
 </pre>
 
-    <h2>Command Substitution</h2>
+    <h2>命令替换（Command Substitution）</h2>
 
-    <p>We now have a pretty good idea of what <dfn>expansion</dfn> means: we replace a syntactical token in our command by the situationally-specific equivalent value of that token.  Thus far, we've only expanded pathnames, either as the result of a pathname expansion pattern or a tilde expansion operation.</p>
+    <p>我们现在对 <dfn>扩展</dfn> 的含义已有很好的概念：即使用具体情境相关的信息作为令牌（token）的值来替换命令中的语法令牌。到目前为止，无论是路径名扩展模式的结果或是波浪号扩展操作，我们仅仅扩展了路径名。</p>
 
-    <p>But expansion can be used for so much more.  We can use expansion to expand almost any kind of data into our command's arguments.  <dfn>Command Substitution</dfn> is an extremely popular method of expanding data into command arguments.  With <dfn>Command Substitution</dfn>, we effectively write a command within a command, and we ask bash to expand the inner command into its <em>output</em> and use that output as argument data for the main command:</p>
+    <p>但扩展其实还可以做非常多的事。我们几乎可以扩展任何种类的数据作为命令的参数。<dfn>命令替换</dfn>就是一种极为流行的将数据扩展为命令参数的方法。借助 <dfn>命令替换</dfn>，我们可以实现在命令中写命令，还可以让 bash 将内部的命令扩展它的 <em>输出</em>，然后使用这个输出作为主命令的参数数据：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>echo 'Hello world.' &gt; hello.txt</kbd>
@@ -240,118 +256,115 @@ Hello world.
 The file &lt;hello.txt&gt; contains: <mark>Hello world.</mark>
 </pre>
 
-    <p>What have we done here?<br>
-    We start out pretty simple: we create a file called <code>hello.txt</code> and put the string <code>Hello world.</code> into it.  We then use the <code>cat</code> command to output the contents of the file.  We can see the file contains the string we saved into it.</p>
-    <p>But then things get interesting:  what we want to do here is output a message to the user that explains in a nice sentence what the string in our file is.  To do this, we want to make the file's contents a "part of"
-    the sentence that we <code>echo</code> out.  However, while we write the code for this sentence, there is no telling what the contents of the file is, so how can we type out the correct sentence in our script?  The answer is expansion:  We know how to get the contents of a file using <code>cat</code>, so here we <em>expand</em> the output of the <code>cat</code> command <em>into</em> our <code>echo</code> sentence.  Bash will first run <code>cat hello.txt</code>, take the output of this command
-    (which is our string <code>Hello world.</code>) and then expand our <dfn>Command Substitution</dfn> syntax (the <code>$(cat ...)</code> part) into that output.  Only after this expansion, bash will try to run the <code>echo</code> command.  And can you guess what the argument to the <code>echo</code> command has become after our <dfn>Command Substitution</dfn> has expanded in-place?  The answer is:<br>
+    <p>我们刚做了什么？<br>
+    我们从很简单的事开始：我们首先创建了一个叫做 <code>hello.txt</code> 的文件，然后写入字符串 <code>Hello world.</code>。然后我们使用 <code>cat</code> 命令将文档的内容输出显示。可以看到文档内包含了我们存入的字符串。</p>
+    <p>但是接下来有意思的事情发生了：在这里我们想做的是向用户输出一条消息，一句话解释我们的文档中存有什么字符。为了实现这一点，我们想要让文档的内容作为我们 <code>echo</code> 出来的这句话的“一部分”。然而，当我们为要输出的这句话写代码的时候，我们并不知道文件里有什么内容，那么我们如何在脚本中打出完整正确的那句话呢？答案就是使用扩展：我们知道如何通过 <code>cat</code> 命令得到文档内容，因此我们可以将 <code>cat</code> 命令的结果 <em>扩展至</em> 我们要 <code>echo</code> 的那句话中。Bash 首先会运行 <code>cat hello.txt</code>，拿到它的输出结果（即字符串 <code>Hello world.</code> ），然后扩展我们的 <dfn>命令替换</dfn> 语法（ <code>$(cat ...)</code> 部分）至输出结果。只有经过这样的扩展，bash 才会尝试运行 <code>echo</code> 命令。你能猜到，在我们的 <dfn>命令替换</dfn> 扩展之后，echo 命令的参数变成了什么吗？答案就是：<br> 
     <code>echo "The file &lt;hello.txt&gt; contains: Hello world."</code></p>
+      
+    <p>以上是我们学习到的第一种值的扩展（value expansion）。值的扩展允许我们讲数据扩展成命令的参数。他们非常有用，因此你之后会反复使用到。对于值的扩展，bash 有非常一致的语法，他们全都以符号 <code>$</code> 开始。</p>
 
-    <p>This is the very first kind of value expansion that we've learned about.  Value expansions allow us to expand data into command arguments.  They are extremely useful and you will use them all the time.  Bash has a fairly consistent syntax with regards to value expansions: they all start with a <code>$</code> symbol.</p>
-
-    <p><dfn>Command Substitution</dfn> essentially expands the <em>value of a command that was executed in a subshell</em>.  As such, the syntax is a combination of the value-expansion prefix <code>$</code> followed by the subshell to expand: <code>(...)</code>.  A subshell is essentially a small new bash process that is used to run a command while the main bash shell waits for the result.  We'll learn more about subshells in a future chapter.  Suffice it to say that the syntax for
-    expansions in bash is very consistent and very deliberate, which certainly helps with learning it!</p>
+    <p><dfn>命令替换</dfn> 本质上是 <em>扩展 bash subshell 执行的某条命令的值</em> 。因此，它的语法是由值扩展前缀符号 <code>$</code> 加 subshell 扩展的部分 <code>(...)</code> 构成。Subshell 本质上是一个小的新开启的 bash 进程，当主 bash shell 等待结果的时候，用它来运行命令。在后面的章节中，我们会学习更多关于 subshell 的内容。当前只需要知道 bash 的扩展语法既一致又缜密，这对学习它非常有利！</p>
 
     <aside class="rule">
-        <p>Very observant readers might have noticed that this guide tends to use single quotes to quote its strings but in this latest example switched to double quotes for the sentence that contained the expansion syntax.  This is intentional: all value expansions (ie. all syntax with a <code>$</code> prefix) can only expand inside quoted arguments if the argument was <em>double-quoted</em>.  Single quotes will turn the dollar-syntax into literal characters, causing bash to output the
-        dollar rather than expand its value in-place!  It is thus important to double-quote all our arguments that contain value expansions.</p>
+        <p>观察敏锐的读者应该已经注意到这份指南倾向于使用单引号来引用字符串，但是在最近的例子中则切换使用双引号来引用包含扩展语法的句子。这是有意为之的：所有的值扩展（即所有以 <code>$</code> 为前缀的语法）只有在 <em>双引号</em> 标注的参数中才会被扩展。单引号会将美元语法转成纯字面性的符号，使得 bash 输出美元符号而非扩展它的值！因此一定要使用双引号引用包含值扩展的参数。</p>
         <p>
-            <q>Value expansions (<code>$...</code>) must <strong>always</strong> be double-quoted.</q>
+            <q>值扩展 (<code>$...</code>) 必须 <strong>永远</strong> 使用双引号</q>
         </p>
     </aside>
     <aside class="warn">
-        <p>Never leave a value expansion unquoted.  If you do, bash will tear the value apart using word-splitting, delete all whitespace from it and perform hidden pathname expansion on all the words in it!</p>
+        <p>永远不要未加引用使用值扩展。如果你这样做，bash 会以单词切割的方式将值的部分拆解，删除其中所有的空格，对其中全部单词执行隐藏的变量名扩展！</p>
     </aside>
 
-    <p>As a closing note, I will make brief mention of the deprecated <code>`...`</code> syntax.  Old-style bourne shells used this syntax for <dfn>Command Substitution</dfn> instead of the more modern <code>$(...)</code> syntax.  In bash and all modern POSIX shells, both syntaxes are supported, but it is highly recommended that you <em>stop</em> using the backtick (<code>`</code>) syntax and change this syntax into the value-expansion equivalent whenever you see it used in the wild.  Although they are
-    functionally equivalent, the backtick variant has some very important downsides:</p>
+    <p>作为结束语，我需简单提及已被废弃的反引号 <code>`...`</code>语法。相比更现代的 <code>$(...)</code>语法，传统的 bourne shell 使用后引号语法表示 <dfn>命令替换</dfn>。虽然 bash 以及所有当代 POSIX shell 对这两种语法都予以支持，但还是强烈建议你 <em>停止</em> 使用反引号（<code>`</code>）语法，而且每当你看到这种用法时都将他们转为值扩展的等加语法。虽然他们在功能上等价，后引号语法有一些严重的缺陷：</p>
     <ul>
-        <li>The backtick syntax looks a <em>lot</em> like quoting.  This has caused widespread confusion among users.  Even to the trained eye, it is sometimes hard to not forget that backtick expansions <em>still need double-quotes around them to be safe</em>, just like all other value expansions.</li>
-        <li>The backtick syntax is inconsistent with value expansions.  The beauty of <code>$(...)</code> is that is clearly communicates that we are expanding a value into place here, just like all other dollar-style value expansions do.  This clarity is absent with the backtick syntax.</li>
-        <li>The backtick syntax turns quoting and nesting into an exercise in absurdity.  It requires a maze of backslash-escaping which makes it almost impossible to parse and nearly guarantees that you will make mistakes: <code>echo "`echo \"\`echo \\"hello\\"\`\"`"</code> vs. <code>echo "$(echo "$(echo "hello")")"</code></li>
+        <li>后引号语法看起来 <em>非常</em>像引用。这已在使用者中引起极广泛的困惑。甚至在训练有素的使用者看来，有时也很难不忘记后引号扩展 <em>仍然需要双引号将其包裹以确保安全</em>，就像其他所有值扩展那样。</li>
+        <li>后引号语法与值扩展并不一致。<code>$(...)</code> 好在可以非常清楚地声明我们要将一个值扩展在这里，就像其他所有美元格式的值扩展那样。这种清晰是后引号语法所缺少的。</li>
+        <li>后引号语法使引用与嵌套的使用显得荒谬。它需要使用迷宫式的转义反斜杠，如此一来基本不可能解析，而且几乎可以确定你必然会犯错误：<code>echo "`echo \"\`echo \\"hello\\"\`\"`"</code> vs. <code>echo "$(echo "$(echo "hello")")"</code></li>
     </ul>
 
 </section>
 
 <section>
-    <h1>How do I store and re-use data?</h1>
+    <h1>我如何储存和再利用数据？</h1>
 
-    <p>We now know how to use bash for writing and managing simple commands.  These commands give us access to many powerful operations on our system.  We've learned how commands tell bash to execute programs by creating new processes for them.  We've even learned to manipulate the basic input and output of these processes such that we can read from and write to arbitrary files.</p>
+    <p>我们现在已知道如何使用 bash 编写与管理简单命令。这些命令使我们可以运用系统内许多强大的操作。我们已学习命令如何通过为程序创建新的进程来运行他们。我们甚至已学会操控进程的基本输入与输出，如此一来我们就可以从任意文件中读取和写入。</p>
 
-    <p>Those of you that have been paying really close attention will even have spotted how we can pass arbitrary data into processes using constructs such as here-documents and here-strings.</p>
+    <p>你们之中那些极为留心的人肯定也已注意到我们通过使用 here 文档与 here 字符串可以将任意数据传递到进程中。</p>
 
-    <p>The biggest limitation now is our inability to handle data flexibly.  We can write it out to files and then read it in again, by employing many file redirections, and we can pass in static pre-defined data using here-documents and here-strings.  But this leaves us longing for more.</p>
+    <p>目前，最大的限制是我们不能灵活地操纵数据。通过使用文件描述符，我们可以将他们写入到文档中然后再读取出来，也可以通过here 文档与here 字符串传递静态的、事先定义好的数据。但是我们渴望更多。</p>
 
-    <p>High time to unlock the next level of wonders: bash parameters.</p>
+    <p>是时候解锁下一水平的惊奇：bash 参数。</p>
 
-    <h2>What are bash parameters?</h2>
+    <!--
+        ? python 或其他语言中也是这样吗，将参数值存在内存中，而且扩展的时候通过运算符对参数值的修改并不会影响参数中存储的原始值，下次调用是原始值不变，这样的确就非常灵活方便。运算符虽然不好记忆，但是对值本身的字符型的操纵与修改感觉是很有用的，python 等其他语言是怎样的？
+    -->
 
-    <p>Simply put, bash parameters are regions in memory where you can temporarily store some information for later use.</p>
+    <h2>bash 参数是什么？</h2>
+
+    <p>简单地说，bash 参数就是内存中的一些位置，你可以暂时在此储存一些信息以备之后使用。</p>
     
-    <p>Not unlike files, we write to these parameters and read from them when we need to retrieve the information later.  But since we're using the system's memory and not the disk to write this information to, access is much faster.  Using parameters is also much easier and the syntax more powerful than redirecting input and output to and from files.</p>
+    <p>不同于文档，我们写入这些参数并在之后需要提取信息的时候从中读取。因为我们使用系统的内存写入信息，而不是硬盘，因此读取速度会更快。相比重定向文档的输入输出，使用参数容易很多，语法也更强大。</p>
 
-    <p>Bash provides a few different types of parameters: positional parameters, special parameters and shell variables.  The latter are the most interesting type, the former two mainly give us access to certain information bash makes available to us.  We'll introduce the practical aspects and usage of parameters through variables and then explain how positional and special parameters are different.</p>
+    <p>Bash 提供几种不同类型的参数：位置参数（positional parameters），特殊参数（special parameters）和 shell 变量（shell variables）。最后一种是最有趣的类型，前两种主要使我们可以访问 bash 提供给我们的特定信息。我们接下来会通过变量介绍参数的实用性与使用，之后会解释位置及特殊参数有何不同。</p>
 
-    <h2>Shell Variables</h2>
+    <h2>Shell 变量</h2>
 
-    <p>A shell variable is essentially a bash parameter that has a name.  You can use variables to store a value and later modify or read that value back for re-use.</p>
+    <p>Shell 变量本质上是被命名的 bash 参数。你可以利用变量储存值，之后还可以修改或读取这个值以再次使用。</p>
 
-    <p>Using variables is easy.  You store information in them through variable assignment, and access that information at any later time using parameter expansion:</p>
+    <p>使用变量非常简单。你可以通过变量赋值将信息储存其中，之后任何时间都可以再通过参数扩展访问存储信息：</p>
 
 <pre lang="bash">
-<span class="prompt">$ </span><kbd>name=lhunath</kbd><em>Assign the value <code>lhunath</code> to the variable <code>name</code></em>
-<span class="prompt">$ </span><kbd>echo "Hello, $name.  How are you?"</kbd><em>Expand the value of <code>name</code> into the echo argument</em>
+<span class="prompt">$ </span><kbd>name=lhunath</kbd><em>将 <code>lhunath</code> 赋值给变量 <code>name</code></em>
+<span class="prompt">$ </span><kbd>echo "Hello, $name.  How are you?"</kbd><em>将变量 <code>name</code> 的值扩展到 echo 参数中</em>
 Hello, lhunath.  How are you?
 </pre>
 
-    <p>As you can see, the assignment creates a variable called <kbd>name</kbd> and puts a value in it. Expansion of the parameter's value is done by prefixing the name with a <kbd title="dollar">$</kbd> symbol, which causes our value to get injected into the echo argument.</p>
+    <p>如你所见，通过赋值我们创建了一个称作 <kbd>name</kbd> 的变量，并存入一个值。通过在变量名的前面附加一个前缀符号 <kbd title="dollar">$</kbd>，使得我们可以将值注入echo的参数中。</p>
 
-    <h3>Assignment</h3>
+    <h3>赋值</h3>
 
-    <p>Assignment uses the <kbd title="equals">=</kbd> operator.  It is imperative that you understand there can be no syntactical space around the operator.  While other languages may permit this, bash does not.  Remember from the previous chapter that spaces in bash have a special meaning: they split commands into arguments.  If we were to put spaces around the <code>=</code> operator, they would cause bash to split the command into a command name and arguments,
-    thinking you wanted to execute a program rather than assign a variable value:</p>
+    <p>赋值使用等号 <kbd title="equals">=</kbd> 运算符。你必须要理解等号运算符的前后不能有任何语法空格。虽然其他语言可能允许这样，但 bash 不允许。前面章节中已说过空格在 bash 中有特殊的含义：他们将命令分割为参数。如果我们在等号 <code>=</code> 前后放置空格，他们会导致 bash 将命令分割为一个命令名称加参数，以为你想要执行程序而不是赋值给变量：</p>
 
 <pre lang="bash" class="bad">
-<span class="prompt">$ </span><kbd>name <mark>=</mark> <mark>lhunath</mark></kbd><em>Run the command <code>name</code> with arguments <code>=</code> and <code>lhunath</code>.</em>
+<span class="prompt">$ </span><kbd>name <mark>=</mark> <mark>lhunath</mark></kbd><em>运行命令 <code>name</code>，参数是 <code>=</code> 和 <code>lhunath</code>.</em>
 -bash: name: command not found
 </pre>
 
-    <p>To fix this code, we simply remove the space around the <code>=</code> operator that was causing the word splitting.  If we wanted to assign a value to the variable which begins with a few literal space characters, we'll need to use quotes to signal bash that our space is literal and shouldn't serve to trigger word splitting:</p>
+    <p>为了修改代码，我们只需去除 <code>=</code> 运算符前后导致单词切割的空格。如果我们想要赋予变量的值以字面性的空格字符起始，则需要使用引用来告诉 bash 我们的空格是字面性的，不要启动单词切割：</p>
 
 <pre lang="bash" class="good">
 <span class="prompt">$ </span><kbd>name=lhunath</kbd>
-<span class="prompt">$ </span><kbd>item='    4. Milk'</kbd><em>Use quotes to make the spaces literal.</em>
+<span class="prompt">$ </span><kbd>item='    4. Milk'</kbd><em>使用引用将空格转成字面性的字符</em>
 </pre>
 
-    <p>We can even combine this assignment syntax with other value expansions:</p>
+    <p>我们甚至可以将赋值的语法与其他值的扩展结合使用：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>contents="$(cat hello.txt)"</kbd>
 </pre>
 
-    <p>Here, we perform a <dfn>Command Substitution</dfn>, expanding the contents of the <code>hello.txt</code> file into our assignment syntax, which subsequently results in that contents getting assigned to the <var>contents</var> variable.</p>
+    <p>这里我们执行了一个 <dfn>命令替换</dfn>，将 <code>hello.txt</code> 文件的内容扩展到我们的赋值语法中，从而将文件中的内容赋值给 <var>contents</var> 变量</p>
 
-    <h3>Parameter Expansion</h3>
+    <h3>参数扩展（Parameter Expansion）</h3>
 
-    <p>Assigning values to variables is neat but not really immediately useful.  It's being able to re-use those values at any time that makes parameters so interesting.  Re-using parameter values is done by expanding them.  <dfn>Parameter Expansion</dfn> effectively takes the data out of your parameter and inlines it into the data of your command.  As we saw briefly before, we expand parameters by prefixing their name with a <code>$</code> symbol.  Whenever you see this symbol in bash, it's probably
-    because something is getting expanded.  It could be a parameter, or the output of a command, or the result of an arithmetic operation.  We'll learn more about the other expansions later on.</p>
+    <p>赋值给变量很棒但不是立即就有用，使参数如此有趣的原因在于之后任何需要的时候可以再次使用这些值。复用变量的值是通过扩展实现的。<dfn>变量扩展</dfn>有效地从你的参数中提取出数据，进而将其作为你命令的数据插入。正如我们前面简单看到的，我们通过在变量名的前面使用前缀符号 <code>$</code> 符号扩展参数。每当你在 bash 中看到这个符号，很可能就是什么东西在被扩展。可能是某个参数，或是某个命令的输出，又或是一个数学运算的结果。我们将会在后面部分学习更多扩展。</p>
     
     <aside class="rule">
-        <p>You might notice a trend here, but it bears consistent repeating:<br>
-        <q>Parameter expansions (and all other value expansions) should <strong>always</strong> be double-quoted.</q></p>
+        <p>你可能已经注意到这里存在一种趋势，但仍然值得重复强调：<br>
+        <q>参数扩展（以及其他所有值的扩展）<strong>永远</strong> 以双引号引用。</q></p>
     </aside>
     
-    <p>In addition, parameter expansion allows you to wrap curly braces (<kbd>{</kbd> and <kbd>}</kbd>) around your expansion.  These braces are used to tell bash what the beginning and end of your parameter name is.  They are usually optional, as bash can often figure the name out by itself.  Though sometimes they become a necessity:</p>
+    <p>此外，参数扩展允许你使用大括号（<kbd>{</kbd> 和 <kbd>}</kbd>）包裹你的扩展。这些大括号是用来告诉 bash 你参数名称的起始和终止。他们通常是被选择性使用，因为 bash 自己通常都可以识别出参数名称。不过有些时候使用他们是必要的：</p>
 
 <pre lang="bash">
-<span class="prompt">$ </span><kbd>name=Britta time=23.73</kbd><em>We want to expand <code>time</code> and add an <code>s</code> for seconds</em>
-<span class="prompt">$ </span><kbd>echo "$name's current record is $times."</kbd><em>but bash mistakes the name for <code>times</code> which holds nothing</em>
+<span class="prompt">$ </span><kbd>name=Britta time=23.73</kbd><em>我们想要扩展 <code>time</code> 并加上 <code>s</code> 表示秒</em>
+<span class="prompt">$ </span><kbd>echo "$name's current record is $times."</kbd><em>但是 bash 将其错误地理解为名称 <code>times</code>，而这个变量是空的</em>
 Britta's current record is .
-<span class="prompt">$ </span><kbd>echo "$name's current record is ${time}s."</kbd><em>Braces explicitly tell bash where the name ends</em>
+<span class="prompt">$ </span><kbd>echo "$name's current record is ${time}s."</kbd><em>括号会明确告诉 bash 变量名称在哪里终止</em>
 Britta's current record is 23.73s.
 </pre>
 
-    <p>Parameter expansions are great for inserting user or program data into our command instructions, but they also have an extra ace up their sleeve: parameter expansion operators.  While expanding a parameter, it is possible to apply an operator to the expanding value.  This operator can modify the value in one of many useful ways.  Remember that this operator only changes the value that is expanded; it does not change the original value that's sitting in your variable.</p>
+    <p>参数扩展对于在我们的命令指令中插入用户或程序数据非常好用，但它手里其实还藏有另一张王牌：参数扩展运算符。当扩展一个参数的时候，可以对正被扩展的值施加一个运算符，这个运算符能以众多有用方式中的某一种改变扩展值。记住这个运算符只会改变扩展时的值，并不会改变变量中原始存储的值。</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>name=Britta time=23.73</kbd>
@@ -361,10 +374,9 @@ Britta's current record is 23 seconds and 73 hundredths.
 PATH currently contains: /Users/lhunath/.bin, /usr/local/bin, /usr/bin, /bin, /usr/libexec
 </pre>
 
-    <p>The examples above use the <code>%</code>, <code>#</code> and <code>//</code> operators to perform various operations on the parameter's value before expanding the result.  The parameters themselves aren't changed; the operator only affects the value that gets expanded into place.  You'll also notice that we can use glob patterns here, just like we did during pathname expansion, to match against the values in our parameter.</p>
+    <p>在扩展结果之前，上面例子中使用了 <code>%</code>，<code>#</code> 和 <code>//</code> 这三种运算符对参数的值施加了各种操作。参数本身并没有被改变，运算符只会影响扩展出的值。你会注意到我们在这里可以使用 glob 模式，就像在变量名扩展中那样，来匹配我们参数中的值。</p>
 
-    <p>In the first case, we used the <code>%</code> operator to remove the <code title="dot">.</code> and the number after it from <code>time</code>'s value before expanding it.  That left us with just the part in front of the <code>.</code>, which is the seconds.  The second case did something similar, we used the <code>#</code> operator to remove a part from the start of the <code>time</code> value.  Finally, we used the <code>//</code> operator, (which is really a special case of the <code>/</code> operator), to replace every <code title="colon">:</code> character in <code>PATH</code>'s value with <code>, </code>.  The result is a list of directories that is
-    easier to read for people than the original colon-separated <code>PATH</code>.
+    <p>在第一个例子中，扩展之前，我们使用 <code>%</code> 移除变量 <code>time</code> 值内的 <code title="dot">.</code> 以及它之后的数值。结果只剩下 <code title="dot">.</code> 以前的部分，也就是秒。第二个例子类似，我们使用 <code>#</code> 移除 <code>time</code> 值中从开始到 <code title="dot">.</code>的部分。最后，我们通过 <code>//</code> 运算符（ 运算符 <code>/</code> 的特殊形式），用 <code>,</code> 来替代 <code>PATH</code> 值中的全部 <code>：</code>。结果就是相比原始冒号分隔的 <code>PATH</code>，一列人们更容易阅读的路径名。
 
     <table>
         <thead>
@@ -373,9 +385,9 @@ PATH currently contains: /Users/lhunath/.bin, /usr/local/bin, /usr/bin, /bin, /u
             </tr>
         </thead>
         <tr>
-            <th>Operator</th>
-            <th>Example</th>
-            <th>Result</th>
+            <th>运算符</th>
+            <th>例子</th>
+            <th>结果</th>
         </tr>
         <tr>
             <th>
@@ -389,7 +401,7 @@ PATH currently contains: /Users/lhunath/.bin, /usr/local/bin, /usr/bin, /bin, /u
             </td>
         </tr>
         <tr>
-            <td colspan="2">Remove the <em>shortest</em> string that matches the <var>pattern</var> if it's at the start of the value.</td>
+            <td colspan="2">删去符合 <var>模式（pattern）的</var> 从值的起始算起的 <em>最短的</em> 字符串</td>
         </tr>
         <tr>
             <th>
@@ -403,7 +415,7 @@ variables.html</pre>
             </td>
         </tr>
         <tr>
-            <td colspan="2">Remove the <em>longest</em> string that matches the <var>pattern</var> if it's at the start of the value.</td>
+            <td colspan="2">删去符合 <var>模式（pattern）的</var> 从值的起始算起的 <em>最长的</em> 字符串</td></td>
         </tr>
         <tr>
             <th>
@@ -417,7 +429,7 @@ https://guide.bash.academy</pre>
             </td>
         </tr>
         <tr>
-            <td colspan="2">Remove the <em>shortest</em> string that matches the <var>pattern</var> if it's at the end of the value.</td>
+            <td colspan="2">删去符合 <var>模式（pattern）的</var> 到值的终止为止的 <em>最短的</em> 字符串</td></td></td>
         </tr>
         <tr>
             <th>
@@ -431,7 +443,7 @@ https:</pre>
             </td>
         </tr>
         <tr>
-            <td colspan="2">Remove the <em>longest</em> string that matches the <var>pattern</var> if it's at the end of the value.</td>
+            <td colspan="2">删去符合 <var>模式（pattern）的</var> 到值的终止为止的 <em>最长的</em> 字符串</td>
         </tr>
         <tr>
             <th>
@@ -445,7 +457,7 @@ https://guide-bash.academy/variables.html</pre>
             </td>
         </tr>
         <tr>
-            <td colspan="2">Replace <em>the first</em> string that matches the <var>pattern</var> with the replacement.</td>
+            <td colspan="2">用替换值替换 <em>第一个</em> 符合 <var>模式（pattern）的</var> 字符串</td>
         </tr>
         <tr>
             <th>
@@ -459,7 +471,7 @@ https://guide-bash-academy/variables-html</pre>
             </td>
         </tr>
         <tr>
-            <td colspan="2">Replace <em>each</em> string that matches the <var>pattern</var> with the replacement.</td>
+            <td colspan="2">用替换值替换 <em>每一个</em> 符合 <var>模式（pattern）的</var> 字符串</td>
         </tr>
         <tr>
             <th>
@@ -473,7 +485,7 @@ http://guide.bash.academy/variables.html</pre>
             </td>
         </tr>
         <tr>
-            <td colspan="2">Replace the string that matches the <var>pattern</var> at the <em>beginning</em> of the value with the replacement.</td>
+            <td colspan="2">用替换值替换 <em>从值的起始算起</em> 符合 <var>模式（pattern）的</var> 字符串</td>
         </tr>
         <tr>
             <th>
@@ -487,7 +499,7 @@ https://guide.bash.academy/variables.jpg</pre>
             </td>
         </tr>
         <tr>
-            <td colspan="2">Replace the string that matches the <var>pattern</var> at the <em>end</em> of the value with the replacement.</td>
+            <td colspan="2">用替换值替换 <em>到值的终止为止</em> 符合 <var>模式（pattern）的</var> 字符串</td>
         </tr>
         <tr>
             <th>
@@ -501,7 +513,7 @@ https://guide.bash.academy/variables.jpg</pre>
             </td>
         </tr>
         <tr>
-            <td colspan="2">Expand the length of the value (in bytes).</td>
+            <td colspan="2">扩展值的长度（字节）</td>
         </tr>
         <tr>
             <th>
@@ -515,7 +527,7 @@ guide.bash.academy/variables.html</pre>
             </td>
         </tr>
         <tr>
-            <td colspan="2">Expand a part of the value, starting at <var>start</var>, <var>length</var> bytes long.  You can even count <var>start</var> from the end rather than the beginning by using a (space followed by a) negative value.</td>
+            <td colspan="2">从 <var>start</var> 开始，<var>length</var> 字节长，扩展出值的一部分。你甚至可以从值的末尾 <var>start</var> 记数，通过使用负数</td>
         </tr>
         <tr>
             <th>
@@ -529,60 +541,69 @@ HTTps://guide.basH.academy/variables.HTml</pre>
             </td>
         </tr>
         <tr>
-            <td colspan="2">Expand the transformed value, either upper-casing or lower-casing the first or all characters that match the <var>pattern</var>.  You can omit the pattern to match any character.</td>
+            <td colspan="2">扩展转换后的值，将符合 <var>模式（pattern）的</var> 的第一个或全部字符转换成小写或大写形式。你也可以忽略模式去匹配任意字符</td>
         </tr>
     </table>
 
     <p>&nbsp;</p>
 
     <footer>
-    Shell variables are parameters that you can freely assign values to.  Assignment is done using the syntax <code>var=value</code>.  Parameters can be expanded to inline their data into a command's arguments.  Parameter expansion is done by prefixing the variable name with a <code>$</code> symbol.  Sometimes, you'll need to add <code>{</code> and <code>}</code> braces around the parameter name to explicitly tell bash where the name of your parameter begins and ends (eg.
-    <code>"${time}s"</code>).<br>
-    Parameter expansions should <strong>always be double-quoted</strong> for consistency and to prevent any potential white-space in them from causing word-splitting in addition to triggering unexpected pathname completion.  While expanding parameters, you can apply a special parameter expansion operator to mutate the expanded value in some way.
+    Shell 变量是你可以自由赋值的参数。赋值通过语法 <code>var=value</code> 实现。参数可以通过扩展将数据写入成为命令的参数。参数扩展通过在变量名称前使用前缀 <code>$</code> 符号实现。有时你会需要在变量名称的周围加上大括号<code>{</code> 和 <code>}</code>，以此明确告知 bash 你的参数名称从哪里起始到哪里终结 （例如：<code>"${time}s"</code>）。<br>
+    
+    为保持一致性，防止因空格的存在而导致单词分割进而触发非预期的路径名补全，<strong>永远使用双引号引用参数扩展</strong>。扩展参数的时候，你可以应用一种特殊的参数扩展运算符以某种方式改变被扩展的值。
     </footer>
 
-    <h2 id="expansion_ex">Exercises!</h2>
+    <h2 id="expansion_ex">练习时间！</h2>
 
-    <h4>EXPAN.1. Assign <kbd>hello</kbd> to the variable <var>greeting</var>.</h4>
+    <h4>EXPAN.1. 将 <kbd>hello</kbd> 作为值赋给变量 <var>greeting</var>.</h4>
 <pre lang="bash" class="exercise"><samp><kbd>greeting=hello</kbd></samp></pre>
 
-    <h4>EXPAN.2. Show the contents of the variable <var>greeting</var>.</h4>
+    <h4>EXPAN.2. 显示变量 <var>greeting</var> 的值</h4>
 <pre lang="bash" class="exercise"><samp><kbd>echo "$greeting"</kbd>
 hello</samp></pre>
 
-    <h4>EXPAN.3. Assign the string <kbd> world</kbd> to the end of the variable's current contents.</h4>
+    <h4>EXPAN.3. 将字符串 <kbd> world</kbd> 赋在变量当前内容的后面</h4>
 <pre lang="bash" class="exercise"><samp><kbd>greeting="$greeting world"</kbd></samp>
-<samp><kbd>greeting+=" world"</kbd><em><code>+=</code> appends the string to the end of the current value.</em></samp></pre>
+<samp><kbd>greeting+=" world"</kbd><em><code>+=</code> 将字符串附在当前值的末尾</em></samp></pre>
 
-    <h4>EXPAN.4. Show the last word in the variable <var>greeting</var>.</h4>
+    <h4>EXPAN.4. 显示变量 <var>greeting</var> 中最后一个单词</h4>
 <pre lang="bash" class="exercise"><samp><kbd>echo "${greeting##* }"</kbd>
 world</samp></pre>
 
-    <h4>EXPAN.5. Show the contents of the variable <var>greeting</var> with the first character upper-cased and a period (<code>.</code>) at the end.</h4>
+    <h4>EXPAN.5. 显示变量 <var>greeting</var> 的内容，第一个字母大写，以 (<code>.</code>) 结束</h4>
 <pre lang="bash" class="exercise"><samp><kbd>echo "${greeting^}."</kbd>
 Hello world.</samp></pre>
 
-    <h4>EXPAN.6. Replace the first space character in the variable's contents with <var> big </var>.</h4>
+    <h4>EXPAN.6. 用 <var> big </var> 替换变量内容中第一个空格符号</h4>
 <pre lang="bash" class="exercise"><samp><kbd>greeting=${greeting/ / big }</kbd></samp></pre>
 
-    <h4>EXPAN.7. Redirect the contents of the variable <var>greeting</var> into a file whose name is the value of the variable with the spaces replaced by underscores (<code>_</code>) and a <code>.txt</code> at the end.</h4>
+    <h4>EXPAN.7. 将变量 <var>greeting</var> 的值重定向输出到一个文档中，用下划线 (<code>_</code>) 替换变量值中的全部空格并在最后加上 <code>.txt</code>，以此作为文档的名称</h4>
 <pre lang="bash" class="exercise"><samp><kbd>echo "$greeting" &gt; "${greeting// /_}.txt"</kbd></samp></pre>
 
-    <h4>EXPAN.8. Show the contents of the variable <var>greeting</var> with the middle word fully upper-cased.</h4>
+    <h4>EXPAN.8. 显示变量 <var>greeting</var> 的值，中间单词的全部字母大写</h4>
 <pre lang="bash" class="exercise"><samp><kbd>middle=${greeting% *} middle=${middle#* }; echo "${greeting%% *} ${middle^^} ${greeting##* }"</kbd>
 hello BIG world</samp></pre>
 </section>
 
+<!--
+    ! 第8题非常典型，在字面上（literally）对字符串做灵活的拆分、操纵以及组合
+    ! 编程的时候需要特意适应的思维，目前想到的有：
+    ! 1）think literally，纯工作在字面层面上，对符号的各种操纵（manipulation）
+    ! 2）指令、表达要非常明确清晰，不得含糊
+-->
+
 <section>
-    <h1>What is the environment and what is it used for?</h1>
+    <h1>环境是什么，它是用来做什么的？</h1>
 
-    <p>There are two separate spaces where variables are kept.  These separate spaces are often confused, leading to many misunderstandings.  You've already become familiar with the first: shell variables.  The second space where variables are kept is the process environment.  We'll introduce environment variables and explain how they differ from shell variables.</p>
+    <p>变量可以保存在两种不同的空间内。这两种空间经常被混淆，进而导致许多误解。你已经熟悉了其中的一种：shell 变量。除此之外，变量还可以保存在进程环境中。接下来我们要介绍的就是环境变量，并向你解释他们与shell 变量的差别。</p>
 
-    <h2>Environment Variables</h2>
+    <h2>环境变量（Environment Variables）</h2>
 
-    <p>Unlike shell variables, environment variables exist at the process level.  That means they are not a feature of the bash shell, but rather a feature of any program process on your system.  If we imagine a process as a piece of land you buy, the building we put on the land will be the code running in your process.  You could put a <code>bash</code> house or a <code>grep</code> shack or a <code>firefox</code> tower on the land.  Environment variables are variables
-    stored on your process' land itself, while shell variables are stored inside the bash house built on your land.<br />
-    You can store variables in the environment and you can store variables in the shell.  The environment is something every process has, while the shell space is only available to bash processes.  As a rule, <em>you should put your variables in the shell space</em> unless you explicitly require the behaviour of environment variables.</p>
+<!--
+    ? 所以环境变量是系统层级中的全局变量概念？还是局部与全局，分装与整体的关系问题？文杰谈论过samlltalk对全局变量的使用与看重，不像其他语言会尽量回避对全局变量的使用，以免引发相互的干扰导致的混乱，所以选择分而治之？
+-->
+    <p>不同于 shell 变量，环境变量存在于进程水平中。这意味着他们不是 shell 本身的特性，而是你系统内任一种程序进程的特性。如果我们将一个进程想象为你购买的一块土地，那么土地上的建筑物就是运行在你进程中的代码。你可以这块地上盖一座 <code>bash</code> 房子，或是一座 <code>grep</code> 棚屋，又或是一座 <code>firefox</code> 高塔。环境变量就是储存在你进程土地上的变量，而 shell 变量保存在你土地之上 bash 房子内部。<br />
+    你可以将变量存在环境中，也可以将他们存在 bash shell 内。环境是每一个进程都需要的，而 shell 空间则只对 shell 进程开放。因此，<em>记住这个规则，你应该把你的变量存放在 shell 空间中，除非你明确地需要环境变量的行为</em>。</p>
 
 <pre>
     ╭─── bash ─────────────────────────╮
@@ -596,7 +617,7 @@ hello BIG world</samp></pre>
     ╰──────────────────────────────────╯
 </pre>
 
-    <p>When you run a new program from the shell, bash will run this program in a new process.  When it does, this new process will have its own environment.  But unlike shell processes, ordinary processes do not have shell variables.  They only have environment variables.  More importantly, when a new process is created, its environment is populated by making a <strong>copy</strong> of the environment of the creating process:</p>
+    <p>当你在 shell 中运行一个新的程序，bash 会创建新的进程执行它，然后这个新的进程就会拥有它自己的环境。但是不同于 shell 进程，一般的进程没有 shell 变量。他们只有环境变量。更重要的是，当一个新的进程被创建，它的环境是通过 <strong>复制</strong>创建它的进程的环境得到的：</p>
 
 <pre>
     ╭─── bash ───────────────────────╮
@@ -616,8 +637,7 @@ hello BIG world</samp></pre>
          ╰────────────────────────────────╯
 </pre>
 
-    <p>It is a common misconception that the environment is a system-global pool of variables that all processes share.  This illusion is often the result of seeing the same variables available in child processes.  When you create a custom environment variable in the shell, any child processes you create afterwards will inherit this variable as a result of it being copied from your shell into the child's environment.  However, since the environment is specific to each process,
-    changing or creating new variables in the child will in no way affect the parent:</p>
+    <p>有一种普遍存在的误解，即环境是所有进程共享的一个系统-全局性的变量池。这种错觉通常是因为在子进程中看到相同变量而产生的。如果你在 bash shell 中创建一个自定义的环境变量，在此之后你新建的任何子程序都会继承到这个变量，因为它把这个变量一起从 shell 的环境变量中复制了过来。但是，因为环境是针对具体每个进程而言的，子进程中被改变或创建的变量不会对父进程产生任何影响：</p>
 
 <pre>
     ╭─── bash ───────────────────────╮
@@ -659,11 +679,10 @@ hello BIG world</samp></pre>
          ╰────────────────────────────────╯
 </pre>
 
-    <p>This distinction also makes it clear why one would opt to put certain variables in the environment.  While most of your variables will be ordinary shell variables, you may opt to "export" some of your shell variables into the shell's process environment.  In doing so, you're effectively exporting your variable's data to each child process you create, and those child processes will in turn export their environment variables to their children.  Your system uses environment variables for all sorts of things, mainly to provide state information and default configurations for certain processes.</p>
+    <p>为什么我们会选择将特定变量存放在环境中，以上所示的区别使得这个问题的答案更清晰了。虽然你绝大多数的变量都是普通的shell 变量，但是你有可能会选择将一些shell 变量输出到shell 进程环境中。这样做后，你能更有效率地将变量的值输出至你创建的每一个子进程中，而这些子进程反过来又会把他们的环境变量输出至他们的子进程中。你的系统会使用环境变量做各种事，主要是提供状态信息以及特定进程的默认配置。</p>
 
-    <p>For instance, the <code>login</code> program, which is traditionally used to log a user into the system, exports information about your user into the environment (<var>USER</var> containing your user name, <var>HOME</var> containing your home directory, <var>PATH</var> containing a standard command search path, etc.).  All processes that run as a result of you logging in can now learn what user they're running for by looking at the environment.</p>
-    <p>You can export your own variables into the environment.  This is often done to configure the behavior of any programs you run.  For instance, you can export <var>LANG</var> and assign it a value that tells programs what language and character set they should use.  Environment variables are generally only useful to those programs that know about and support them explicitly.  Some variables have a very narrow usage, for instance
-    <var>LSCOLORS</var> can be used by some <code>ls</code> programs to colorize their output of files on your system.</p>
+    <p>例如，通常用来帮一个用户登陆进系统内的<code>login</code> 程序，会把用户信息输出至环境中（ <var>USER</var> 包含你的用户名，<var>HOME</var> 包含你的主目录，<var>PATH</var> 包含标准命令搜索路径，等等）。在你登陆后运行的所有进程，通过查看环境变量就会知道他们当前是在为哪个用户运行。</p>
+    <p>你也可以输出自己的变量到环境中。这通常是用来配置任何你想要运行的程序的行为。例如，你可以输出 <var>LANG</var> 并为它赋值，以告诉程序他们应该使用什么语言与字符集。环境变量通常只对了解他们并明确支持他们的程序有用。有些变量的使用范围非常窄，例如 <var>LSCOLORS</var> 可以被一些 <code>ls</code> 程序用来彩色化你系统文档的输出结果。</p>
 
 <pre>
     ╭─── bash ───────────────────────╮
@@ -709,37 +728,33 @@ hello BIG world</samp></pre>
               ╰────────────────────────────────╯
 </pre>
 
-    <h2>Shell Initialization</h2>
+    <h2>Shell 初始化（Shell Initialization）</h2>
 
-    <p>When you start an interactive bash session, bash will prepare itself for usage by reading a few initialization commands from different files on your system.  You can use these files to tell bash how to behave.  One in particular is intended to give you the opportunity to export variables into the environment.  The file is called <code>.bash_profile</code> and it lives in your home directory.  There's a good chance that you don't have this file yet; if this is the
-    case, you can just create the file and bash will find it the next time it goes looking for it.</p>
-    <p>At the very end of your <code>~/.bash_profile</code>, you should have the command <code>source ~/.bashrc</code>.  That's because when <code>.bash_profile</code> exists, bash behaves a little curious in that it stops looking for its standard shell initialization file <code>~/.bashrc</code>.  The <code>source</code> command remedies this oddity.</p>
-    <p>Note that if there is no <code>~/.bash_profile</code> file, bash will try to read from <code>~/.profile</code> instead, if it exists.  The latter is a generic shell profile configuration file, which is also read by other shells.  You can opt to put your environment configuration there instead, but if you do, you need to be aware that you should limit yourself to POSIX sh
-    syntax and not use any bash-specific shell syntax in the file.  POSIX sh syntax is similar to bash but it is beyond the scope of this guide.</p>
+    <p>当你启动一个交互式 bash 时，通过读取你系统内不同文档中存储的初始化命令，bash 会自行准备好。你可以使用这些文档来告诉 bash 要如何行动。其中有一个文档就是特别用来使你输出变量到环境中的，这个文件叫做 <code>.bash_profile</code>，它保存在你的主目录中。很有可能你并没有这个文件，如果真是这样的话，你可以自己创建一个，下一次 bash 就会找到它。</p>
+    <p>在你的 <code>~/.bash_profile</code> 文件末尾，应该有一条这个命令 <code>source ~/.bashrc</code>。这是因为当 <code>~/.bash_profile</code> 文档存在的时候，bash 的表现会有些奇怪，它会停止寻找标准的 shell 初始化配置 <code>~/.bashrc</code> 文档。<code>source</code> 命令则会修复这点反常。</p>
+    <p>注意，如果没有 <code>~/.bash_profile</code> 文档，bash 就会尝试从 <code>~/.profile</code> 文档中读取信息， 如果这个文档存在的话。这后一种文档是一种通用性的 shell 配置文件，其他 shell 也可以读取。你可以选择将环境配置信息储存在这里，但如果你真的这样做，需知道在这个文档中，你要使用POSIX sh 语法，而不能是任何具体的 bash shell 语法。POSIX sh 语法和 bash 语法非常相似，但这部分内容不在我们这份指南覆盖的范围内。</p>
 
 <pre>
-    login<em>The <code>login</code> program signs the user in</em>
+    login<em><code>login</code> 程序使用户登陆至系统内</em>
       │
-      ╰─ <strong>-bash</strong><em>The <code>login</code> command starts the user's login shell</em>
+      ╰─ <strong>-bash</strong><em><code>login</code> 命令启动用户登陆过的shell</em>
          │
-         ╰─ screen<em>The user runs the <code>screen</code> program from his login shell</em>
+         ╰─ screen<em>用户从他登陆后的 shell 中运行 <code>screen</code> 程序</em>
               │
-              ╰─ weechat<em>The <code>screen</code> program creates multiple windows</em>
-              │         <em>and allows the user to switch between them.</em> 
-              ╰─ bash   <em>The first runs an IRC client, two others run a</em> 
-              │         <em>non-login bash shell.</em> 
+              ╰─ weechat<em><code>screen</code> 程序会创建多个窗口</em>
+              │         <em>且允许用户在他们之间切换</em> 
+              ╰─ bash   <em>第一个运行一个 IRC 客户端，另外两个则分别运行</em> 
+              │         <em>一个未登录的 bash shell</em> 
               ╰─ bash
 </pre>
 
-    <p>This process tree depicts a user who uses bash as his login shell and multiplexes his terminal to create several separate "screens", allowing him to interact with multiple concurrently running programs.  After logging in, the system (the <code>login</code> program) determines the user's login shell.  It might do this, for example, by looking at <code>/etc/passwd</code>.  In this case, the user's login shell is set to bash.  <code>login</code> proceeds by running bash and
-    setting its name to <code>-bash</code>.  It is standard procedure for the <code>login</code> program to prefix the name of the login shell with a <code>-</code> (dash), indicating to the shell that it should behave as a login shell.</p>
+    <p>这个进程树描绘了一个用户，使用 bash 作为他登陆的 shell，同时复用终端创建了几个独立的“屏幕（screen）”，使得他可以与多个同时正在运行的程序交互。登陆后，系统（ <code>login</code> 程序）会决定用户的登陆 shell。例如，它可能会通过查看 <code>/etc/passwd</code> 确定。在这个例子中，用户登陆的 shell 被设置为 bash。<code>login</code> 接下来会运行 bash 并将它的名字设置为 <code>-bash</code>。这是 <code>login</code> 命令的标准执行流程，它会在登陆的 shell 名称前加一个前缀 <code>-</code>，表示这个 shell 会作为登陆 shell 运行。</p>
 
-    <p>Once the user has a running bash login shell, he runs the <code>screen</code> program.  While screen is running, it takes over the user's entire terminal and emulates multiple terminals within it, allowing the user to switch between them.  In each emulated terminal, screen runs a new program.  In this case, the user has screen configured to start one emulated terminal that runs an IRC client, and two that run interactive (but non-login) bash shells. Here's what that would
-    look like in practice:</p>
+    <p>当用户有了一个运行着的 bash 登陆 shell，接着他启动了 <code>screen</code> 程序。当这个程序运行时，它会接管用户的整个终端并在其中模拟多个终端，允许用户在他们之间切换。在每一个模拟终端中，screen 程序都会运行一个新的程序。在这个例子中，用户使用 screen 程序配置了一个模拟终端运行一个 IRC 客户端，配置另外两个终端交互式（但是非登陆）运行 bash shell。下面视频中是具体的操作过程：</p>
 
     <script type="text/javascript" src="https://asciinema.org/a/13948.js" id="asciicast-13948" async></script>
 
-    <p>Let's take a look at how the initialization happens in this scenario, and where the environment variables come from:</p>
+    <p>让我们来看一下这个例子中的初始化过程具体是怎样的，以及环境变量从哪里来：</p>
 
 <pre>
     login
@@ -799,32 +814,31 @@ hello BIG world</samp></pre>
                     ╰──────────────╯     ╰──────────────────╯
 </pre>
 
-    <p>As you can see, different levels export their own variables into the environment.  Each child process inherits the variables from its parent's environment.  In turn, it can overwrite some of these values or add new variables.</p>
-    <p>Notice how the first (login) bash sources both <code>~/.bash_profile</code> and <code>~/.bashrc</code> while the bottom two source only <code>~/.bashrc</code>.  That's because only the first bash process is started as a "login shell" (by means of having a <code>-</code> in front of its name).  The bottom two bash processes are ordinary interactive shells.  The reason they have no need for sourcing <code>~/.bash_profile</code> is now becoming more obvious: the responsibility of
-    <code>~/.bash_profile</code> is to set up bash's environment, and the bottom two shells are already inheriting the environment from their login shell ancestor.</p>
+    <p>如你所见，不同水平会将他们自己的变量输出至环境中。每一个子进程会继承父进程的环境变量。反过来，子进程也可以覆盖一些变量的值或添加新的变量。</p>
+    <p>注意看第一个（登陆）bash 会同时读取并执行（点命令，source）<code>~/.bash_profile</code> 和 <code>~/.bashrc</code>，而下面的两个 bash 则只读取和执行 <code>~/.bashrc</code>。之所以会这样是因为只有第一个 bash 进程是作为“登陆 shell”的（它的名称前面有一个前缀 <code>-</code>）。下面两个 bash 进程只是普通的交互式 shell。他们之所以不需要读取并执行 <code>~/.bash_profile</code> 的原因现在看来就更为明显了：<code>~/.bash_profile</code> 的职责在于配置 bash 的环境，而下面两个 shell 已从登陆的 shell 那里继承了它的环境。</p>
 
 </section>
 
 <section>
-    <h1>What else can I use parameters for?</h1>
+    <h1>我还可以用参数来做什么？</h1>
 
-    <p>As we mentioned earlier in the chapter, there are positional parameters, special parameters and variables.  Variables are essentially parameters with a name.  We're going to have a closer look at the different kinds of parameters and how they allow you to get specific information from the shell or change certain behaviours of the shell.</p>
+    <p>正如我们在前面章节中提到的，参数有位置参数、特殊参数和变量三种类型。变量本质上就是有名字的参数。现在我们将会进一步看看不同类型的参数以及他们如何允许你从 shell 中获得具体的信息或是如何改变 shell 的特定行为。</p>
 
-    <h2>Positional Parameters</h2>
+    <h2>位置参数（Positional Parameters）</h2>
 
-    <p>Where variables are parameters with a name, positional parameters are parameters with a number (more specifically, a positive integer number).  We expand these parameters using the normal parameter expansion syntax: <code>$1</code>, <code>$3</code>.  It's important to note, though, that bash requires you to employ curly braces around positional parameters of more than one digit: <code>${10}</code>, <code>${22}</code> (in practice, you will rarely if ever need to explicitly refer to positional parameters this high up).</p>
+    <p>如果说变量是有名字的参数，位置参数就是有数值的参数（更具体地说，正整数）。我们使用正常的参数扩展语法扩展这些参数：<code>$1</code>，<code>$3</code>。一定要注意，如果数字位数超过一位，bash 会要求你使用大括号将位置参数包裹：<code>${10}</code>，<code>${22}</code> （实践中，你基本不需要明确指定如此高的位置参数）。</p>
 
-    <p>Positional parameters expand to values that were sent into the process as arguments when it was created by the parent.  For instance, when you start a <code>grep</code> process using this command:</p>
+    <p>位置参数会扩展出值，然后作为参数发送至父进程创建的子进程中。例如，当你使用如下命令启动 <code>grep</code> 进程：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>grep Name registrations.txt</kbd>
 </pre>
 
-    <p>You're effectively running the <code>grep</code> command with the arguments <code>Name</code> and <code>registrations.txt</code>.  If <code>grep</code> were a bash script, the first argument would be available in the script by expanding <code>$1</code> and the second argument by expanding <code>$2</code>.  Positional parameters higher than <code>2</code> will be unset.</p>
+    <p>你正在有效地运行 <code>grep</code> 命令，参数是 <code>Name</code> 和 <code>registrations.txt</code>。如果 <code>grep</code> 是一个 bash 脚本，通过扩展位置参数 <code>$1</code> 和 <code>$2</code>就能分别获得脚本所需的第一个和第二个参数。比 <code>2</code> 更高的位置参数未定义。</p>
 
-    <p>It's good to know that there is also a zero'th positional parameter.  This positional parameter expands to the <em>name</em> of the process.  The name of the process is chosen by the program that creates it, so the zero'th argument can really contain anything and is entirely up to your script's parent.  Most shells will use the absolute path of the file that they ran to start the process as the name of the process, or the command that the user executed to start the process.  Be aware that this is by no means a requirement and you cannot make any reliable assumptions on the contents of the zero'th argument: it is best avoided for all intents and purposes.</p>
+    <p>另外很高兴知道还有一个第0位参数，这个位置参数会扩展为进程的 <em>名称</em>。进程的名称由创建它的程序选择，因此第0位的参数可以包含任何信息，且完全由脚本的夫进程决定。绝大多数 shell 会使用启动进程的执行文件的绝对路径作为进程名称，或是用户执行的命令名。注意这并非必须，你不能据此对第0位参数的内容做出任何可靠的推测：无论出于任何意图或目的最好都避免使用。</p>
 
-    <p>What's nice and extremely convenient: most of what we've learned thus far about variable parameters applies to positional parameters as well: we can expand them and we can apply parameter expansion operators on these expansions to mutate the resulting values:</p>
+    <p>好在且极为方便的是：关于变量参数我们目前所学的绝大多数内容也都适用于位置参数：我们可以扩展他们，可以应用参数扩展运算符来改变结果值：</p>
 
 <pre lang="bash">
 <kbd>#!/usr/bin/env bash
@@ -837,8 +851,11 @@ echo "Your last name is: $last"
 echo "Your middle names are: $middle"</kbd>
 </pre>
 
-    <p>If you save this script in a file called <code>names</code> and run it according to the usage description, by passing a single argument to it, you'll see the script analyse your name and inform you which part of your name constitute the first, last and middle names.  We're using the variables <var>first</var>, <var>last</var> and <var>middle</var> to store these pieces of information for later, when we expand the variables in the <code>echo</code> statements.  Notice how the
-    computation of the <var>middle</var> name requires both the knowledge of the full name (available from the first positional parameter) and the first name (which was previously computed and stored in the variable <var>first</var>).</p>
+    <p>如果你将这个脚本以 <code>names</code> 为名字保存，并按照用法描述运行它，通过传递一个参数给它，你将会看到这个脚本分析你的名字并告诉你名字的哪些部分分别是名、姓和中间名。我们使用变量<var>first</var>，<var>last</var> 和 <var>middle</var> 储存这些信息片段，由此后面可以在 <code>echo</code> 语句中扩展使用他们。注意 <var>中间名</var> 的计算同时需要名字全称（可从第一位置参数获得）以及名字（以被计算过并存储在变量 <var>first</var> 中）信息。</p>
+
+<!--
+    ! 位置参数在脚本中的扩展使用很像python中的形参与实参？
+-->
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>chmod +x names</kbd>
@@ -858,16 +875,16 @@ Your last name is: Kirk
 Your middle names are:  Tiberius "Jim"
 </pre>
 
-    <p>It is important to understand that, unlike most variables, positional parameters are read-only parameters.  On reflection, it likely makes sense to you that one cannot change the arguments to your script from within your script.  As such, this is a syntax error:</p>
+    <p>一定要理解，和绝大数变量不同，位置参数是只读参数。仔细想想，你很可能也会觉得有道理，我们是无法从脚本内部改变脚本参数的。因此下面就是一个语法错误：</p>
 
 <pre lang="bash" class="bad">
 <span class="prompt">$ </span><kbd>1='New First Argument'</kbd>
 -bash: 1=New First Argument: command not found
 </pre>
 
-    <p>While the error message is slightly confounding, it indicates that bash doesn't even recognize this statement as an attempt to assign a value to a variable (since the parameter <code>1</code> is not a variable) and instead thinks you have given it the name of a command you want to run.</p>
+    <p>虽然该错误消息看起来略显混乱，它表示 bash 甚至都没有识别出这个语句是想要赋值给变量（因为参数<code>1</code>不是一个变量），相反 bash 以为你给了它一个想要运行的命令。</p>
 
-    <p>There is, however, a built-in command we can use to change the values of the set of positional parameters.  While this is a common practice in ancient shells that lack bash's more advanced features, you will rarely if ever have a need for this in bash.  To modify the current set of positional parameters, use the <code>set</code> command and specify the new positional parameters as arguments after the <code>--</code> argument:</p>
+    <p>然而，我们可以使用一种内置命令去改变位置参数集合的值。虽然在那些缺少 bash 高级特性的古老 shell 中，这是很常用的一种操作，但是你之后在 bash 中基本不会用到。为了改变当前的位置参数集合，使用 <code>set</code> 命令并在 <code>--</code> 参数的后面指定新的位置参数：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>set -- 'New First Argument' Second Third 'Fourth Argument'</kbd>
@@ -875,53 +892,51 @@ Your middle names are:  Tiberius "Jim"
 1: New First Argument, 2: Second, 4: Fourth Argument
 </pre>
 
-    <p>In addition to changing the set of positional parameters, there is also the <code>shift</code> built-in that can be used for "pushing" our set of positional parameters around.  When we shift positional parameters, we essentially push them all toward the beginning, causing the first few positional parameters to get bumped off to make way for the others:</p>
+    <p>除了改变位置参数集合，内置命令 <code>shift</code> 可以用来“推动”位置参数。当我们移动位置参数，实质上是将他们向开始的方向推动，移走前面的参数，为后面的腾出位置来：</p>
 
 <pre lang="bash">
 <mark>New First Argument</mark> <mark>Second</mark> <mark>Third</mark> <mark>Fourth Argument</mark>
-<span class="prompt">$ </span><kbd>shift 2</kbd><em>Push the positional parameters back 2.</em>
-<mark>Third</mark> <mark>Fourth Argument</mark> &lt;----<em>The first two disappeared and the third is now in first spot with the fourth in second place.</em>
+<span class="prompt">$ </span><kbd>shift 2</kbd><em>将位置参数推动至2</em>
+<mark>Third</mark> <mark>Fourth Argument</mark> &lt;----<em>前面两个位置参数消失，原来第三个现处于第一个的位置，第四个现在第二个</em>
 </pre>
 
-    <p>Finally, when starting a new bash shell using the <code>bash</code> command, there is a way to pass in positional parameters.  This is a very useful way of passing a list of arguments to an inline bash script.  You will use this method later when you combine inline bash code with other utilities, but for now this is a great way of experimenting with positional parameters without having to create a separate script to invoke and pass arguments to (such as we did with the
-    <code>names</code> example above).  Here's how to run an inline bash command and pass in a list of arguments to populate the positional parameters:</p>
+    <p>最后，当我们使用 <code>bash</code> 命令启动一个新的 bash shell 的时候，有一种方法可用来传递位置参数。这是一种非常有用的方法，可以将一列参数传至内联 bash 脚本中。之后，当你把内联 bash 代码与其他功用结合使用的时候，你会使用到这种方法，但现在我们只把它作为一种实验位置参数而无需创建独立脚本去激活和传递参数（如我们在上面 <code>names</code> 例子中所做的那样）的方法。。下面示例的就是如何运行一个内联 bash 命令，并传递一个参数列表扩展位置参数：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>bash -c 'echo "1: $1, 2: $2, 4: $4"' -- 'New First Argument' Second Third 'Fourth Argument'</kbd>
 1: New First Argument, 2: Second, 4: Fourth Argument
 </pre>
 
-    <p>We run the <code>bash</code> command, passing the <code>-c</code> option followed by an argument that contains some bash shell code.  This will tell bash that instead of starting a new interactive bash shell, you want to just have the shell run the provided bash code and finish.  After the shell code, we specify the arguments to use for populating the positional parameters.  The first argument in our example is <code>--</code>, and while this argument is technically used to populate
-    the zero'th positional parameter, it is a good idea to always use <code>--</code> for the sake of compatibility and to make clear the separation between bash's arguments and the arguments to your shell code.  After this argument, each argument populates the standard positional parameters as you would expect.</p>
+    <p>我们运行 <code>bash</code> 命令，传递 <code>-c</code> 选项，后面跟着一个参数，其内含有一些 bash shell 代码。这样会告诉 bash，相比启动一个新的交互式 bash shell，你只是想让 shell 运行以上 bash 代码并结束。shell 代码之后，我们指明用以扩展位置参数的参数。第一个参数是我们例子中的 <code>--</code>。虽然这个参数技术上是用来填充第 0 位上的位置参数，但是为了兼容性，以及区分bash 参数和你的shell 代码参数，最好总是使用 <code>--</code>。在这个参数之后，每一个参数会按你的预期填充标准位置参数。</p>
 
     <aside class="rule">
-        <p>Note that our argument containing bash code is <strong><code>'single-quoted'</code></strong>:</p>
-        <q>Whenever we put <em>code</em> in a <em>string</em> (such as in the case of passing it in as an argument), the code <em>should</em> be single-quoted.</q>
-        <p>Do not use <code>"double quotes"</code> to wrap code strings.  This is important because single quotes are much more reliable at making the wrapped data literal than double quotes.</p>
+        <p>注意，包含 bash 代码的参数是被 <strong><code>'单引号引用'</code></strong> 的：</p>
+        <q>当我们把 <em>代码</em> 放在 <em>字符串</em> 中的时候（就像例子中那样作为参数），代码 <em>应该</em> 被单引号引用。</q>
+        <p>不要使用 <code>"双引号"</code> 包裹代码字符串。这很重要，因为在确保将引用数据字面化上，单引号远比双引号可靠。 </p>
     </aside>
 
-    <p>If we used double-quotes in the example above, the shell that we're typing the <code>bash</code> command into would expand the <code>$1</code>, <code>$2</code> and <code>$4</code> expansions instead, resulting in a broken argument to the <code>-c</code> option.</p>
+    <p>如果在上面例子中我们使用双引号，接收我们 <code>bash</code> 命令的shell 会将位置参数<code>$1</code>、<code>$2</code> 以及 <code>$4</code>分别扩展，由此 <code>-c</code> 选项的参数就破裂掉了。</p>
 
-    <p>To illustrate this point, compare our good example from above:</p>
+    <p>为了示例这一点，请对比我们上面完整正确的例子：</p>
 <pre lang="bash" class="good">
-<span class="prompt">$ </span><kbd>bash -vc <mark>'echo "1: $1, 2: $2, 4: $4"'</mark> -- \</kbd><em>We pass the -v argument to bash to show us the code it is going to run before the result.</em>
-<kbd>'New First Argument' Second Third 'Fourth Argument'</kbd><em>We can use \ at the end of a line to resume on a new line.</em>
-echo "1: $1, 2: $2, 4: $4"<em>Here is the code it is going to run.</em>
-1: New First Argument, 2: Second, 4: Fourth Argument<em>And this is the result.</em>
+<span class="prompt">$ </span><kbd>bash -vc <mark>'echo "1: $1, 2: $2, 4: $4"'</mark> -- \</kbd><em>我们将 -v 参数传递给 bash 好让它在显示结果之前先呈现要运行的代码</em>
+<kbd>'New First Argument' Second Third 'Fourth Argument'</kbd><em>我们可以在行末使用反斜杠 \ 以在新的一行继续</em>
+echo "1: $1, 2: $2, 4: $4"<em>这是即将运行的代码</em>
+1: New First Argument, 2: Second, 4: Fourth Argument<em>这是结果</em>
 </pre>
 
-    <p>to what would happen if we used double quotes around the <code>-c</code> argument instead of single quotes:</p>
+    <p>以及如果我们使用双引号而非单引号引用 <code>-c</code> 的参数，会发生什么：</p>
 <pre lang="bash" class="bad">
-<span class="prompt">$ </span><kbd>bash -vc <mark>"echo "1:</mark> <mark>$1,</mark> <mark>2:</mark> <mark>$2,</mark> <mark>4:</mark> <mark>$4""</mark> -- \</kbd><em>The outer double-quotes conflict with the inner double-quotes, leading to ambiguity.</em>
+<span class="prompt">$ </span><kbd>bash -vc <mark>"echo "1:</mark> <mark>$1,</mark> <mark>2:</mark> <mark>$2,</mark> <mark>4:</mark> <mark>$4""</mark> -- \</kbd><em>外部的双引号与内部的双引号冲突，导致混淆</em>
 <kbd>'New First Argument' Second Third 'Fourth Argument'</kbd>
-echo 1:<em>As a result, the argument to -c is no longer the entire bash code but only the first word of it.</em>
+echo 1:<em>结果就是，-c 选项的参数不再是完整的 bash 代码，而只包含第一个单词</em>
 1:
-<span class="prompt">$ </span><kbd>bash -vc <mark>"echo \"1: $1, 2: $2, 4: $4\""</mark> -- \</kbd><em>Even if we fix the quoting ambiguity, the $1, $2 and $4 are now evaluated by the shell we're typing this command into,</em>
-<kbd>'New First Argument' Second Third 'Fourth Argument'</kbd><em>not the shell we pass the arguments to.</em>
-echo "1: , 2: , 4: "<em>Since $1, $2 and $4 are likely empty in your interactive shell, they will expand empty and disappear from the -c argument.</em>
+<span class="prompt">$ </span><kbd>bash -vc <mark>"echo \"1: $1, 2: $2, 4: $4\""</mark> -- \</kbd><em>就算我们修复了引用的模糊性，问题仍在，位置参数 $1、$2 和 $4 正被我们输入命令的 shell 解释</em>
+<kbd>'New First Argument' Second Third 'Fourth Argument'</kbd><em>而不是参数被传入的 shell </em>
+echo "1: , 2: , 4: "<em>因为位置参数 $1、$2、$4 在你交互式的 shell 中很可能为空，扩展的结果也就相应为空，因此 -c 就没有了参数</em>
 1: , 2: , 4:
 </pre>
-    <p>We could go as far as to fix all of the issues inside the double quotes by backslash-escaping all of the special characters, including the double quotes and dollar signs.  This would fix the issue, but it makes the shell code look extremely convoluted and hard to read.  Maintaining shell code that has been escaped in a special way like this is a nightmare and begs for accidental mistakes that are hard to spot:</p>
+    <p>通过使用反斜杠转义所有特殊字符，包括双引号和美元符号，我们可以修复掉双引号内的全部问题。但是这会使 shell 代码看起来极为复杂且难读。维护如此被特殊转义后的 shell 代码简直就像噩梦，随时可能招致极难发现的错误：</p>
 <pre lang="bash" class="good">
 <span class="prompt">$ </span><kbd>bash -vc "echo \"1: \$1, 2: \$2, 4: \$4\"" -- \</kbd>
 <kbd>'New First Argument' Second Third 'Fourth Argument'</kbd>
@@ -930,91 +945,90 @@ echo "1: $1, 2: $2, 4: $4"
 </pre>
 
 
-    <h2>Special Parameters</h2>
+    <h2>特殊参数（Special Parameters）</h2>
 
-    <p>Understanding positional parameters makes understanding special parameters much easier: they are very similar.  Special parameters are parameters whose name is a single symbolic character, they are used to request certain state information from the bash shell.  Here are the different kinds of special parameters and the information they hold:</p>
+    <p>理解位置参数使得理解特殊参数容易很多：因为他们非常相似。以单独符号字符为参数名的参数就是特殊参数，他们通常被用来向 bash shell 请求特定状态信息。下面是不同种类的特殊参数以及他们持有的信息：</p>
 
     <table>
         <tr>
-            <th>Parameter</th>
-            <th>Example</th>
-            <th>Description</th>
+            <th>参数</th>
+            <th>示例</th>
+            <th>描述</th>
         </tr>
         <tr>
             <th><code class="syntax"><strong>"$</strong><var>*</var><strong>"</strong></code></th>
             <td><kbd>echo "Arguments: $<mark>*</mark>"</kbd></td>
             <td>
-                Expands a <strong><em>single</em> string</strong>, joining all positional parameters into one, separated by the first character in <var>IFS</var> (by default, a space).<br>
-                <strong>Note:</strong> You should never use this parameter unless you explicitly intend to join all the parameters.  You almost always want to use <code>@</code> instead.
+                扩展 <strong><em>单个字符串</em></strong>，将所有位置参数连接合并成一个，相互之间被 <var>IFS</var> 中的第一个字符分隔（通常默认的是一个空格）<br>
+                <strong>注：</strong> 永远不要使用这个参数，除非你明确希望连接所用参数。你基本上总是可以使用 <code>@</code> 替代。
             </td>
         </tr>
         <tr>
             <th><code class="syntax"><strong>"$</strong><var>@</var><strong>"</strong></code></th>
             <td><kbd>rm "$<mark>@</mark>"</kbd></td>
             <td>
-                Expands the positional parameters as a list of separate arguments.
+                将位置参数作为一列参数分别扩展
             </td>
         </tr>
         <tr>
             <th><code class="syntax"><strong>"$</strong><var>#</var><strong>"</strong></code></th>
             <td><kbd>echo "Count: $<mark>#</mark>"</kbd></td>
             <td>
-                Expands into a number indicating the amount of positional parameters that are available.
+                扩展出一个数值，对应可用位置参数的数量
             </td>
         </tr>
         <tr>
             <th><code class="syntax"><strong>"$</strong><var>?</var><strong>"</strong></code></th>
             <td><kbd>(( $? == 0 )) || echo "Error: $<mark>?</mark>"</kbd></td>
             <td>
-                Expands the exit code of the last (synchronous) command that just finished.<br>
-                An exit code of 0 indicates the command succeeded, any other number indicates why the command failed.
+                扩展最后一个（同步）命令的退出代码<br>
+                退出代码 0 表示命令执行成功，其他数字分别对应执行失败的原因
             </td>
         </tr>
         <tr>
             <th><code class="syntax"><strong>"$</strong><var>-</var><strong>"</strong></code></th>
             <td><kbd>[[ $<mark>-</mark> = *i* ]]</kbd></td>
             <td>
-                Expands to the set of option flags that are currently active in the shell.<br>
-                Option flags configure the behaviour of the shell, the example tests for the presence of the <code>i</code> flag, indicating the shell is interactive (has a prompt) and is not running a script.
+                扩展出当前 shell 中活跃的选项标识集<br>
+                选项标识（option flags）会设置 shell 的行为，例子是在测试 <code>i</code> 标识是否存在，i表示shell 是交互模式（有提示符），并未在运行脚本
             </td>
         </tr>
         <tr>
             <th><code class="syntax"><strong>"$</strong><var>$</var><strong>"</strong></code></th>
             <td><kbd>echo "$<mark>$</mark>" &gt; /var/run/myscript.pid</kbd></td>
             <td>
-                Expands a number that's the unique process identifier for the shell process (that's parsing the code).
+                扩展一个数值，对应正在解析代码的 shell 进程的唯一识别码
             </td>
         </tr>
         <tr>
             <th><code class="syntax"><strong>"$</strong><var>!</var><strong>"</strong></code></th>
             <td><kbd>kill "$<mark>!</mark>"</kbd></td>
             <td>
-                Expands a number that's the unique process identifier of the last process that was started in the background (asynchronously).<br>
-                The example signals the background process that it's time to terminate.
+                扩展一个数值，对应上一个后台异步运行的进程的唯一识别码<br>
+                例子表示终止后台进程
             </td>
         </tr>
         <tr>
             <th><code class="syntax"><strong>"$</strong><var>_</var><strong>"</strong></code></th>
             <td><kbd>mkdir -p ~/workspace/projects/myscripts &amp;&amp; cd "$<mark>_</mark>"</kbd></td>
             <td>
-                Expands to the last argument of the previous command.
+                扩展上一个命令的最后一个参数
             </td>
         </tr>
     </table>
 
-    <p>Just like positional parameters, special parameters are read-only: you can only use them to expand information, not store information.</p>
+    <p>正如位置参数，特殊参数也是只读性的：你只能使用他们扩展信息，而非储存信息。</p>
     
-    <h2>Shell Internal Variables</h2>
+    <h2>Shell 内部变量</h2>
 
-    <p>You already know what shell variables are.  Were you aware that the bash shell also creates a few variables for you?  These variables are used for various tasks and are handy for looking up certain state information from the shell or changing certain shell behaviours.</p>
+    <p>你已知道 shell 变量是什么。你是否意识到 bash shell 也会为你创建一些变量？这些变量被用在各种任务中，对于从 shell 中查询状态信息或是改变shell 行为非常方便。</p>
     
     <aside class="rule">
-        <p>Internal shell variables are shell variables with ALL-UPPERCASE names.  The same holds true for nearly all environment variables.  It is important to make sure that when we start creating our own shell variables, we don't accidentally use the name of a shell variable we didn't know about, this mistake will result in all kinds of dangerous and unexpected behaviour.  Thankfully, shell variable names are case-sensitive, so in order to avoid ever accidentally overriding a shell-internal
-        variable or a system-exported variable of the same name, the general rule is:</p>
-        <p><q>You should make all of your own shell variables <em>lower-case</em>.  If you create an environment variable, give it an ALL-UPPERCASE name.</q></p>
+        <p>Shell 内部变量就是名称全部大写的 Shell 变量。环境变量基本也都是这样。当我们准备新建自己的 shell 变量时，一定要确保没有误用了内部已有变量的名称，否则会导致各种危险难预期的行为。幸好，shell 变量的名称是区分字母大小写的，因此为了防止不小心覆盖shell 内部变量或系统输出的同名变量，一般的规则是：</p>
+        <p><q>你自己的所有shell 变量名称应该全部使用 <em>小写字母</em>。如果你创建了一个环境变量，则以全部<em>大写字母</em>为它命名。</q></p>
     </aside>
 
-    <p>While bash actually defines quite a lot of internal shell variables, most of them are not very useful.  Others have use but only in very specific scenarios.  Many of these variables require you to understand more advanced bash concepts.  I will briefly mention a few internal shell variables that are interesting to learn about at this stage.  The full list of internal shell variables can be found in <code>man bash</code>.</p>
+    <p>虽然 bash 实际定义了许多 shell 内部变量，但绝大多数都不是非常有用。有些即使有用也只是在一些很具体的情境中。这里面许多变量的使用需要你理解更多高级的 bash 概念。下面我简单介绍一些当前阶段学起来比较有趣的内部 shell 变量。使用 <code>man bash</code> 可以得到完整的 shell 内部变量列表。</p>
 
     <table>
         <tr>
@@ -1023,7 +1037,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              This variable contains the full pathname of the command that started the bash you are currently in.</td>
+              这个变量包含启动你当前bash的命令的完整路径名</td>
         </tr>
         <tr>
             <th><var>BASH_VERSION</var></th>
@@ -1031,7 +1045,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              A version number that describes the currently active version of bash.</td>
+              描述当前活跃 bash 版本的版本号</td>
         </tr>
         <tr>
             <th><var>BASH_VERSINFO</var></th>
@@ -1039,7 +1053,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              An array of detailed version information on the currently active version of bash.</td>
+              关于当前活跃 bash 版本的一列详细版本信息 </td>
         </tr>
         <tr>
             <th><var>BASH_SOURCE</var></th>
@@ -1047,8 +1061,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              This contains all the filenames of the scripts that are currently running.  The first is the script that's currently running.<br>
-              Usually it is either empty (no scripts running) or contains just the pathname of your script.</td>
+              当前正在运行的全部脚本的文件名。第一个是当前正在运行的脚本。通常这个变量或者为空（没有正在运行的脚本），或是包含你脚本的路径名。</td>
         </tr>
         <tr>
             <th><var>BASHPID</var></th>
@@ -1056,7 +1069,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              This contains the process ID of the bash that is parsing the script code.</td>
+              正在解析脚本代码的bash的进程ID </td>
         </tr>
         <tr>
             <th><var>UID</var></th>
@@ -1064,7 +1077,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              Contains the ID number of the user that's running this bash shell.</td>
+              正在运行 bash shell 的用户的ID</td>
         </tr>
         <tr>
             <th><var>HOME</var></th>
@@ -1072,7 +1085,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              Contains the pathname of the home directory of the user running the bash shell.</td>
+              正在运行 bash shell的用户的主目录路径名</td>
         </tr>
         <tr>
             <th><var>HOSTNAME</var></th>
@@ -1080,7 +1093,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              The name of your computer.</td>
+              电脑的名字</td>
         </tr>
         <tr>
             <th><var>LANG</var></th>
@@ -1088,7 +1101,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              Used to indicate your preferred language category.</td>
+              你偏好的语言类别</td>
         </tr>
         <tr>
             <th><var>MACHTYPE</var></th>
@@ -1096,7 +1109,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              A full description of the type of system you are running.</td>
+              你正在运行的系统类型的完整描述</td>
         </tr>
         <tr>
             <th><var>PWD</var></th>
@@ -1104,7 +1117,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              The full pathname of the directory you are currently in.</td>
+              你当前所处的路径的路径名</td>
         </tr>
         <tr>
             <th><var>OLDPWD</var></th>
@@ -1112,7 +1125,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              The full pathname of the directory you were in before you came to the current directory.</td>
+              在你来到当前路径前上一个路径的完整路径名</td>
         </tr>
         <tr>
             <th><var>RANDOM</var></th>
@@ -1120,7 +1133,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              Expands a new random number between 0 and 32767, every time.</td>
+              每次在0-32767之间扩展出一个新的随机值</td>
         </tr>
         <tr>
             <th><var>SECONDS</var></th>
@@ -1128,7 +1141,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              Expands the number of seconds your bash shell has been running for.</td>
+              扩展出你 bash shell 已运行多少秒</td>
         </tr>
         <tr>
             <th><var>LINES</var></th>
@@ -1136,7 +1149,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              Contains the height (amount of rows or lines) of your terminal display.</td>
+              你终端显示的高度（多少行）</td>
         </tr>
         <tr>
             <th><var>COLUMNS</var></th>
@@ -1144,7 +1157,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              Contains the width (amount of single-character spaces) of a single row in your terminal display.</td>
+              你终端显示单行的宽度（多少个字符空间）</td>
         </tr>
         <tr>
             <th><var>IFS</var></th>
@@ -1152,7 +1165,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              The "Internal Field Separator" is a string of characters that bash uses for word-splitting of data.  By default, bash splits on spaces, tabs and newlines.</td>
+              “Internal Field Separator” 是一个字符串，bash 用它来对数据做单词分割。默认地，bash 会在空格、tab制表键以及换行处（newlines）分割。</td>
         </tr>
         <tr>
             <th><var>PATH</var></th>
@@ -1160,7 +1173,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              The list of paths bash will search for executable programs when you run a command.</td>
+              当你运行命令时，bash 会去搜索可执行程序的路径的列表</td>
         </tr>
         <tr>
             <th><var>PS1</var></th>
@@ -1168,7 +1181,7 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              This contains a string that describes what the interactive bash shell's prompt should look like.</td>
+              描述交互式 bash shell 提示符会是什么样子的字符串</td>
         </tr>
         <tr>
             <th><var>PS2</var></th>
@@ -1176,16 +1189,15 @@ echo "1: $1, 2: $2, 4: $4"
         </tr>
         <tr>
             <td colspan="2">
-              This contains a string that describes what the interactive bash shell's secondary prompt should look like.
-              The secondary prompt is used when you finish a command line but the command isn't yet complete.</td>
+              描述交互式 bash shell 二级提示符会是什么样子的字符串。二级提示符是当你输入完一行命令但是命令尚未完整时使用</td>
         </tr>
     </table>
 
-    <p>As I mentioned, there are many other internal shell variables, but they each serve very specific advanced cases that are uninteresting at this point.  Chances are, if you're looking for some information on how bash is currently operating, you can find it in one of its internal shell variables.</p>
+    <p>如我提到的，还有许多其他的 shell 内部变量，但是他们每一个都是为某个具体的高级案例服务，这些不是我们当前关心的。很有可能，如果你查询 bash 当前如何操作的相关信息，你应该可以在它的内部 shell 变量中找到。</p>
 
-    <h2 id="parameter_ex">Exercises!</h2>
+    <h2 id="parameter_ex">练习时间！</h2>
 
-    <h4>PARAM.1. Start a new bash shell that outputs its <em>first</em> argument and pass <kbd>Hello World!</kbd> in as an argument to it.</h4>
+    <h4>PARAM.1. 启动一个新的 bash shell 输出它的<em>第一</em>参数并将 <kbd>Hello World!</kbd> 作为一个参数传递给它Start a new bash shell that outputs its <em>first</em> argument and pass  in as an argument to it.</h4>
 <pre lang="bash" class="exercise"><samp><kbd>bash -c 'echo "$1"' -- 'Hello World!'</kbd></samp></pre>
 
     <h4>PARAM.2. Start a bash shell that outputs the number of arguments passed in and pass in the arguments <kbd>1</kbd>, <kbd>2</kbd> and <kbd>The Third</kbd>.</h4>
@@ -1199,59 +1211,52 @@ echo "1: $1, 2: $2, 4: $4"
 </section>
 
 <section>
-    <h1>Arrays</h1>
+    <h1>数组（Arrays）</h1>
 
-    <p>Last but certainly <em>not least</em>, we arrive at perhaps the most interesting kind of bash parameter: the arrays.</p>
+    <p>最后，但<em>绝非无足轻重的</em>，我们抵达了可能最有趣的一种 bash参数：数组。</p>
 
-    <h2>What are arrays and why should I use them?</h2>
+    <h2>什么是数组，为什么我要使用他们？</h2>
 
-    <p>An array is a fancy word for a parameter that can hold not one string, but a whole list of strings.  The concept of storing lists of things is not new - we've seen it done before in this very guide, such as <code>PATH</code> storing a list of directory pathnames for bash to find command programs.  Arrays, however, were introduced to address a very important problem that arises when you use simple string variables to store lists of things.</p>
+    <p>数组只是相比参数听起来更炫的一个名字，指的是它不仅能容纳一个字符串，甚至装得了一列字符串。以列表的方式存储东西的概念并不新鲜，在这份指南中我们就已看到过，如变量 <code>PATH</code> 内就存储了一列供 bash 寻找命令程序的路径名。然而，数组的引入是为了解决当你使用简单的字符串变量存储一列事物时会面临的问题。</p>
 
-    <p>The problem with storing lists of things inside a simple variable is that when you become interested in the separate elements of this list, you inevitably need to split this single variable apart into those separate elements.  Most of us, however, don't even notice this as a problem: as human beings, we are extremely well adept at doing this contextually.  When we see a name such as <code>Leonard Cohen</code>, we recognize that it consists of two separate names that together make a
-    single person's full name.  When we now look at a string such as <code>Leonard Cohen - Adam Cohen - Lorca Cohen</code>, we immediately recognize it as a list of three distinct names:  we instantly recognize the pattern in this string that's separating names with a dash.  In fact, we're so good at this, that we don't usually even need to stop and think when we see a list of names such as <code>Susan Q. - Mary T. - Steven S. - Anne-Marie D. - Peter E.</code>.  We're even great at finding
-    the relevant contextual units in larger strings such as poems that consist of lines and paragraphs.</p>
+    <p>将一列事物存放在简单的变量中会产生的问题是，当你对列表中单独的部分产生兴趣时，不可避免地你需要将这单个变量分成多个独立部分。然而，我们中的大多数人T甚至都不会意识到这是一个问题：作为人类，我们极为擅长依据情况这样做。当我们看到一个名字如 <code>Leonard Cohen</code>，我们会识别出它由两个独立的名字合构成一个人的全名。当我们看到一串字符如 <code>Leonard Cohen - Adam Cohen - Lorca Cohen</code>，我们立即就会看出这是由三个名字组成的一个序列：我们立即就能识别出这个字符串中的模式，即用破折号分割姓名。事实上，我们如此擅长这样做，甚至通常都不需要停下来思考当我们看到这样一串名字时 <code>Susan Q. - Mary T. - Steven S. - Anne-Marie D. - Peter E.</code>。我们甚至擅长在更大型的由行与段构成的字符串中如诗歌中发现相关的语义单元</p>
 
-    <p>Unfortunately, though, when we start thinking in terms of having the computer handle data for us, we need to stop thinking about our excellent human abstractions and put on our cognitive baby shoes.  A computer doesn't know that <code>Susan Q. - Mary T. - Steven S. - Anne-Marie D. - Peter E.</code> is a list of names, it certainly doesn't know that these names are delimited by dashes and it most definitely wouldn't be able to guess that <code>Anne-Marie</code> is a single name as
-    opposed to two distinct people in the list.</p>
+    <p>不幸的是，当我们开始利用计算机处理数据帮助我们思考的时候，我们就要将人类杰出的抽象才能搁置一边，穿上认知婴儿鞋了。计算机不知道 <code>Susan Q. - Mary T. - Steven S. - Anne-Marie D. - Peter E.</code> 这是一串人名，它不知道这些人名被破折号分隔，也绝对猜不到 <code>Anne-Marie</code> 是一个人名，而不是两个人名组成的序列。</p>
     
     <aside class="rule">
-        <p>When we need to work with lists of things in bash, we should <strong>always</strong> be as explicit as possible about what the different elements in this list are.</p>
+        <p>当我们在 bash 中要处理事物列表的时候，我们 <strong>总是</strong> 应该尽可能明确列表中不同的元素都是什么。</p>
     </aside>
 
-    <p>A good way of being explicit about the separate elements in our list is by using arguments to our commands.  Remember when we learned about quoting?  This is, in fact, a great time to recall our quoting lessons.</p>
+    <p>使列表中事物明确的好办法是在我们的命令中使用参数。还记得我们学过的引用吗？事实上，现在是重温那些内容的绝佳时机。</p>
 
 <pre lang="bash" class="bad">
 <span class="prompt">$ </span><kbd>ls -l <mark>05</mark> <mark>Between</mark> <mark>Angels</mark> <mark>and</mark> <mark>Insects.ogg</mark></kbd>
 </pre>
 
-    <p>In this command, we are passing the <code>ls</code> command a list of many arguments and bash will assume each argument as a separate filename.  This is obviously not the intended effect, but bash is not as good at deriving contextual sense from arbitrary data as we, humans.  It is therefore important that we are explicit about what the elements of our list are:</p>
+    <p>在这个例子中，我们传递给 <code>ls</code> 命令一列参数，bash 会将每一个参数单独理解为一个文件名。很明显这不是我们想要的效果，但是 bash 并不像我们人类那样擅长从任意的数据中提取情境信息。因此，对于我们列表中的元素是什么，一定要非常明确地表达出来：</p>
 
 <pre lang="bash" class="good">
 <span class="prompt">$ </span><kbd>ls -l <mark>"05 Between Angels and Insects.ogg"</mark></kbd>
 </pre>
 
-    <p>Now that we have made it clear to bash that our list contains only a single filename, and that filename itself contains several words, the <code>ls</code> command is capable of doing its job properly.</p>
+    <p>现在我们非常清楚地告诉 bash，列表中只含有一个文件名，而这个文件名内包含几个单词，<code>ls</code> 命令终于能够正确地完成它要做的事。</p>
 
-    <p>The very same problem exists with variables.  What if we wanted to create a variable that contains a list of all the files we want to delete?  How do we create such a list in a way that we can then pass each distinct element of that list to an <code>rm</code> command for deletion, without running the risk that bash will misunderstand how our file names need to be interpreted?</p>
+    <p>变量中也存在同样的问题。如果我们想要创建一个变量，其中包含一列我们想要删除的所有文件，该怎么办？我们该如何创建一个列表，既可以把其中的每个元素传递给 <code>rm</code> 命令以删除文件，还不会产生 bash 错误理解文件名该如何被解释的风险？</p>
 
-    <p>The answer is <em>arrays</em>:</p>
+    <p>答案就是使用 <em>数组</em>：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>files=( <mark>myscript</mark> <mark>hello.txt</mark> <mark>"05 Between Angels and Insects.ogg"</mark> )</kbd>
 <span class="prompt">$ </span><kbd>rm -v "${files[@]}"</kbd>
 </pre>
 
-    <p>To create an array variable, bash introduces a slightly different assignment operator: <code>=( )</code>.  As with the standard <code>=</code>, we put the name of our variable on the left hand side of the operator, however, the list of values to assign to this variable should go nicely inbetween the <code>(</code> and <code>)</code> braces.</p>
+    <p>为了创建一个数组变量，bash 引入了一个略微不同的赋值运算符：<code>=( )</code>。和标准的 <code>=</code> 一样，我们将变量的名称放在运算符的左侧，赋给这个变量的列表的值则放在右侧 <code>(</code> 和 <code>)</code> 括号内。</p>
 
-    <p>You might recall from our section on variable assignment that it was critical we do not put syntactical spaces around our assignment values: spaces after the <code>=</code> cause
-    bash to split the assignment into a command name and argument pair; unquoted spaces in our assignment value cause bash to split the value into a partial assignment followed by a command name.  With this new array assignment syntax, spaces are freely permitted <em>inside</em> the braces, and in fact, they are used to separate the many elements of your array's list of values.  But just like regular variable assignment, when space needs to be part of the variable's data, it <strong>must be
-        quoted</strong> so that bash interpretes the space as literal.  Notice in the example above that we use <em>syntactical</em> spacing between <code>myscript</code> and <code>hello.txt</code>, allowing bash to understand these two words as being distinct elements of the list, while we use <em>literal</em> spacing inbetween the words <code>05</code> and <code>Between</code> - the space here is part of the filename, it should not cause bash to break the words into separate list
-    elements: the space is literal, and as such, we have quoted it.</p>
+    <p>你或许还记得在前面变量赋值部分，我们特别强调过不要在赋值周围使用 <em>句法性</em>的空格：<code>=</code> 后面的空格会将赋值分隔成命令名称与参数对；值内未加引用的空格则会导致 bash 将值分隔成部分参数后面跟着一个命令名称。在这种新的数组赋值语法中，括号 <em>之内</em> 空格是可以自由使用的。实际上，他们也的确被用来分隔数组內不同的元素。但是和通常的变量赋值一样，当空格是数据的一部分时，<strong>必须被引用</strong>，如此 bash 才会将它按字面解释。注意看上面的例子中，在<code>myscript</code> 和 <code>hello.txt</code> 之间，我们使用 <em>句法性</em>的空格，使 bash 认识到这两个词语是列表中的独立元素，但是在 <code>05</code> 和 <code>Between</code>之间，我们使用 <em>字面性</em> 的空格，这里空格是文件名的一部分，不能使 bash 误将它拆为列表中的不同元素：即空格在此要被引用。</p>
 
-    <p>In fact, these syntactical rules are nothing new.  We already know how to pass distinct arguments to our commands, and passing distinct elements to our array assignment operator is no different.</p>
+    <p>事实上，这些句法规则都不是新内容。我们已经知道如何传递不同的参数给我们的命令，如果传递不同的元素给数组赋值运算符并无不同。</p>
 
-    <p>Finally, after creating a list of files, we expand our parameter for our <code>rm</code> command.  If you recall from the parameter expansion section above, expansion happens by prefixing our parameter name with a <code>$</code>-sign.  Contrary to regular parameter expansion, though, we are not interested in expanding a single argument: what we want to do is expand every element in our list as a separate and distinct argument to the <code>rm</code> command.  To do this, we suffix our
-    parameter name with <code>[@]</code> and we are now <em>required</em> to wrap the whole using curly braces (<code>{ }</code></code>) to ensure bash understands the whole as a single parameter expansion unit.  The expansion of the <code>files</code> parameter using the <code>"${files[@]}"</code> syntax effectively results in this:</p>
+    <p>最后，创建完文件列表后，我们需要将参数扩展到 <code>rm</code> 命令。如果你还记得前面参数扩展部分的内容，扩展是通过在参数名称前加前缀 <code>$</code> 符号实现的。与一般参数扩展不同的是，我们感兴趣的不是扩展一个参数：我们想要做的是将列表中的每一个元素作为独立的参数扩展到 <code>rm</code> 命令中。为了实现这个目的，我们使用 <code>[@]</code> 作为参数名后缀，同时为了保证 bash 将他们作为一个完整参数扩展单元理解，还需用花括号 <code>{ }</code>将他们包裹起来。参数 <code>files</code> 使用 <code>"${files[@]}"</code> 语法扩展后会有如下效果：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>rm -v <mark>myscript</mark> <mark>hello.txt</mark> <mark>"05 Between Angels and Insects.ogg"</mark></kbd>
@@ -1260,10 +1265,10 @@ removed 'hello.txt'
 removed '05 Between Angels and Insects.ogg'
 </pre>
 
-    <p>Bash neatly expands each separate element of our array list as a separate argument to the <code>rm</code> command!</p>
+    <p>Bash 正确地将数组列表中的每一个独立元素作为单独的参数传递给了 <code>rm</code> 命令！</p>
 
     <aside class="warn">
-        <p>As with all parameter expansion, it is <strong>critically important</strong> that you wrap all of your array parameter expansions in double quotes.  Failure to double-quote your expansions will, just like with regular parameter expansion, cause bash to word-split all of the values in your neatly distinct list of array items, resulting in a broken list of word arguments to your command:</p>
+        <p>和所有的参数扩展一样，<strong>极为重要的是</strong>，你要用双引号引用全部的数组参数扩展，否则 bash 就会将你数组列表中所有的元素及其值做单词分割，把破裂的词语参数列表传递给命令：</p>
 
 <pre lang="bash" class="bad">
 <span class="prompt">$ </span><kbd>rm -v ${files[@]}</kbd>
@@ -1276,83 +1281,78 @@ rm: cannot remove 'and': No such file or directory
 rm: cannot remove 'Insects.ogg': No such file or directory
 </pre>
 
-        <p>Just recall the quoting rule we learned previously: <q>If there is whitespace or a symbol in your argument, you <strong>must</strong> quote it.</q></p>
+        <p>在重温一下我们前面学习的引用规则：<q>如果你的参数中有空格或其他符号，<strong>必须</strong>引用它</q></p>
 
 <pre lang="bash" class="good">
 <span class="prompt">$ </span><kbd>rm -v "${files[@]}"</kbd>
 </pre>
     </aside>
 
-    <p>Congratulations!  You now understand the most powerful data structure in the bash shell language.</p>
+    <p>祝贺你！现在你已理解 bash shell 语言中最有力的数据结构。</p>
 
-    <h2>What else can I do with arrays?</h2>
+    <h2>我还可以使用数组做什么？</h2>
 
-    <p>In addition to array assignment and array expansion, bash provides some other operations that we can perform on arrays:</p>
+    <p>除了数组赋值以及数组扩展，bash 还提供给我们一些其他可以执行在数组上的操作：</p>
 
 <pre lang="bash">
-<span class="prompt">$ </span><kbd>files+=( selfie.png )</kbd><em>Using the <code>+=( )</code> operator we can append a list of items to the end of an array.</em>
-<span class="prompt">$ </span><kbd>files=( *.txt )</kbd><em>Just like in a command's arguments, we can expand glob patterns here.</em>
-<span class="prompt">$ </span><kbd>echo "${files[0]}"</kbd><em>To expand a single item from an array, specify that item's ordinal number.</em>
-<span class="prompt">$ </span><kbd>echo "$files"</kbd><em>If we forget the array expansion syntax, bash will expand only the first item.</em>
-<span class="prompt">$ </span><kbd>unset "files[3]"</kbd><em>To remove a specific item from the array, we use <code>unset</code>.</em>
-<em>Notice though: we do not use a <code>$</code> here, since we are not expanding the value!</em>
+<span class="prompt">$ </span><kbd>files+=( selfie.png )</kbd><em>使用 <code>+=( )</code> 运算符我们可以在数组后面增添列表元素</em>
+<span class="prompt">$ </span><kbd>files=( *.txt )</kbd><em>J正像在命令参数中那样，我们也可以扩展 glob 模式</em>
+<span class="prompt">$ </span><kbd>echo "${files[0]}"</kbd><em>如果要扩展数组中的单独一个元素，指明元素的顺序值</em>
+<span class="prompt">$ </span><kbd>echo "$files"</kbd><em>如果我们忘记数组扩展语法，bash 就只扩展第一个元素</em>
+<span class="prompt">$ </span><kbd>unset "files[3]"</kbd><em>如果想要从数组中移除某一个元素，使用 <code>unset</code> </em>
+<em>但是要注意：这里我们不再使用 <code>$</code>，因为我们不是在扩展值！</em>
 </pre>
 
-    <p>In addition to the <code>[@]</code> suffix for expanding array elements as distinct arguments, bash also has a way of expanding all array elements into a <em>single</em> argument.  This is done using the <code>[*]</code> suffix.  How does bash merge all of our separate elements into a single argument?  There are many ways in which we might expect it to this - does it create a space-separated string?  Does it squeeze all elements together into a long string with nothing delimiting the elements?
-    Perhaps it could create a single string where each element is on a separate line?  The fact is that for all the reasons illustrated above, there isn't a single strategy for merging distinct elements into a single string that doesn't come with problems.  This operator is therefore <em>highly dubious</em> and should be avoided in favour of <code>[@]</code> in nearly all cases!</p>
+    <p>除了使用 <code>[@]</code> 后缀来扩展数组元素作为单独的参数，bash 还有办法将所有数组元素扩展到 <em>单个</em> 参数中去。这是通过使用 <code>[*]</code> 后缀做到的。Bash 如何将所有独立的元素合并进单个参数中呢？对此我们可能会想到很多种方法——它是不是创建了一个用空格分隔的字符串？它是不是未加区隔地将全部元素挤进一个长字符串中？或者它可以创建单个字符串，其中每一个元素各居一行？事实是出于以上呈现的各种原因，实际并不存在某种策略可以将全部元素合并进一个字符串且不会产生任何问题。因此，运算符 <code>[*]</code> 是非常不可靠的，任何情况下都应该尽力回避使用它而选用 <code>[@]</code>！</p>
 
-    <p>The fact is, bash allows you to choose how to merge elements into a single string when you use <code>[*]</code>: by looking at the current value of the <var>IFS</var> internal shell variable.  Bash uses this variable's <em>first</em> character (which, by default, is a space) to separate the elements in the resulting string:</p>
+    <p>实际情况是，当你使用 <code>[*]</code>，bash 允许你选择如何将元素合并为单一字符串：通过查看 shell 内部变量 <var>IFS</var> 当前的值。Bash 使用这个变量的 <em>第一个</em> 字符（默认一般是空格）来分隔字符串中的不同元素：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>names=( "Susan Quinn" "Anne-Marie Davis" "Mary Tate" )</kbd>
-<span class="prompt">$ </span><kbd>echo "Invites sent to: &lt;${names[*]}&gt;."</kbd><em>Results in a single argument where elements are separated by a literal space.</em>
+<span class="prompt">$ </span><kbd>echo "Invites sent to: &lt;${names[*]}&gt;."</kbd><em>产生单独一个参数，其中每个元素之间用字面性空格相连</em>
 Invites were sent to: &lt;Susan Quinn Anne-Marie Davis Mary Tate&gt;.
-<span class="prompt">$ </span><kbd>( IFS=','; echo "Invites sent to: &lt;${names[*]}&gt;." )</kbd><em>When we change <var>IFS</var> to a <code>,</code>, the distinct elements become more clear.</em>
+<span class="prompt">$ </span><kbd>( IFS=','; echo "Invites sent to: &lt;${names[*]}&gt;." )</kbd><em>当我们将 <var>IFS</var> 改为 <code>,</code>，每个元素看起来就更为清晰</em>
 Invites were sent to: &lt;Susan Quinn,Anne-Marie Davis,Mary Tate&gt;.
 </pre>
 
-    <p>Since a single string containing multiple distinct elements is almost always flawed and less useful than an array variable with those elements nicely separated, there happens to be very little real use for the <code>[*]</code> suffix.  With one exception:  this operator is quite useful for displaying a list of elements to the user.  When we're trying to show an array's values to a human, we need not be so worried about the syntactical correctness of the output.  The example
-    above, where <var>IFS</var> is changed to <code>,</code> illustrates a common way of displaying the values in an array to the user.</p>
+    <p>相比一个其内元素被清晰区隔的数组变量，包含多个独立元素的单个字符串基本总是有缺陷且不实用的，因此 <code>[*]</code> 后缀其实很少被真正用到。只有一种情况下例外：当要向用户展示一列元素时，这个运算符非常有用。当我们试图向一个人呈现数组值的时候，我们就不需要特别担心输出结果的句法正确性。上面 <var>IFS</var> 被设为 <code>,</code>的例子，就展示了一种常见的向用户呈现数组值的方式。</p>
 
     <aside class="warn">
-        <p>It is important to be extremely careful when modifying internal bash shell variables such as in the example above with <var>IFS</var>:<br>
-        When we change internal shell variables, we need to be cognisant of the fact that we are changing the way in which bash operates.  Changing the value of <var>IFS</var> to a comma (<code>,</code>) for the purpose of expanding files using the <code>[*]</code> suffix is fine, but if you then continue on with your script while leaving <var>IFS</var> set to its non-default value of a "<code>,</code>", many other things in bash that are based on <var>IFS</var>'s value will suddenly
-        malfunction.</p>
-        <p>It is for this reason that you should <em>always scope internal shell configuration changes</em> to as narrow an area of your script as possible.  You may have noticed in the example above that we introduced braces <code>( )</code> around the code.  These braces create a subshell within which the code is executed and when the braces end, the subshell with the non-standard <var>IFS</var> value ends with it.  As a result, the original script's bash shell never had its
-        <var>IFS</var> variable modified and we avoid these unexpected malfunctions.</p>
+        <p>当修改 bash shell 内部变量时，如上例中的 <var>IFS</var>，一定要极为小心：当我们改变shell 内部变量时，要认识到我们正在改变 bash 的操作方式。为了使用 <code>[*]</code> 后缀扩展文件而将 <var>IFS</var> 的值设为逗号（<code>,</code>）没有关系，但是如果你继续运行脚本且依然任 <var>IFS</var> 的值设为非默认的 <code>,</code>，bash 中其他许多依赖 <var>IFS</var> 值的东西就会因此受影响而突然失效。</p>
+        <p>正是因为这个原因，你应该 <em>总是</em>将你对 shell 内部配置的更改限定在脚本中一个尽可能小的范围内。你可能已经注意到了，在上面例子中我们使用了括号 <code>( )</code> 来包裹代码。括号会创建一个 subshell，括号内的代码就只在 subshell中运行，运行结束后，非默认的 <var>IFS</var> 值也随之失效。如此一来，原始脚本的 bash shell 的 <var>IFS</var> 值就从未被改变过，从而就避免了预料外的其他功能的失效。</p>
     </aside>
 
-    <p>Finally, all of the special parameter expansion operators we learned about previously can also be applied to array expansions, but we're going to re-iterate some of them as their effect is quite interesting in the context of expanding multiple distinct elements.</p>
+    <p>最后，我们前面学习过的所有特殊参数扩展运算符也都适用于数组扩展，但是下面我们会挑选一些重申，因为在扩展多个独立元素的情境下，他们的效果变得极为有趣：</p>
 
-    <p>For starters, the <code>${parameter[@]/pattern/replacement}</code> operator and all of its variants has its replacement logic applied to each element distinctly, as it's being expanded:</p>
+    <p>作为第一个，对于<code>${parameter[@]/pattern/replacement}</code> 运算符以及所有它的变式，他们的替换逻辑都单独适用于每一个元素，当他们被扩展的时候： </p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>names=( "Susan Quinn" "Anne-Marie Davis" "Mary Tate" )</kbd>
-<span class="prompt">$ </span><kbd>echo "${names[@]/ /_}"</kbd><em>Replace spaces by underscores in each name.</em>
+<span class="prompt">$ </span><kbd>echo "${names[@]/ /_}"</kbd><em>使用下划线替换每个姓名中的空格</em>
 Susan_Quinn Anne-Marie_Davis Mary_Tate
-<span class="prompt">$ </span><kbd>( IFS=','; echo "${names[*]/#/Ms }" )</kbd><em>More interestingly: replace the start of each name with <code>Ms </code>,</em>
-Ms Susan Quinn,Ms Anne-Marie Davis,Ms Mary Tate<em>effectively prefixing every element with a string as we expand them.</em>
+<span class="prompt">$ </span><kbd>( IFS=','; echo "${names[*]/#/Ms }" )</kbd><em>更有趣的是，使用 <code>Ms </code> 替换每个姓名的起始，</em>
+Ms Susan Quinn,Ms Anne-Marie Davis,Ms Mary Tate<em>成功地扩展每个元素并前缀一个字符串</em>
 </pre>
 
-    <p>The <code>${#parameter}</code> operator combined with the <code>[@]</code> suffix gives us a count of the elements:</p>
+    <p>运算符 <code>${#parameter}</code> 结合 <code>[@]</code> 前缀会返回给我们元素的数量：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>echo "${#names[@]}"</kbd>
 3
-<span class="prompt">$ </span><kbd>echo "${#names[1]}"</kbd><em>But we can still get the length of a string by specifying directly</em>
-16<em>which string element in the array we want to get the length of.</em>
+<span class="prompt">$ </span><kbd>echo "${#names[1]}"</kbd><em>我们仍然可以得到字符串的长度通过直接指定</em>
+16<em>我们想知道的数组中的某个字符串元素</em>
 </pre>
 
-    <p>And lastly, the <code>${parameter[@]:start:length}</code> operator can be used to obtain slices or "sub-sets" of our array:</p>
+    <p>最后，运算符 <code>${parameter[@]:start:length}</code> 可以用来获得数组的片段或子集：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>echo "${names[@]:1:2}"</kbd>
 Anne-Marie Davis Mary Tate
-<span class="prompt">$ </span><kbd>echo "${names[@]: -2}"</kbd><em>Specifying a negative start allows us to count backwards from the end!</em>
-Anne-Marie Davis Mary Tate<em>While omitting the length yields "all remaining elements" from the start.</em>
+<span class="prompt">$ </span><kbd>echo "${names[@]: -2}"</kbd><em>起始指定一个负数会使我们从末尾反向数起！</em>
+Anne-Marie Davis Mary Tate<em>如果省略指定长度值会纳入从起始算起剩下全部的元素</em>
 </pre>
 
-    <p>Notice that it is important to include a space in front of the negative start value:  if we omit the space, bash gets confused and thinks you are trying to invoke the <code>${parameter:-value}</code> operator, which substitutes a default <code>value</code> whenever parameter's value is empty.  This is obviously not what we want.</p>
+    <p>注意在负数的起始值前一定要使用一个空格：如果我们遗漏了空格，bash 就会困惑并且认为你是想要使用 <code>${parameter:-value}</code> 运算符，每当参数值为空时，这个运算符会用默认 <code>value</code> 值替换。这显然不是我们想做的事。</p>
 
-    <p>That's it!  You've got a firm grasp of the absolutely most important and useful aspects of the bash shell language:  its parameters and expansions, as well as the many ways in which we can apply operators to expanded values and shape them to our every needs.</p>
+    <p>就是这些！你已经坚实地掌握了 bash shell 语言中绝对最重要也最有用的部分：参数与扩展，以及众多通过使用运算符扩展参数值、按我们的需求塑造他们的方法。</p>
 </section>
