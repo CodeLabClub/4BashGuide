@@ -1197,16 +1197,16 @@ echo "1: $1, 2: $2, 4: $4"
 
     <h2 id="parameter_ex">练习时间！</h2>
 
-    <h4>PARAM.1. 启动一个新的 bash shell 输出它的<em>第一</em>参数并将 <kbd>Hello World!</kbd> 作为一个参数传递给它Start a new bash shell that outputs its <em>first</em> argument and pass  in as an argument to it.</h4>
+    <h4>PARAM.1. 启动一个新的 bash shell 输出它的 <em>第一</em> 参数并将 <kbd>Hello World!</kbd> 作为一个参数传递给它</h4>
 <pre lang="bash" class="exercise"><samp><kbd>bash -c 'echo "$1"' -- 'Hello World!'</kbd></samp></pre>
 
-    <h4>PARAM.2. Start a bash shell that outputs the number of arguments passed in and pass in the arguments <kbd>1</kbd>, <kbd>2</kbd> and <kbd>The Third</kbd>.</h4>
+    <h4>PARAM.2. 启动一个 bash shell 输出传递给它的参数个数，。将 <kbd>1</kbd>、<kbd>2</kbd>、<kbd>The Third</kbd> 作为参数传递给它。</h4>
 <pre lang="bash" class="exercise"><samp><kbd>bash -c 'echo "$#"' -- 1 2 'The Third'</kbd></samp></pre>
 
-    <h4>PARAM.3. Start a bash shell that shifts a positional parameter away and then outputs the first. Pass in the arguments <kbd>1</kbd>, <kbd>2</kbd> and <kbd>The Third</kbd>.</h4>
+    <h4>PARAM.3. 启动一个 bash shell 将位置参数移位 1，然后输出第一个参数。将 <kbd>1</kbd>、<kbd>2</kbd>、<kbd>The Third</kbd> 作为参数传递给它。</h4>
 <pre lang="bash" class="exercise"><samp><kbd>bash -c 'shift; echo "$1"' -- 1 2 'The Third'</kbd></samp></pre>
 
-    <h4>PARAM.4. Start a bash shell that outputs the last argument passed in and pass in the arguments <kbd>1</kbd>, <kbd>2</kbd> and <kbd>The Third</kbd>.</h4>
+    <h4>PARAM.4. 启动一个 bash shell 输出最后一个传入的参数。将 <kbd>1</kbd>、<kbd>2</kbd>、<kbd>The Third</kbd> 作为参数传递给它。</h4>
 <pre lang="bash" class="exercise"><samp><kbd>bash -c 'echo "${@: -1}"' -- 1 2 'The Third'</kbd></samp></pre>
 </section>
 
@@ -1317,6 +1317,9 @@ Invites were sent to: &lt;Susan Quinn,Anne-Marie Davis,Mary Tate&gt;.
 
     <p>相比一个其内元素被清晰区隔的数组变量，包含多个独立元素的单个字符串基本总是有缺陷且不实用的，因此 <code>[*]</code> 后缀其实很少被真正用到。只有一种情况下例外：当要向用户展示一列元素时，这个运算符非常有用。当我们试图向一个人呈现数组值的时候，我们就不需要特别担心输出结果的句法正确性。上面 <var>IFS</var> 被设为 <code>,</code>的例子，就展示了一种常见的向用户呈现数组值的方式。</p>
 
+<!--
+    ! 全局和局部的关系是很重要的问题。为了避免重复，需要全局变量，或是想环境变量那样，子进程可以直接继承父进程，不用重复定义。但是同时因为具体情况具体需求的存在，又需要局部变量，使得某个部分的改变不要影响到其他部分的正常工作。所以这里会用括号括起来创建一个临时的亚进程。对，临时也是一个重要的概念。有些改变、数据的存储是真的，还有一些只是临时现在用一下或改一下，结束了就消失了。
+-->
     <aside class="warn">
         <p>当修改 bash shell 内部变量时，如上例中的 <var>IFS</var>，一定要极为小心：当我们改变shell 内部变量时，要认识到我们正在改变 bash 的操作方式。为了使用 <code>[*]</code> 后缀扩展文件而将 <var>IFS</var> 的值设为逗号（<code>,</code>）没有关系，但是如果你继续运行脚本且依然任 <var>IFS</var> 的值设为非默认的 <code>,</code>，bash 中其他许多依赖 <var>IFS</var> 值的东西就会因此受影响而突然失效。</p>
         <p>正是因为这个原因，你应该 <em>总是</em>将你对 shell 内部配置的更改限定在脚本中一个尽可能小的范围内。你可能已经注意到了，在上面例子中我们使用了括号 <code>( )</code> 来包裹代码。括号会创建一个 subshell，括号内的代码就只在 subshell中运行，运行结束后，非默认的 <var>IFS</var> 值也随之失效。如此一来，原始脚本的 bash shell 的 <var>IFS</var> 值就从未被改变过，从而就避免了预料外的其他功能的失效。</p>

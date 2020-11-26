@@ -2,30 +2,34 @@
 id: null
 layout: chapter
 chapter: 4
-title: Tests And Conditionals
-subtitle: Different commands for different data.
+title: 测试与条件
+subtitle: 对不同数据执行不同命令
 status: draft
 description: >-
-  Exit codes, success and failure, testing files, strings and numbers, handling
-  different conditions, conditional operators and conditional compound commands.
+  退出代码，成功与失败，测试文件，字符串与不同条件，处理不同条件，条件运算符，条件复合命令
 published: true
 ---
 
+<!--
+    ! 以bash指南翻译这个项目为例，可以写写过程中都有哪些因素可能会影响这个项目的执行以及结果：如远超出预期的时间投入，兴奋、兴趣的疲软，本身精神状态、情绪、睡眠的影响，freshing效果的遗失等等。
+
+    ! 坚持只做这一件事，一方面是一心想要完成再去做别的，有偏执的因素在其中，但是这样也是努力在抓紧那根纬线，想要沉浸在bash语境中，不脱线。但是这样做也有可能就麻木在其中了，也不是身心沉浸的效果。。。
+-->
+
 <section>
-    <h1>What are conditionals and what do I use them for?</h1>
+    <h1>什么是条件，为什么我要使用他们？</h1>
 
-    <p>The best way to think about conditionals is essentially just as a <em>choice</em>.</p>
+    <p>理解条件最好的办法就是把他们实质理解为 <em>选择（choice）</em>。</p>
 
-    <p>Whenever a choice comes up, we can take one of various different paths forward.  Either path is available to us, and each path leads somewhere different.  The path that we end up taking, is determined by how our choice turns out.</p>
+    <p>每当一个选择出现，我们就可以从多条不同路径中选择其一前进。每条路径都是可选的，每条都通向不同的地方。最终我们走的那条路，就取决于我们的选择。</p>
 
-    <p>These are not choices like you read about in a novel: the novel has already chosen for you.  The story of a novel is fixed, the choices don't open up alternate endings.  Conditionals are choices like in games: every so often, you need to make a critical decision, and each decision changes the game situation in one way or another.  If you finish a game and retry it, making one of the choices differently, the game's situation would be different from that point on.  We call this
-    branching.  Every choice sets us on a new branch that affects our environment in a different way than the others.  Note, though, that these branches are not different because of the <em>choice we made</em> but rather because of the <em>actions we take after making the choice</em>.</p>
+    <p>这些不像你阅读小说时碰到的选择：小说中的选择都已为你做好。小说的故事是确定了的，并没有通向其他结局的选择。条件更像是游戏中的选择：时不时地，你需要做出一个关键选择，每一个选择都会以某种方式改变游戏的境况。如果你结束游戏并重新尝试，做出不同的选择，游戏的走向就可能由此不同。我们将其称为分支。每一个选择会为我们设置一条新的分支，它会以不同的方式影响我们的环境。但是要注意，这些分支的差异并不在于<em>我们做出的选择</em>，而在于 <em>选择做出之后我们采取的行动</em>。</p>
 
-    <p>That sounds kind of complicated, but it's really no different from choosing to buy an iPhone or an Android phone.  Choosing to have breakfast in the morning or skip it.  Choosing to take the highway or the side way.  We try to make these choices by considering our options.  Considering what we have and what's best in the given situation.  This is exactly what conditionals are:  we evaluate what we have and we choose where to go with that.</p>
+    <p>这听起来多少有些复杂，但其实和选择买苹果手机还是安卓手机并无不同。或是选择吃早餐还是不吃。选择走高速公路还是辅路。我们考虑各个选项然后尝试做出选择。考虑我们拥有的以及给定条件下什么是最好的。条件就是这样：我们评估我们所拥有的，然后选择带着他们去向哪里。</p>
 
-    <p>A script with conditional branches is broad and versitile compared to a linear script without them, in all the ways that games are versitile compared to the linear narative of a book.  So, why do we need conditionals?  We need them to write scripts that can dynamically handle varying situations and depending on what the situation is, change how it operates.</p>
+    <p>包含条件分支的脚本要远比线性脚本广阔灵活，就像游戏总是比线性叙述的书籍灵活。那么，我们为什么需要条件呢？我们需要使用他们来写出可以动态处理变化情境，根据情境改变运行方式的脚本。</p>
 
-    <p>Let's start you off with a really simple conditional to help us start the day right:</p>
+    <p>让我们首先从一个非常简单的条件入手，来开始我们的学习：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>read -p "Would you like some breakfast? [y/n] "</kbd>
@@ -38,16 +42,17 @@ Would you like some breakfast? [y/n] <kbd>n</kbd>
 Here, you should at least have a coffee.
 </pre>
 
-    <p>What's key with conditionals versus all the code we've written before, is that we now have code that will never get executed unless the situation changes.  Only the code in the second branch was executed, and even though we have actual code in the first branch, bash has never actually executed it.  Only if the situation - in this case, our answer to the preceding question - changes, will the executed branch of our script change and will we see the code in the first branch get executed,
-    but at the same time, that will cause the second branch to become "dead".</p>
-
-    <p>Bash has a few different ways of evaluating conditionals.  Nearly all of them have a key commonality: they are all evaluated based on the exit code of another command.  As such, before diving into this chapter, it is important that you are comfortable with your knowledge on exit codes as discussed in a previous chapter.</p>
+    <p>条件相比我们之前已写的所有代码，关键的不同在于现在我们写下的部分代码永远不会得到执行，除非情况发生变化。虽然第一条分支中我们也有实际的代码，但 bash 并未运行过他们，只有第二条分支中的代码会被执行。除非，情况发生了改变-对应上面例子就是我们对前面问题的回答变了，这时脚本中被执行的分支会变化，第一条分支中的代码会被运行，同时第二条分支中的代码就相应“死掉了”。</p>
+<!--
+    ? 上一章哪里有讲过退出代码，这里作者似乎没有讲清楚这部分。
+-->
+    <p>Bash 有很多种不同的方式评估条件。几乎所有这些方式都有一个共同点：他们都是基于另一个命令的退出代码被评估。因此，在深入这一章的内容之前，很重要的是你要足够熟悉上一章讨论过的退出代码。</p>
     
-    <p>Usually, we evaluate conditionals explicitly by using compound commands such as the <code>if ...</code> statement in the example above.  Another way is using <dfn>Control Operators</dfn>, which we very briefly touched down on in a previous chapter when we were discussing <dfn>List</dfn> commands.  We will enumerate and discuss each type of conditional in-depth here.</p>
+    <p>通常，我们通过使用复合命令，如上面例子中的 <code>if ...</code> 语句来直接评估条件。另一种方式是使用 <dfn>控制运算符 （Control Operaotr）</dfn>，我们前面章节中讨论 <dfn>List</dfn> 命令时有简单触及。我们接下来会在这里深度列举并讨论每一种条件。</p>
 
-    <h2>The <code>if</code> compound.</h2>
+    <h2><code>if</code> 复合命令</h2>
 
-    <p>The <code>if</code> statement is so ubiquitous across programming languages that it is almost guaranteed the first thing that comes to mind when we think about building a choice into our code.  This is no accident:  these statements are clear, simple and explicit.  That also makes them an excellent starting point for us to get familiar with conditionals in bash.</p>
+    <p><code>if</code> 语句在编程语言中是如此常见，以至于每当我们考虑在代码中构建一个选择时，基本可以保证第一个就会想到它。这并不意外，这些语句清晰、简单又明确。因此也使得他们可以作为非常好的起点来熟悉 bash 中的条件。</p>
 
 <pre class="syntax">
     <strong>if</strong> <var>list</var> [ <strong>;</strong>|<strong>&lt;newline&gt;</strong> ] <strong>then</strong> <var>list</var> <strong>;</strong>|<strong>&lt;newline&gt;</strong>
@@ -63,16 +68,15 @@ elif rm hello.txt; then <mark class="blue">echo "Deleted hello.txt."</mark>
 else <mark class="red">echo "Couldn't remove hello.txt." &gt;&amp;2; exit 1</mark>; <u title="end of compound command 'if'">fi</u></samp>
 </pre>
 
-    <p>The syntax for the <code>if</code> compound is, while at first a little verbose, in essence very simple.  We start with the <code>if</code> keyword, followed by a command list.  This command list will be executed by bash, and upon completion, bash will hand the final exit code to the <code>if</code> compound to be evaluated.  If the exit code is zero (<code>0</code> = <dfn>success</dfn>), the <em>first</em> branch will be executed.  Otherwise, the first branch will be skipped.</p>
+    <p><code>if</code> 复合命令的语法虽然第一眼看起来有些冗余，实质上非常简单。首先起始于 <code>if</code> 关键词，后面跟的是一个命令列表。这个命令列表会被 bash 执行，完成后 bash 会把 退出代码发给 <code>if</code> 复合命令评估。如果退出代码是0（<code>0</code> = <dfn>成功（success）</dfn>），<em>第一条</em> 分支就会被执行，否则，第一条分支会被跳过。</p>
 
-    <p>If the first branch is skipped, the <code>if</code> compound will pass the opportunity of execution to the next branch.  If one or more <code>elif</code> branches are available, these will in-turn execute and evaluate their own command list, and if successful, execute their branch.  Note that as soon as any branch of the <code>if</code> compound is executed, the remaining branches are automatically skipped: only one single branch is ever executed.  If neither <code>if</code> or
-    <code>elif</code> branches are eligible for execution, the <code>else</code> branch will be executed instead, if it is present.</p>
+    <p>如果第一条分支被跳过，<code>if</code> 复合命令就会把执行的机会留给下一条分支。如果有一个或多个 <code>elif</code> 分支，他们就会相继被执行并评估各自的命令列表，如果成功，就执行他们的分支。需要注意，一旦 <code>if</code> 复合命令的任一条分支被执行，剩下的分支就会被自动跳过：即只有一条分支会被执行。如果 <code>if</code> 或是 <code>elif</code> 分支都没有可被执行的，而 <code>else</code> 分支存在，那么这条分支就会被执行。</p>
 
-    <p>Effectively, an <code>if</code> compound is a statement that expresses a series of potential branches to execute, each preceded by a command list that evaluates whether or not that branch should be chosen.  Most <code>if</code> statements will have only a single branch or a primary and an <code>else</code> branch.</p>
+    <p>实际上，<code>if</code> 复合命令是一条语句，描述了一系列可能被执行的分支，每一条分支前都有一个命令列表，用来评估这条分支是否被选中。绝大多数 <code>if</code> 语句都只有一条分支或是一条主分支外加一条 <code>else</code> 分支。</p>
 
-    <h2>Conditional command lists</h2>
+    <h2>条件命令列表（Conditional command lists）</h2>
 
-    <p>As stated, the <code>if</code> statement, akin to most other conditional statements, evaluate a <dfn>List</dfn> command's final exit code to determine whether its corresponding conditional branch should be taken or skipped.  Nearly all <code>if</code> and other conditional statements you'll encounter will have nothing more than a <dfn>Simple Command</dfn> as its conditional, but it is nevertheless possible to provide a whole list of simple commands.  When we do so, it is important to understand that only the final exit code after executing the entire list is relevant for the branch's evaluation:</p>
+    <p>如前所述，与其他绝大多数条件语句相似，<code>if</code> 语句会评估一个命令 <dfn>列表</dfn>最终的退出代码，从而决定它所对应的条件分支是被执行还是跳过。几乎所有你即将遇到的 <code>if</code> 和其他条件语句都是以一条 <dfn>简单命令</dfn> 作为它的条件，但也还是可以用一个简单命令列表作为条件。如果我们这样做，就一定要理解只有执行完整个命令列表后的退出代码，才会被用来评估分支是否被执行：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>read -p "Breakfast? [y/n] "; if [[ $REPLY = y ]]; then echo "Here are your eggs."; fi</kbd>
@@ -83,20 +87,19 @@ Breakfast? [y/n] <kbd>y</kbd>
 Here are your eggs.
 </pre>
 
-    <p>Both of these are identical in operation.  In the first, our <code>read</code> command precedes the <code>if</code> statement; in the latter, our <code>read</code> command is embedded in the initial branch conditional.  It is essentially a choice of style or preference that will determine which of these methods you prefer.  Some thoughts on the matter:</p>
+    <p>上面两个例子有完全相同的执行效果。第一个例子中，我们的 <code>read</code> 命令在 <code>if</code> 语句之前被执行；后一个例子中，<code>read</code> 命令被内嵌在初始的分支条件中。这本质上是风格或偏好的选择决定你倾向于使用哪种方法。对此的一些想法：</p>
     <ul>
-        <li>Embedding the data-gathering command creates a "wholesome" approach to the conditional: the conditional becomes a unit which consists of all its dependencies.</li>
-        <li>Preceding the data-gathering command to the conditional statement separates the two distinct operations.  It also makes the conditional more symmetric or "balanced" when other <code>elif</code> branches become part of the statement.</li>
+        <li>将数据获取命令内嵌使得条件语句有了一种“完整”的取向E：条件成为一个单元，其内包含了它所有的依赖。</li>
+        <li>数据获取命令前置于条件语句，将这两部分分成了独立的操作。当其他<code>elif</code> 分支也是语句的组成部分时，这种做法会使条件语句更为对称或者说“均衡”。</li>
     </ul>
 
-    <h2>Conditional test commands</h2>
+    <h2>条件测试命令（Conditional test commands）</h2>
 
-    <p>The most common command used as a conditional is the <code>test</code> command, also known as the <code>[</code> command.  These two are synonymous with each other: they are the same command with a different name.  The only difference is that when you use <code>[</code> as the command name, it is imperative to terminate the command with a trailing <code>]</code> argument.</p>
+    <p>条件中最常见的命令是 <code>test</code> 命令，也作 <code>[</code> 命令。他们两个是同义的，只是一条命令有两个不同的名字而已。唯一的区别在于当你使用 <code>[</code> 作为命令名称时，必须用尾部参数 <code>]</code> 终止命令。</p>
 
-    <p>In modern bash scripts, however, the <code>test</code> command has, for all intents and purposes, been superceded by its two younger brothers: the <code>[[</code> and <code>((</code> keywords.  The <code>test</code> command has been effectively rendered obsolete and its flawed and fragile syntax is no match for the special powers granted to both <code>[[</code> and <code>((</code> by the bash parser.</p>
-
-    <p>It may seem strange at first thought, but it is actually quite interesting a revelation to notice that <code>[</code> and <code>[[</code>, as we've seen them appear several times in <code>if</code> and other sample statements in this guide, are not some special form of <code>if</code>-syntax - no!  They are simple, ordinary commands, just like any other command.  The <code>[[</code> command name takes a list of arguments and its final argument must be <code>]]</code>.
-    Similarly, <code>[</code> is a command name which takes test arguments and must be closed with a trailing <code>]</code> argument.  This is especially noticable when we make a mistake and omit spaces between these command names and their arguments:</p>
+    <p>然而，在当代 bash 脚本中，<code>test</code> 命令，已经因为各种原因，被后面这两个更年轻的兄弟取代了： <code>[[</code> 与 <code>((</code> 。<code>test</code> 命令已被认为是过时的，它有缺陷且脆弱的语法也完全不能与 bash 解析器赋予 <code>[[</code> 和 <code>((</code> 的特殊能力相提并论。</p>
+ 
+    <p>乍一想可能有些奇怪，但其实是很有趣的揭示，注意看 <code>[</code> 和 <code>[[</code>，正如我们在这份指南的 <code>if</code> 以及其他示例语句中所见多次的，他们并不是 <code>if</code> 语法的特殊形式，不是的！他们就是简单、普通的命令，就像其他命令一样。<code>[[</code> 命令会获取一列参数并以参数 <code>]]</code> 终止。相似的，<code>[</code> 也是命令名称，会接收测试参数且必须以参数 <code>]</code> 结束。当我们错误省略掉命令名称与他们参数之间的空格时，这一点会尤其凸显：</p>
 
 <pre lang="bash">
 <span class="prompt">$ </span><kbd>[[ Jack = Jane ]] &amp;&amp; echo "Jack is Jane" || echo "Jack is not Jane"</kbd>
@@ -107,11 +110,10 @@ Jack is not Jane
 Jack is Jane
 </pre>
 
-    <p>The first statement was written correctly and we got the expected output.  In the second statement, we forgot to separate the <code>[[</code> command <em>name</em> from the <em>first argument</em>, causing the bash parser to go looking for a command named <code>[[Jack</code>.  After all, when bash parses this command and word-splits the command's name and arguments into tokens, the first space-delimited token is the entire string <code>[[Jack</code>.</p>
+    <p>第一条语句是正确的，因此我们也得到了预期的输出结果。第二条语句中，我们忘记用空格区隔 <code>[[</code> 命令 <em>名称</em> 与它后面的 <em>第一个参数</em>，导致 bash 解析器去错误寻找一个叫作 <code>[[Jack</code> 的命令。毕竟，当 bash 解析这条命令并用单词切割将命令名称和参数分作token时，第一个空格区隔开的 token 确实就是完整的字符串 <code>[[Jack</code>。</p>
 
-    <p>The third command is perhaps more insiduous.  It is always alarming when there are situations where we can write buggy code that does not yield a bash parser error but instead simply behaves "strangely".  These types of bugs are hard to spot and can be hard to understand as well.  In our situation, the first argument to the <code>[[</code> command is the single string <code>Jack=Jane</code>.  Unfortunately, the syntax for performing an equality test using the <code>[[</code> command
-    is <code class="syntax"><strong>[[</strong> <var>arg</var> <strong>=</strong> <var>arg</var> <strong>]]</strong></code>, where bash will then perform the equality test between the two distinct string arguments.  In this third example, however, we do not have three arguments following the <code>[[</code> command: we only have one long argument.  And it just so happens that <code>[[</code> has a short-hand syntax for testing whether a certain string is empty or not: <code class="syntax"><strong>[[</strong> <var>string</var> <strong>]]</strong></code>.  Now, perhaps, it becomes clear that bash has mistaken our intention of comparing two strings using the <code>=</code> operator with a different kind of test that simply checks whether our single argument is an empty string.  Since the string <code>Jack=Jane</code> is <em>not empty</em>, the test succeeds, and as a result, the <code>&amp;&amp;</code> branch is taken.</p>
+    <p>第三条命令的错误可能更隐蔽。当我们有 bug 的代码导致的不是 bash 解析器错误，而只是表现怪异时，这种情况总是惊人的。这类 bug 既难以发现，也难以理解。在我们的例子中，<code>[[</code> 命令的第一个参数是一个单独的字符串 <code>Jack=Jane</code>。不幸的是，使用 <code>[[</code> 命令执行相等测试的语法是 <code class="syntax"><strong>[[</strong> <var>arg</var> <strong>=</strong> <var>arg</var> <strong>]]</strong></code>，由此 bash 才会比较两个独立的字符串参数是否相等。第三个例子中，在 <code>[[</code> 命令之后，我们并没有三个参数：我们只有一个长参数。错误结果的产生则是因为 <code>[[</code> 命令有一个测试某一字符串是否为空的简易语法：<code class="syntax"><strong>[[</strong> <var>string</var> <strong>]]</strong></code>。现在应该很明显了，bash 错误理解了我们的意图，我们是想使用 <code>=</code> 运算符比较两个字符串是否相同，bash 则以为我们是想确认某个单独的参数是否是一个空字符串。因为字符串 <code>Jack=Jane</code> <em>不为空</em>，所以测试成功，结果 <code>&amp;&amp;</code> 分支被执行。</p>
 
-    <p>The take-away from all this is that it is important to realize that these test commands are their own bash commands and we need to continue applying the standard command-argument spacing rules to them.</p>
+    <p>最后的总结是，一定要认识到这些测试命令本身也是 bash 命令，所以我们仍需要对他们施加标准的命令-参数间隔规则。</p>
 
 </section>
