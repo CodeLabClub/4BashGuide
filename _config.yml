@@ -1,12 +1,11 @@
 # Site settings
-title: The Bash Guide
-email: lhunath@lyndir.com
+title: Bash 指南 4 篇
+email: yanglq@outlook.com
 description: >
-  A complete guide for newcomers and advanced users to correct usage and deep understanding of the bash shell language.
+  4 篇 bash 指南；围绕 bash 到底是什么，以及 bash 的命令与参数、变量与扩展、测试与条件，作者 Ihunath 做了极为清晰细致地介绍，CodeLab 将其翻译并发布。
 baseurl: ""
 url: "https://guide.bash.academy"
-twitter_username: lhunath
-github_username:  lhunath
+github_username:  codelab.club
 
 # Build settings
 markdown: kramdown
