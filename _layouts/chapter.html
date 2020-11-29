@@ -2,17 +2,17 @@
 layout: page
 ---
 {% if page.status == 'todo' %}
-<div class="status {{page.status}}">This chapter has not yet been written.  It is pending and will be written as soon as I get to it.<br>
-    If you are interested in getting updates on the progress of this guide, you can <a href="https://github.com/lhunath/bash.academy">star the source repository here</a>.</div>
+<div class="status {{page.status}}">本章内容尚未写作。<br>
+    如果你对本篇指南的进展感兴趣，可以<a href="https://github.com/lhunath/bash.academy">点击这里</a>为源仓库加星。</div>
 {% elsif page.status == 'draft' %}
-<div class="status {{page.status}}">This chapter is actively being drafted.  It is incomplete, will be updated from time to time and content is likely to move around.<br>
-    If you are interested in getting updates on the progress of this guide, you can <a href="https://github.com/lhunath/bash.academy">star the source repository here</a>.</div>
+<div class="status {{page.status}}">本章仍在写作中。它尚不完整，还有待时不时地更新，内容也很有可能会被移动。<br>
+    如果你对本篇指南的进展感兴趣，可以<a href="https://github.com/lhunath/bash.academy">点击这里</a>为源仓库加星。</div>
 {% elsif page.status == 'alpha' %}
-<div class="status {{page.status}}">This chapter's content target has been reached. It is pending audit and feedback from readers like you.<br>
-    If you are interested in getting updates on the progress of this guide, you can <a href="https://github.com/lhunath/bash.academy">star the source repository here</a>.</div>
+<div class="status {{page.status}}">本章内容的写作目标已达成，现等待像你这样的读者的审阅与反馈。<br>
+    如果你对本篇指南的进展感兴趣，可以<a href="https://github.com/lhunath/bash.academy">点击这里</a>为源仓库加星。</div>
 {% elsif page.status == 'beta' %}
-<div class="status {{page.status}}">This chapter has reached a state of completion. Enjoy, and let us know if you spot anything that can be improved.<br>
-    If you are interested in getting updates on the progress of this guide, you can <a href="https://github.com/lhunath/bash.academy">star the source repository here</a>.</div>
+<div class="status {{page.status}}">本章的写作已完成，请享用。如果你发现任何值得改善的地方，请告知我们。<br>
+    如果你对本篇指南的进展感兴趣，可以<a href="https://github.com/lhunath/bash.academy">点击这里</a>为源仓库加星。</div>
 {% endif %}
 
 {{ content }}
