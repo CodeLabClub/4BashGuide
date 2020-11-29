@@ -1,13 +1,13 @@
 ---
 layout: page
-title: Bash 指南
-subtitle: 四篇 Bash 相关的高质量指南，译自 The Bash Guide
+title: Bash 指南四篇
+subtitle: 关于 bash 到底是什么，以及 bash 的命令与参数、变量与扩展、测试与条件；译自 The Bash Guide
 editable: false
 ---
 
 <section>
     <h2>内容</h2>
-    <p>这里是 <strong>Bash</strong> 相关的、4篇质量极高的学习指南。分别为：</p>
+    <p>这里是关于 <strong>bash</strong> 、四篇质量极高的学习指南。分别为：</p>
     <ol>
         <li>
             <a href="inception">开篇</a>：Bash 是什么，它活在哪里？
@@ -23,16 +23,16 @@ editable: false
             </p>
         </li>
         <li>
-            <a href="expansions">变量与扩展</a>：我如何储存并使用数据？
+            <a href="expansions">变量与扩展</a>：我要如何存储和使用数据？
             <p>
                 Bash
-                参数与变量；环境变量，特殊参数以及数组参数；扩展参数，扩展运算控制符，命令替换与进程替换；路径名扩展，尾数扩展与括号扩展
+                参数与变量；环境变量，特殊参数以及数组参数；扩展参数，扩展运算符，命令替换以及进程替换；路径名扩展，波浪号扩展以及花括号扩展
             </p>
         </li>
         <li>
-            <a href="conditionals">测试与条件</a>：不同的命令给不同的数据
+            <a href="conditionals">测试与条件</a>：对不同的数据执行不同的命令
             <p>
-                退出代码，成功与失败，测试文件，字符串与数值，处理不同的条件，条件操作符以及条件复合命令
+                退出代码，成功与失败，测试文件，字符串与数值，处理不同的条件，条件运算符，条件复合命令
             </p>
         </li>
     </ol>
@@ -40,19 +40,13 @@ editable: false
         <li><a href="exercises">练习题索引</a></li>
     </ul>
     <p>
-        按原作者的构想，这份 Bash 指南共<a href="https://guide.bash.academy/"
-            >11章</a
-        >内容。遗憾的是，作者只完成了前面4章，但因其写作质量之高、讲解之透彻，还是极为可贵，遂将这4篇指南翻译并分享于此。
+        按原作者的构想，这份 Bash 指南共 <a href="https://guide.bash.academy/"
+            >11 章</a
+        >内容。遗憾的是，目前作者只完成了前面四章。但因其写作质量之高、讲解之透彻，还是极为可贵，<a href="https://codelab.club/">CodeLab </a>遂将这四篇指南翻译并分享于此。
     </p>
-    <p>原作者对整份指南的介绍如下：</p>
-    <footer>
-        这份指南是对bash shell 基础及高级概念的介绍。<br />
-        旨在把编写强力bash脚本以及高效快速交互式运用shell的最好、最安全、最可靠的方法，教给bash新手及长时间使用者。
-        <br />
-        这份指南已经过多版迭代，是就此话题无论在互联网上、公共图书馆还是书店，都始终严重缺乏持续、清晰又可靠的语言的结果。
-    </footer>
+
     <p>
-        如此精彩的教程却不完整，实在可惜。但此前，作者与GreyCat其实已就 Bash
+        如此精彩的教程却不完整，实在可惜。但此前，作者与 GreyCat 其实已就 bash
         <strong>完整</strong> 写过一份旧版指南，感兴趣的读者请移步<a
             href="https://mywiki.wooledge.org/BashGuide"
             >此处</a
@@ -63,7 +57,7 @@ editable: false
 
     <h2>署名</h2>
     <p>
-        原作者是<a href="https://www.lhunath.com"
+        指南的原作者是<a href="https://www.lhunath.com"
             >lhunath （Maarten Billemont）</a
         >，英文版原址在<a href="https://guide.bash.academy/">这里</a
         >，英文源码仓库在<a href="https://github.com/lhunath/guide.bash.academy"
@@ -76,6 +70,14 @@ editable: false
             >CC BY-SA 4.0 协议</a
         >。
     </p>
+
+    <h2>赞赏</h2>
+    <p>
+        这份指南由原作者无偿写作并遵照 CC BY-SA 4.0 协议开源分享给所有人。如果你有认真读过，就不难看出作者无论是在指南内容还是呈现形式上都极为用心，竭力分享了他对 bash 的理解与使用经验 。如果阅读后你觉得颇有收获，请考虑打赏原作者，用我们的实际行动鼓励开源共享精神。
+    </p>
+
+    {% include contribute.html %}
+    
     <p>
         <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/"
             ><img
