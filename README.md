@@ -1,15 +1,37 @@
-关于Bash，[Ihunath(Maarten Billemont)](https://lhunath.com/)写了一份[神仙指南](https://guide.bash.academy/)，源仓库在[这里](https://github.com/snownstone/guide.bash.academy)。非常遗憾的是，后面几个章节未完成。即便如此，前面他所写下的部分帮助我理解并厘清了很多概念，感谢他。
+# Bash 指南四篇
 
-为了加深这些认识和记忆，我决定把他已写下的部分逐句翻译出来。在开篇即将翻译完成的时候，突然醒悟过来可以fork源仓库，完全保留他原有的呈现方式，只是将文本内容替换为中文翻译后的即可。之后再部署出来，就还像原版那样保留了这份指南的相对独立与完整。
+这里是关于 **bash** 、四篇质量极高的学习指南。分别为：
 
-注：原网站使用的是[jekyll](https://jekyllrb.com/docs/installation/)与[prose](https://github.com/prose/prose)
++ 开篇：Bash 是什么，它活在哪里？
 
-1.fork源仓库，复制一份到本地  
+    简介 Bash，以及如何安装和启动它；终端，键盘及结果显示；程序，进程以及他们内部流动的信息如何被连接在一起 
+
++ 命令与参数：我要如何给 bash 下指令？
+
+    关于什么是命令，如何发布他们；交互模式与脚本；命令语法，通过名称搜索命令与程序；参数与单词分割，以及输入和输出重定向 
+
++ 变量与扩展：我要如何存储和使用数据？
+
+    Bash 参数与变量；环境变量，特殊参数以及数组参数；扩展参数，扩展运算符，命令替换以及进程替换；路径名扩展，波浪号扩展以及花括号扩展 
+
++ 测试与条件：对不同的数据执行不同的命令
+
+    退出代码，成功与失败，测试文件，字符串与数值，处理不同的条件，条件运算符，条件复合命令 
+
+按原作者的构想，这份 Bash 指南共 11 章内容。遗憾的是，目前作者只完成了前面四章。但因其写作质量之高、讲解之透彻，还是极为可贵，CodeLab 遂将这四篇指南翻译并分享于此。
+
+指南的原作者是 [lhunath （Maarten Billemont）](https://www.lhunath.com)，英文版原址在[这里](https://guide.bash.academy/)，英文源码仓库在[这里](https://github.com/lhunath/guide.bash.academy)，遵照 CC BY-SA 4.0 协议。
+
+
+## 备注
+
+网站使用jekyll框架，如本地部署可如下操作：
+
+1.fork 源仓库，复制一份到本地  
 2.[安装jekyll](https://jekyllrb.com/docs/installation/)（需先安装ruby、gems及其依赖）  
 3.进入本地仓库，输入：  
 
 ```
-jekyll serve --watch
+jekyll serve
 ```
 
-prose目前看来是编辑md文档和管理github仓库内文件用，这个文档就是在prose中修改提交的，挺好用的。
