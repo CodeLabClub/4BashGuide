@@ -5,7 +5,7 @@ description: >
   4 篇 bash 指南；围绕 bash 到底是什么，以及 bash 的命令与参数、变量与扩展、测试与条件，作者 Ihunath 做了极为清晰细致地介绍，CodeLab 将其翻译并发布。
 baseurl: ""
 url: "https://guide.bash.academy"
-github_username:  codelab.club
+github_username:  CodeLabClub
 
 # Build settings
 markdown: kramdown
