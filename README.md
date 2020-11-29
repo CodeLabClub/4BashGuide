@@ -18,7 +18,7 @@
 
     退出代码，成功与失败，测试文件，字符串与数值，处理不同的条件，条件运算符，条件复合命令 
 
-按原作者的构想，这份 Bash 指南共 11 章内容。遗憾的是，目前作者只完成了前面四章。但因其写作质量之高、讲解之透彻，还是极为可贵，CodeLab 遂将这四篇指南翻译并分享于此。
+按原作者的构想，这份 Bash 指南共 11 章内容。遗憾的是，目前作者只完成了前面四章。但因其写作质量之高、讲解之透彻，还是极为可贵，[CodeLab](https://codelab.club/) 遂将这四篇指南翻译并分享于此。
 
 指南的原作者是 [lhunath （Maarten Billemont）](https://www.lhunath.com)，英文版原址在[这里](https://guide.bash.academy/)，英文源码仓库在[这里](https://github.com/lhunath/guide.bash.academy)，遵照 CC BY-SA 4.0 协议。
 
