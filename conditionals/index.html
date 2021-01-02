@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>测试与条件</title>
+    <meta name="description" content="4 篇 bash 指南；围绕 bash 到底是什么，以及 bash 的命令与参数、变量与扩展、测试与条件，作者 Ihunath 做了极为清晰细致地介绍，CodeLab 将其翻译并发布。
+">
+    <meta name="viewport" content="width=device-width">
+
+    <link rel="canonical" href="https://www.codelab.club/conditionals/">
+    <link rel="stylesheet" type="text/css" href="/css/normalize.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/main.css#1">
+    <link rel="stylesheet" type="text/css" href="/css/responsive.css">
+    <link rel="alternate" type="application/rss+xml" title="Bash 指南 4 篇" href="https://www.codelab.club/feed.xml" />
+
+    <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+    <script src="js/vendor/prefixfree.min.js"></script>
+</head>
+
+    <body id="conditionals">
+
+        
+        <a class="page-edit fixed" href="https://prose.io/#lhunath/guide.bash.academy/edit/gh-pages/conditionals.html">[edit this page]</a>
+        
+
+        <header data-stellar-background-ratio="0.4">
+            <div>
+                <h1>测试与条件</h1>
+                <h2>对不同的数据执行不同的命令</h2>
+            </div>
+
+            
+            <h3>退出代码，成功与失败，测试文件，字符串与数值，处理不同条件，条件运算符，条件复合命令</h3>
+            
+
+            
+                <a class="page-edit" href="https://prose.io/#lhunath/guide.bash.academy/edit/gh-pages/conditionals.html">[edit this page]</a>
+            
+        </header>
+
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> or <a href="https://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+        <![endif]-->
+
+        <nav>
+    <h1>本篇目录</h1>
+    <div id="toc"></div>
+
+    <div class="footnote"><div class="contribute">
+    <div class="thanks" style="display: none">
+        <h3>✅ 谢谢你的 <a href="javascript:" class="toggle">赞赏</a>！</h3>
+    </div>
+    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+        <p><q>我愿意为我从这些指南中学习到的知识支付
+            <input type="hidden" name="business" value="UASPXT4P7DMTW">
+            <input type="hidden" name="cmd" value="_donations">
+            <input type="hidden" name="item_name" value="Contribution for guide.bash.academy">
+            <input type="hidden" name="no_shipping" value="1">
+            <input type="text" name="amount" value="20" size="5" class="text">
+            <select name="currency_code" class="text">
+                <option value="USD">US $</option>
+                <option value="RUB">₽</option>
+                <option value="GBP">£</option>
+                <option value="EUR">€</option>
+                <option value="CAD">C$</option>
+                <option value="AUD">A$</option>
+            </select> <input type="submit"></q>
+    </p></form>
+</div>
+</div>
+
+    <h1>篇章</h1>
+    <ul>
+        <li><a href="/">Bash 指南 4 篇<br>
+            <sub>回到首页</sub></a></li>
+        
+        
+            <li><a href="/inception/#">开篇<br>
+                <sub>Bash 是什么，它活在哪里？</sub></a></li>
+        
+            <li><a href="/commands/#">命令与参数<br>
+                <sub>我要如何给 bash 下指令？</sub></a></li>
+        
+            <li><a href="/expansions/#">变量与扩展<br>
+                <sub>我要如何存储和使用数据？</sub></a></li>
+        
+            <li><a href="/conditionals/#">测试与条件<br>
+                <sub>对不同的数据执行不同的命令</sub></a></li>
+        
+            <li><a href="/postscript/#">译后记<br>
+                <sub></sub></a></li>
+        
+    </ul>
+</nav>
+
+
+<div class="status draft">本章仍在写作中。它尚不完整，还有待时不时地更新，内容也很有可能会被移动。<br>
+    如果你对本篇指南的进展感兴趣，可以<a href="https://github.com/lhunath/bash.academy">点击这里</a>为源仓库加星。</div>
+
+
+<section>
+    <h1>什么是条件，为什么我要使用他们？</h1>
+
+    <p>理解条件最好的办法就是把他们实质理解为 <em>选择（choice）</em>。</p>
+
+    <p>每当一个选择出现，我们可以从众多路径中择其一继续向前。每条路径都是可选的，每条都通向不同的地方。最终走的那条，就取决于我们的选择。</p>
+
+    <p>这些不像你在小说中读到的选择：那些小说都已为你选好。小说的故事情节是确定了的，那些选择不会引出其他结局。条件更像是游戏中的选择：时不时地，你要做出一个关键选择，而这些选择都会以某种方式改变游戏的境况。如果你结束游戏重新来过，在某一点做出不同于此前的选择，那么游戏的走向由此就会不同。我们将其称为分支（branching）。每个选择都会开启一条新的分支，以不同方式影响我们的环境。但是要注意，这些分支的差异并不在于 <em>我们做出的选择</em>，而在于 <em>选择做出后我们采取的行动</em>。</p>
+
+    <p>听起来似乎有些复杂，但实际上这和我们选择买苹果手机还是安卓手机并没什么不同，或是吃早餐还是不吃，走高速公路还是辅路。我们会考虑各个选项，结合自身情况考虑什么是给定条件下最好的，然后尝试做出选择。条件也是这样：评估我们所拥有的，选择由此去向哪里。</p>
+
+    <p>包含条件分支的脚本要远比线性脚本广阔灵活，正如游戏要比线性叙述的书籍灵活。那么，我们为什么需要条件呢？我们需要使用他们来写出能够动态处理变化情境，以及根据情境改变运行方式的脚本。</p>
+
+    <p>让我们首先从一个非常简单的条件入手，来开始我们的学习：</p>
+
+<pre lang="bash">
+<span class="prompt">$ </span><kbd>read -p "Would you like some breakfast? [y/n] "</kbd>
+Would you like some breakfast? [y/n] <kbd>n</kbd>
+<span class="prompt">$ </span><kbd>if [[ $REPLY = y ]]; then</kbd>
+<span class="prompt">&gt; </span><kbd>    echo "Here you go, an egg sandwich."</kbd><em>Branch #1</em>
+<span class="prompt">&gt; </span><kbd>else</kbd>
+<span class="prompt">&gt; </span><kbd>    echo "Here, you should at least have a coffee."</kbd><em>Branch #2</em>
+<span class="prompt">&gt; </span><kbd>fi</kbd>
+Here, you should at least have a coffee.
+</pre>
+
+    <p>条件相比我们之前已写的所有代码，关键的不同在于部分代码永远不会被执行，除非情况发生变化。上面例子中，即使第一条分支内也有对应执行代码，但 bash 并未运行他们，只有第二条分支中的代码被执行。除非情况发生改变——对应上面例子就是我们对前面问题的回答变了，这时脚本中被执行的分支就会切换到第一条，第二条分支中的代码则“死掉”。</p>
+
+    <p>Bash 有多种不同方式评估条件。几乎所有这些方式都有一个共同点：他们都是基于另一条命令的退出代码被评估。因此，在深入这一章的内容之前，你首先要足够熟悉前面章节谈论过的退出代码概念。</p>
+    
+    <p>我们通常使用复合命令明确地评估条件，如上面例子中的 <code>if ...</code> 语句。另一种方式是使用 <dfn>控制运算符 （Control Operaotr）</dfn>，我们在前面章节中讨论 <dfn>List</dfn> 命令时有简单提及。我们接下来会在这里深度列举并讨论每种类型的条件。</p>
+
+    <h2><code>if</code> 复合命令</h2>
+
+    <p><code>if</code> 语句在编程语言中如此常见，以至于当我们考虑在代码中构建一个选择时，基本可以保证第一个就会想到它。这并不意外，毕竟这些语句清晰、简单又明确。因此对于熟悉 bash 中的条件，他们也是非常好的起点。</p>
+
+<pre class="syntax">
+    <strong>if</strong> <var>list</var> [ <strong>;</strong>|<strong>&lt;newline&gt;</strong> ] <strong>then</strong> <var>list</var> <strong>;</strong>|<strong>&lt;newline&gt;</strong>
+    [ <strong>elif</strong> <var>list</var> [ <strong>;</strong>|<strong>&lt;newline&gt;</strong> ] <strong>then</strong> <var>list</var> <strong>;</strong>|<strong>&lt;newline&gt;</strong> ] ...
+    [ <strong>else</strong> <var>list</var> <strong>;</strong>|<strong>&lt;newline&gt;</strong> ]
+    <strong>fi</strong>
+
+<samp><u title="start of compound command 'if'">if</u> ! rm hello.txt; then <mark>echo "Couldn't delete hello.txt." &gt;&amp;2; exit 1</mark>; <u title="end of compound command 'if'">fi</u></samp>
+<samp><u title="start of compound command 'if'">if</u> rm hello.txt; then <mark>echo "Successfully deleted hello.txt."</mark>
+else <mark class="red">echo "Couldn't delete hello.txt." &gt;&amp;2; exit 1</mark>; <u title="end of compound command 'if'">fi</u></samp>
+<samp><u title="start of compound command 'if'">if</u> mv hello.txt ~/.Trash/; then <mark>echo "Moved hello.txt into the trash."</mark>
+elif rm hello.txt; then <mark class="blue">echo "Deleted hello.txt."</mark>
+else <mark class="red">echo "Couldn't remove hello.txt." &gt;&amp;2; exit 1</mark>; <u title="end of compound command 'if'">fi</u></samp>
+</pre>
+
+    <p><code>if</code> 复合命令的语法虽然第一眼看起来有些冗余，实际上非常简单。首先起始于 <code>if</code> 关键词，后面跟的是一个命令列表。这个命令列表会被 bash 执行，完成后 bash 会把 退出代码发给 <code>if</code> 复合命令做评估。如果退出代码是 0（<code>0</code> = <dfn>成功（success）</dfn>），<em>第一条</em> 分支就会被执行，否则，第一条分支会被跳过。</p>
+
+    <p>如果第一条分支被跳过，<code>if</code> 复合命令就会把执行的机会留给下一条分支。如果有一个或多个 <code>elif</code> 分支，他们就会相继被执行并评估各自的命令列表，如果成功，就执行他们的分支。需要注意，一旦 <code>if</code> 复合命令的任一条分支被执行，剩下的分支就会被自动跳过：也就是说全部分支中只有一条会被执行。如果没有一条 <code>if</code> 或 <code>elif</code> 分支满足执行条件，若 <code>else</code> 分支存在，那么这条分支就会被执行。</p>
+
+    <p>实际上，<code>if</code> 复合命令是一条语句，描述了一系列可能被执行的分支，每一条分支前都有一个命令列表，用来评估这条分支是否被选中。绝大多数 <code>if</code> 语句都只有一条分支或是一条主分支外加一条 <code>else</code> 分支。</p>
+
+    <h2>条件命令列表（Conditional command lists）</h2>
+
+    <p>如前所述，与其他绝大多数条件语句相似，<code>if</code> 语句会评估一 <dfn>列（List）</dfn> 命令最终的退出代码，从而决定它所对应的条件分支是被执行还是跳过。几乎所有你即将遇到的 <code>if</code> 以及其他条件语句都以一条 <dfn>简单命令</dfn> 作为它的条件，但也还是可以用一个简单命令的列表作为条件。如果我们这样做，就一定要理解只有整个命令列表中最后的那个退出代码，会被用来评估是否执行这条分支：</p>
+
+<pre lang="bash">
+<span class="prompt">$ </span><kbd>read -p "Breakfast? [y/n] "; if [[ $REPLY = y ]]; then echo "Here are your eggs."; fi</kbd>
+Breakfast? [y/n] <kbd>y</kbd>
+Here are your eggs.
+<span class="prompt">$ </span><kbd>if read -p "Breakfast? [y/n] "; [[ $REPLY = y ]]; then echo "Here are your eggs."; fi</kbd>
+Breakfast? [y/n] <kbd>y</kbd>
+Here are your eggs.
+</pre>
+
+    <p>上面两个例子有完全相同的执行效果。第一个例子中，我们的 <code>read</code> 命令在 <code>if</code> 语句之前被执行；后一个例子中，<code>read</code> 命令被内嵌在初始的分支条件中。本质上对风格或偏好的不同选择会决定你倾向于使用哪种方法，下面是我对此的一些想法：</p>
+    <ul>
+        <li>将数据获取命令内嵌，使条件语句有一种“完整”感：条件成为一个完整单元，其中包含了它所有的依赖。</li>
+        <li>将数据获取命令前置于条件语句，使这两部分成了完全独立的操作。当其他 <code>elif</code> 分支也是语句的组成部分时，这种做法会使条件语句结构上更对称或者说“平衡”。</li>
+    </ul>
+
+    <h2>条件测试命令（Conditional test commands）</h2>
+
+    <p>条件中最常见的命令是 <code>test</code> 命令，也作 <code>[</code> 命令。他们两个是同义的，只是一条命令有两个不同的名字而已。唯一的区别在于当你使用 <code>[</code> 作为命令名时，必须在最后用尾部参数 <code>]</code> 终止命令。</p>
+
+    <p>然而，在当代 bash 脚本中，<code>test</code> 命令已经因各种原因，被后面这两个更年轻的兄弟取代了： <code>[[</code> 与 <code>((</code> 。<code>test</code> 命令已被认为是过时的，它有缺陷且脆弱的语法也完全不能与 bash 解析器赋予 <code>[[</code> 和 <code>((</code> 的特殊能力相提并论。</p>
+ 
+    <p>乍一想可能有些奇怪，但其实是很有趣的提示，注意看 <code>[</code> 和 <code>[[</code>，我们其实已在这份指南的 <code>if</code> 以及其他示例语句中多次见过他们，他们并不是 <code>if</code> 语法的特殊形式，不是的！和其他命令一样，他们就是简单、普通的命令。<code>[[</code> 命令会接收一列参数且必须以参数 <code>]]</code> 终止。相似的，<code>[</code> 也是命令名称，会接收测试参数且必须以参数 <code>]</code> 终止。当我们错误省略掉命令名称与他们参数之间的空格时，这一点会尤其凸显：</p>
+
+<pre lang="bash">
+<span class="prompt">$ </span><kbd>[[ Jack = Jane ]] &amp;&amp; echo "Jack is Jane" || echo "Jack is not Jane"</kbd>
+Jack is not Jane
+<span class="prompt">$ </span><kbd>[[Jack = Jane ]] &amp;&amp; echo "Jack is Jane" || echo "Jack is not Jane"</kbd>
+-bash: [[Jack: command not found
+<span class="prompt">$ </span><kbd>[[ Jack=Jane ]] &amp;&amp; echo "Jack is Jane" || echo "Jack is not Jane"</kbd>
+Jack is Jane
+</pre>
+
+    <p>第一条语句是正确的，因此我们也得到了预期的输出结果。第二条语句中，我们忘记用空格区隔 <code>[[</code> 命令 <em>名称</em> 与它后面的 <em>第一个参数</em>，因此导致 bash 解析器去错误寻找一个叫作 <code>[[Jack</code> 的命令。因为当 bash 解析这条命令并用单词分割将命令名称和参数分作 token 时，第一个空格区隔开的 token 确实就是字符串 <code>[[Jack</code>。</p>
+
+    <p>第三条命令的错误可能更隐蔽。当我们有 bug 的代码导致的不是 bash 解析器错误，而只是表现怪异时，这种情况总是惊人的。这类 bug 既难以发现，也难以理解。在我们的例子中，<code>[[</code> 命令的第一个参数是一个单独的字符串 <code>Jack=Jane</code>。不幸的是，使用 <code>[[</code> 命令执行相等测试的语法是 <code class="syntax"><strong>[[</strong> <var>arg</var> <strong>=</strong> <var>arg</var> <strong>]]</strong></code>，由此 bash 才会比较两个独立的字符串参数是否相等。第三个例子中，在 <code>[[</code> 命令之后，我们并没有三个参数：有的只是一个长参数。错误结果的产生是因为 <code>[[</code> 命令有一个测试某一字符串是否为空的简易语法：<code class="syntax"><strong>[[</strong> <var>string</var> <strong>]]</strong></code>。现在应该很明显了，bash 错误理解了我们的意图，我们本是想使用 <code>=</code> 运算符比较两个字符串是否相同，bash 则以为我们是想确认某个单独的参数是否是一个空字符串。因为字符串 <code>Jack=Jane</code> <em>不为空</em>，所以测试成功，结果 <code>&amp;&amp;</code> 分支被执行。</p>
+
+    <p>最后的总结是，一定要认识到这些测试命令本身也是 bash 命令，所以我们仍需要对他们施加标准的命令-参数间隔规则。</p>
+
+</section>
+
+
+<aside class="nav">
+    
+    
+    
+        
+
+        
+    
+        
+
+        
+    
+        
+
+        
+    
+        
+
+        
+    
+        
+            <a href="/postscript/">Next up: 译后记</a>
+            
+</aside>
+
+
+
+        
+<footer>
+    <a href="https://codelab.club/">CodeLab</a> — <a href="/attributions.html"> 署名 </a><br>
+    
+        <a href="https://github.com/CodeLabClub">
+            <span class="icon  icon--github">
+                <svg viewBox="0 0 16 16">
+                    <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+                </svg>
+            </span>
+            <span class="username">CodeLabClub</span>
+        </a>
+    
+<!--
+    
+-->
+</footer>
+
+<a href="https://github.com/CodeLabClub/4BashGuide" class="fork"><img src="https://camo.githubusercontent.com/52760788cde945287fbb584134c4cbc2bc36f904/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f77686974655f6666666666662e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png"></a>
+
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
+
+        <script src="/js/plugins.js"></script>
+        <script src="/js/vendor/toc.bower.min.js"></script>
+        <script src="/js/main.js"></script>
+
+        <script async defer src="https://static.factlink.com/lib/dist/factlink_loader.min.js"></script>
+
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-24338692-4', 'bash.academy');
+          ga('require', 'displayfeatures');
+          ga('send', 'pageview');
+
+        </script>
+    </body>
+</html>

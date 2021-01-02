@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Bash 指南 4 篇</title>
+    <description>4 篇 bash 指南；围绕 bash 到底是什么，以及 bash 的命令与参数、变量与扩展、测试与条件，作者 Ihunath 做了极为清晰细致地介绍，CodeLab 将其翻译并发布。
+</description>
+    <link>https://www.codelab.club/</link>
+    <atom:link href="https://www.codelab.club/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Thu, 03 Dec 2020 15:32:32 +0800</pubDate>
+    <lastBuildDate>Thu, 03 Dec 2020 15:32:32 +0800</lastBuildDate>
+    <generator>Jekyll v4.1.1</generator>
+    
+  </channel>
+</rss>

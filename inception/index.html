@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>开篇</title>
+    <meta name="description" content="4 篇 bash 指南；围绕 bash 到底是什么，以及 bash 的命令与参数、变量与扩展、测试与条件，作者 Ihunath 做了极为清晰细致地介绍，CodeLab 将其翻译并发布。
+">
+    <meta name="viewport" content="width=device-width">
+
+    <link rel="canonical" href="https://www.codelab.club/inception/">
+    <link rel="stylesheet" type="text/css" href="/css/normalize.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/main.css#1">
+    <link rel="stylesheet" type="text/css" href="/css/responsive.css">
+    <link rel="alternate" type="application/rss+xml" title="Bash 指南 4 篇" href="https://www.codelab.club/feed.xml" />
+
+    <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+    <script src="js/vendor/prefixfree.min.js"></script>
+</head>
+
+    <body id="inception">
+
+        
+        <a class="page-edit fixed" href="https://prose.io/#lhunath/guide.bash.academy/edit/gh-pages/inception.html">[edit this page]</a>
+        
+
+        <header data-stellar-background-ratio="0.4">
+            <div>
+                <h1>开篇</h1>
+                <h2>Bash 是什么，它活在哪里？</h2>
+            </div>
+
+            
+            <h3>简介 bash，以及如何安装和启动它；终端，键盘及结果显示；程序，进程以及他们内部流动的信息如何被连接在一起</h3>
+            
+
+            
+                <a class="page-edit" href="https://prose.io/#lhunath/guide.bash.academy/edit/gh-pages/inception.html">[edit this page]</a>
+            
+        </header>
+
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> or <a href="https://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+        <![endif]-->
+
+        <nav>
+    <h1>本篇目录</h1>
+    <div id="toc"></div>
+
+    <div class="footnote"><div class="contribute">
+    <div class="thanks" style="display: none">
+        <h3>✅ 谢谢你的 <a href="javascript:" class="toggle">赞赏</a>！</h3>
+    </div>
+    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+        <p><q>我愿意为我从这些指南中学习到的知识支付
+            <input type="hidden" name="business" value="UASPXT4P7DMTW">
+            <input type="hidden" name="cmd" value="_donations">
+            <input type="hidden" name="item_name" value="Contribution for guide.bash.academy">
+            <input type="hidden" name="no_shipping" value="1">
+            <input type="text" name="amount" value="20" size="5" class="text">
+            <select name="currency_code" class="text">
+                <option value="USD">US $</option>
+                <option value="RUB">₽</option>
+                <option value="GBP">£</option>
+                <option value="EUR">€</option>
+                <option value="CAD">C$</option>
+                <option value="AUD">A$</option>
+            </select> <input type="submit"></q>
+    </p></form>
+</div>
+</div>
+
+    <h1>篇章</h1>
+    <ul>
+        <li><a href="/">Bash 指南 4 篇<br>
+            <sub>回到首页</sub></a></li>
+        
+        
+            <li><a href="/inception/#">开篇<br>
+                <sub>Bash 是什么，它活在哪里？</sub></a></li>
+        
+            <li><a href="/commands/#">命令与参数<br>
+                <sub>我要如何给 bash 下指令？</sub></a></li>
+        
+            <li><a href="/expansions/#">变量与扩展<br>
+                <sub>我要如何存储和使用数据？</sub></a></li>
+        
+            <li><a href="/conditionals/#">测试与条件<br>
+                <sub>对不同的数据执行不同的命令</sub></a></li>
+        
+            <li><a href="/postscript/#">译后记<br>
+                <sub></sub></a></li>
+        
+    </ul>
+</nav>
+
+
+<div class="status beta">本章的写作已完成，请享用。如果你发现任何值得改善的地方，请告知我们。<br>
+    如果你对本篇指南的进展感兴趣，可以<a href="https://github.com/lhunath/bash.academy">点击这里</a>为源仓库加星。</div>
+
+
+<section>
+    <h1>Bash 是什么，我为什么会需要它？</h1>
+
+    <p>欢迎来到 bash 指南。既然已开始阅读，想必关于 bash 是什么以及用它来干什么，其实你心中已有模糊的想法了。</p>
+    
+    <p>如果你对 bash 有一定的认识，在继续向下阅读之前，我想先劝你试着忘记所有那些你已知的东西。围绕 bash、它的语法还有它在你电脑系统中的位置，有太多错误信息浮荡在我们四周。如果你能抹除先前的经验，以白板状态重新开始，这份 bash 指南的效果就能发挥至最大。</p>
+
+    <h2>那么 bash 到底<em> 是 </em>什么呢？</h2>
+
+    <!--
+    ! 如果与程序的交互方式是非GUI性质的，那么就需要学会程序的语言，而bash这个程序的语言被设计的好学，学会之后通过bash来对其他程序发号施令。CLI其实就很像人与机器的交谈，只是说的动作是通过打字输入完成的，听的动作是通过看完成的。当然现在电脑也支持语音输入，还能发声说话，就像机器人一样，但还是远不如真人。
+    -->
+
+    <p>长话短说：Bash 也是一种跑在你电脑里的 <dfn>程序（program）</dfn>，但它的设计使你能轻松地与之对话（talk）。</p>
+
+    <p>在你电脑里的每个程序都能做很多不同的事：读取文档、启动其他程序、数学运算、控制设备。Bash 这个程序，与他们最大的不同在于，它并不执行某种特定的任务，而是听从你这个用户的命令。为此，一种“语言”被特意创造出来，使你可以用来与 bash 对话，告诉它要做什么。这种语言就是 bash shell 语言，你之后会与它熟悉亲近起来。</p>
+
+    <p><dfn>Shell</dfn> 这类程序，本质上是为你提供一个与其他程序交互的界面（interface）。这类程序数量也非常多，每一个都有它自己配套使用的语言，如其中比较流行的 <dfn>C shell（csh）</dfn> 、<dfn>Z shell（zsh）</dfn> 、<dfn>Korn shell（ksh）</dfn> 、<dfn>Bourne shell</dfn>、<dfn>Almquist shell（dash）</dfn>等，目前最主流的就是 bash（也作 Bourne Again shell） 。特别需要注意的是，所有这些 shell 使用的语法看起来都很相像，因此当你实际写代码输入命令时，一定要先搞清楚自己当前正在使用哪种 shell。以后，你可能会经常听到人们用“shell 代码”称呼他们所写的代码，而这种表达的含糊程度就相当于用“源码”指代你具体的 Java 代码。这份指南要教你的是如何写 bash shell 代码，它仅适用于 bash 这种 shell。</p>
+
+    <footer>
+    Bash 是一种 <dfn>程序</dfn> ，它被设计用来听从我的 <dfn>命令</dfn>，做我让它做的事。
+    </footer>
+
+    <h2>那我用它做什么呢？</h2>
+
+    <p>你们中的大多数人应该都有丰富的电脑操作经验，通过鼠标和键盘与各种程序交互，并且十之八九，这些操作都发生在一个由按钮、组件、文本框、图片等构成的可视界面中。这就是图形用户界面（graphical user interface, GUI），其俨然已成为绝大多数人与电脑交互方式的核心</p>
+
+    <p>但是，除此之外还有其他与电脑交互的方式。Bash 采用的方法就与图形用户界面的概念完全相对：它运行在一个只支持文本的“控制台”（console）内，在这里，交互主要指显示在你屏幕上的字符以及读取你从键盘上输入的字符。如果你尚不熟悉这种交互环境，就会觉得非常怪异、原始、受限。</p>
+
+    <p>其实并非如此。基于文本的交互界面在信息呈现上确实相对受限（它显然不适合呈现图片），但这种简洁性使我们更容易在信息中发现稳定一致的结构，无论是界面中显示的文本还是我们自己发出的命令。你会发现，那些最熟练的计算机用户使用基于文本的界面，执行相同任务时，对比图形界面，效率高的惊人。你也很快就会了解，bash shell 语言的简洁性正是关键所在。</p>
+
+    <p>那么你用 bash 做什么呢？你可以使用它查询计算机内都存放了哪些文件，文件中又是什么内容。你可以使用它来运行别的程序，这些程序可以对计算机作出各种改变：从编辑文件和图片到转化他们，从移动、复制文件到创建自动备份，从下载新程序的源码到编译、运行他们。若你为此而感到兴奋的话，请先别激动，一定要记住 <strong>bash 是一种工具</strong>，而且只是程序工具箱内的一种。仅 bash 自己只能帮你对文件或其他程序做一些基本操作，你还需要理解系统工具箱内的其他所有工具。这部分知识很多，学习起来不会很快，你一定要<strong>付出时间把他们学好</strong>，而不是对所有工具了解个大概后明天就把腿摔断（或更可能发生的，毁了你电脑内的音乐或家庭照片收藏）。</p>
+
+    <footer>
+        Bash 是庞大程序工具箱中的一种简单工具，使我通过 <dfn>基于文本的界面</dfn> 与计算机系统交互。
+    </footer>
+</section>
+
+<section>
+    <h1>我在哪可以找到 bash，又如何使用它？</h1>
+
+    <p>我们已经知道 bash 不过是你电脑里的一个程序，随时等待你启动它并向它发出操作指令。我们也已知道与 bash 的交互通常发生在一个基于文本的界面内，在这里，你使用 bash shell 语言编写你要“说”的命令，其他程序的输出内容或运行结果同样也在这个界面中，以文本的形式呈现反馈给你。</p>
+
+    <p>在我们深入 bash 之前，先站稳脚跟。你首先需要知道： Bash 通常呆在哪儿，如何激活它，它所处的环境是什么样，能力的边界在哪儿，当根据你的指令执行任务时，可以召唤哪些朋友过来帮忙。</p>
+    
+    <h2>我在哪可以找到 bash？我要如何开始使用它？</h2>
+
+    <p>如果你的操作系统自带 bash，你就会发现它是一个简单可执行的程序，存放在系统的标准二进制文件路径下。二进制文件是一种可执行程序，其中包含有操作系统内核可以直接执行的二进制代码（binary code）。如果你当前使用的操作系统没有默认安装 bash，如 FreeBSD 或 Windows 系统，你就需要从分发平台上下载安装，或是取得源码后自己编译二进制文件。FreeBSD 用户可以使用<code><a href="https://www.freebsd.org/doc/handbook/ports-using.html">ports</a></code>, Windows 用户可以使用
+    <code><a href="ttps://www.cygwin.com/">cygwin</a></code>, 也有其他发行版。源码可以从<a href="https://ftp.gnu.org/gnu/bash/">GNU.org</a>官网上下载。如果以上方法都不适用，请借助互联网的力量找到安装 bash 的有效方法。</p>
+
+    <aside>
+        <p>如果你倾向于在另一台远程电脑上实验 bash shell, 或是当前无法在自己的电脑上安装 bash，那你可能会对远程 shell 服务感兴趣，如<a href="https://sdf.org/">The Super Dimension Fortress (SDF)</a>。</p>
+    </aside>
+
+    <p>Bash 安装就绪后，我们可以运行二进制文件启动它。在启动之前，需要特别注意 bash shell 支持以下两种不同的操作模式：</p>
+    <dl>
+        <dt><dfn>交互模式</dfn></dt>
+        <dd>交互模式下，bash shell 会等待你发出命令然后再执行他们。Bash 会执行你的每一条命令，并且在它执行这条命令的期间，你将无法和 bash shell 交互。一旦它执行完成，你就可以继续向它发出下一条指令。</dd>
+        <dt><dfn>非交互模式</dfn></dt>
+        <dd>Bash shell 也可以执行 <dfn>脚本</dfn>。所谓脚本，就是提前写好的一系列指令，bash 会直接连续地执行它们，而无需中途停下询问你下一步要做什么。脚本通常以文件的形式保存，多用来自动化执行各种任务。</dd>
+    </dl>
+
+    <p>除了 bash 执行的命令来源不同，这两种模式其实非常相似。我们基本可以如下总结：如果 bash 等待你给出任务执行指令，你就处于 <dfn>交互模式</dfn> 中；如果它执行的是某文件中的指令，那它就是在 <dfn>非交互模式</dfn> 下运行一个脚本。</p>
+
+    <p>另外要记得，bash 程序通常都运行在基于文本的界面中。因为它没有可供你与之交互的图形界面，这就意味着，如果你现在正处于某图形界面中，那在与 bash 开始任何有意义的互动之前，你首先需要打开一个基于文本的界面，标准方式就是打开 <dfn>终端（terminal）</dfn>。过去，终端是我们连接电脑并与电脑交互所需的硬件设备。当下，绝大多数终端都是“模拟性的”。也就是说，他们都是运行在你电脑中的程序，无论是图形还是文本性的，他们以软件的形式“模拟”曾经实体的终端，提供一个文本性的界面供你使用。终端模拟器有很多种，具体哪些可用取决于你当前电脑的操作系统。Linux 与 BSD 用户可以使用 <a href="https://sourceforge.net/projects/rxvt">rxvt</a>, <a
+        href="https://invisible-island.net/xterm/">xterm</a>，<a href="https://help.gnome.org/users/gnome-terminal/stable/">gnome-terminal</a> 或 <a href="https://konsole.kde.org/">konsole</a>。IOS 用户可能使用 <a href="https://en.wikipedia.org/wiki/Terminal_(OS_X)">Terminal</a> 或 <a href="https://www.iterm2.com/#/section/home">iTerm 2</a>。Windows 用户可以使用 <a href="https://en.wikipedia.org/wiki/Command_Prompt">cmd.exe</a>，<a
+        href="https://sourceforge.net/projects/console/">Console 2</a> 和 <a href="https://code.google.com/p/mintty/">mintty</a>。总之，每一种操作系统都有很多适用的选择。找出你喜欢的一种，安装并启动，然后继续阅读。
+    </a>
+
+    <p>现在让我们 bash 起来！<br>
+    首先，打开你的终端或终端模拟器，确认自己处于基于文本的界面中。一旦你进入这样的界面，就需要找到一种运行程序的方式。就像在不同的图形界面中有不同的启动程序的方式，文本界面中也是如此。好在，绝大多数终端都被设置为打开后自动启动 shell 程序。还记得 bash 就是一种 shell 程序吗？所以通常，当你的终端启动时，bash 也已经同时运行其中了。但有些终端并非这样，一些操作系统默认选用的 shell 程序可能是 <code>cmd.exe</code>，<code>sh</code>，<code>dash</code>，<code>csh</code> 或 <code>zsh</code>。所有这些 shell 程序都不是 <code>bash</code>，本教程也不会涉及他们的使用（如果你需要了解其他这些 shell，还是建议你借助互联网的力量自行搜索）。为了查看你当前终端运行的是否是 bash shell，现在让我们来输入<strong>第一条 bash 命令</strong>！</p>
+
+<pre lang="bash">
+<span class="prompt">$ </span><kbd>echo "$BASH_VERSION"</kbd>
+4.2.45(2)-release
+</pre>
+
+    <aside>既然已输入第一组 shell 代码，让我们花点时间来说明一下这篇指南使用的语法。所有的代码会 <code>如此标注</code>。如果是像上方例子中那样一组代码，我们会同时显示你在终端内输入的命令以及返回的输出结果。我们还会区分你输入的文本以及终端本身显示的文本，你键入的文本会
+    <kbd>这样标识</kbd>。而且，需要你输入的文本通过 <kbd>单击它</kbd> 就能轻易选中。请看上方的代码组块，现在你就会明白起始的那个 <code>$</code> 符号并非你要输入的文本，它代表命令提示符，当 shell 等待你输入命令时，它就会显示在终端内，不过你终端内实际提示符的样子有可能会与例子中的这个不同。在命令提示符那里，你输入以下文本：<kbd>echo "$BASH_VERSION"</kbd>，然后单击 <kbd title="enter">⏎</kbd> （回车/return）确认。在你按下回车确认这条指令后，bash shell 立即就会执行它，并将结果返回显示在下一行（实际返回的版本号可能与此有别）。</aside>
+
+    <p>如果输入以上命令后没有返回任何结果或错误信息（假设你的输入完全正确），那说明你的终端很可能运行的不是 bash shell。你就需要手动启动 bash shell，然后再输入上面的命令试试看。在绝大多数 shell 中，启动 bash 仅需要执行 <kbd>bash</kbd> 命令。如果 bash 仍没有启动，你就需要去查阅系统、终端或是 shell 文档了，或是借助互联网的力量找出如何在你的终端内运行 bash shell。</p>
+
+    <p>如果你觉得还没有完全理解上面那条命令是如何工作的，不要担心。在后面的章节里，我们会逐渐深入 bash 命令。在那之前，你会时不时看到一些简单的代码，他们都很直白，要做的事也不难理解。现在，不用担心，bash shell 语言的一个优点就是它语句简短，相对容易理解。</p>
+
+    <footer>
+    Bash shell 是一个二进制程序，通常运行在由 <dfn>终端模拟器</dfn> 提供的基于文本的界面中，有 <dfn>交互式</dfn> 或 <dfn>非交互式</dfn> 两种运行方式。
+    </footer>
+
+    <h2>这里到底是怎么一回事？文本，终端，bash，程序，输入，输出！</h2>
+
+    <p>在上一部分接近尾声的时候，你或许留意到我们提速了一点。或许因速度加快（或其他什么）你会觉得有些晕，我们现在就退后一步，争取从整体上对所有这一切形成一个清晰的图景。取决于你对这些内容的熟悉程度，这里可能有不少新概念。即使你对他们并非全然陌生，也可能并不清楚该以怎样的框架组织他们的关系。如果你想完全理解运行代码时计算机内究竟发生了什么，理解这些不同概念间的关系就至关重要。</p>
+
+    <img src="/img/terminal-bash.png" alt="终端程序运行在GUI中，bash程序运行在终端内。">
+
+    <p>当你在图形用户界面中打开一个终端模拟程序时，就会看到一个带有文本内容的窗口弹出。这个窗口内呈现的文本，既有终端里程序运行后输出的结果，还有你通过键盘向这些程序输入的指令。bash 程序只是运行在终端内的众多程序中的一个，所以要记住 <em>并不是 bash 使文本呈现在你的屏幕上</em>。是终端在负责这项工作，它从 bash 那里获得文本内容并将它呈现在窗口中给你看。终端也会为其他运行在它内部的程序做这项工作，如邮件程序或 IRC 客户端，这与 bash 没一点关系。</p>
+
+    <img src="/img/bashguide1_p2.png" alt="终端程序可以运行其他程序，其他程序又可以运行别的程序，程序之间进而构建成串。">
+
+    <p>有时候，终端里正在运行什么程序并不好判断。在上面这个例子中，你通过键盘输入的文本，经一长串的程序，最终抵达目的地（运行在另一台 IP 地址为 <code>192.168.1.1</code> 的 <code> 邮件（mail）</code>程序）。<br>
+    在此我不会展开解释这些程序，这里的关键点是终端内的程序都是相互连通（inter-connect）、协同工作的。因为关于终端内当前正在发生什么，我们并没有太多视觉上的提示，所以对于这些程序什么时候启动、连通、终止，你自己要逐渐形成清楚的认识。这样你就会理解，在基于文本的用户界面中，向各种程序输入指令或是接收他们返回的结果，是怎么一回事。</p>
+    <p>简单地说，上面这个例子使用 <code>bash</code> 程序运行 <kbd>ssh</kbd> 程序，从而与另一台电脑建立连接。在另外那台电脑上，一个新的 <code>bash</code> shell 会被启动，它的输入与输出通过两台电脑间的连接往返。接下来我们在远端电脑的 bash 中运行 <kbd>screen</kbd> 程序，这是一个 <dfn>终端复用器</dfn>。这种程序可以在一个基于文本的终端内，模拟多个终端，他们共用同一终端显示（使用热建来回切换显示当前活跃的终端，或是用分屏同时呈现所有终端）。<code>screen</code> 程序又会在它的某个模拟终端内启动一个 <code>bash</code> shell。在这第三个 bash shell 中，我们运行 <kbd>mail</kbd> 程序，输入想通过邮件发送的内容。</p>
+
+    <aside>
+        <p>需要说明的是我们这里使用的“文本”（text），在计算机世界中，更通常的叫法是“字符串” （string）。顾名思义，就是一长串字符。一个姓名，如 <code>Leonard Cohen</code> 就是一个字符串，一首长诗也是一个字符串，只不过更长，包含更多行的文本。之后，每当我们使用 <em>字符串</em> 这个概念时，请记住我们谈论的其实就是任一种文本而已。</p>
+    </aside>
+
+    <footer>
+        在终端内，许多基于终端的程序可以同时运行，连成长串，你输入的命令与他们输出的结果就在其中往返流动。
+    </footer>
+
+    <h2>那么程序到底是什么？它又如何与其他程序连接？</h2>
+
+    <p>之所以要回答以上两个问题，一方面，程序到底是什么，乍一想似乎很清楚，但仔细想一下，可能多数人又无从回答。另一方面，在这份指南中，至少在我们关心的主题域内，我会竭力避免出现未加解释的概念，如程序之间如何“连接” （connect）的问题。</p>
+    <p>简言之，程序就是你的操作系统内核可以执行的、已提前编写好的指令集合。程序会直接对内核下指令。本质上，<dfn>内核</dfn> 也是一个程序，只不过它会持续运行并负责与你的硬件交互。</p>
+
+    <img src="/img/bashguide1_process.png" alt="进程就是一个运行的程序，可以将指令传递给内核，还有被称作文件描述符FD 的输入与输出连接。">
+
+    <p>程序通常都呆在你的磁盘里，等待着被启动。当你运行（run 或 execute）某个程序时，你的系统内核会为它创建一个 <dfn>进程（process）</dfn> 来加载已提前编写好的指令（即 <dfn>代码</dfn> ）。我们在前面已简单提及，你的程序可以同时运行多次，每一个实例都是这个程序运行着的进程。如果把程序比做巧克力蛋糕食谱，那么你烘焙蛋糕的过程就是程序的进程。进程将你程序中的指令传递给内核。同时，进程使用一些被称作 <dfn>文件描述符（file descriptors）</dfn> 的挂钩（hooks）与外界连通，他们本质上就是连接这个进程与其他文件、设备或进程的插件（plug）。虽然大多数巧克力蛋糕食谱没有、但有些食谱可能会包含这样一份表格，例如根据蛋糕供应的需求量查询所需原料的用量。参照这样的食谱，蛋糕产出量会随原料投入量的变化而变化。文件描述符都采用数字标识，但最前面的三个有标准的名称：</p>
+    <dl>
+        <dt><dfn>标准输入（standard input）</dfn></dt>
+        <dd><strong>文件描述符 0</strong> 也被称作 <dfn>标准输入</dfn>。绝大多数进程都从这里接收他们的输入。默认地，你终端内的进程都将他们的标准输入与你的键盘连接，更具体地说，是与你终端程序接收到的输入连接。</dd>
+        <dt><dfn>标准输出（standard output）</dfn></dt>
+        <dd><strong>文件描述符 1</strong> 被称作 <dfn>标准输出</dfn>。绝大多数的进程将他们的输出发送至此。默认地，你终端内的进程都将他们的输出与你的显示器相连，更具体地说，是你的终端程序会把他们的输出显示在终端窗口中。</dd>
+        <dt><dfn>标准错误输出（standard error）</dfn></dt>
+        <dd><strong>文件描述符 2</strong> 也被称作 <dfn>标准错误输出</dfn>。绝大多数的进程将他们的错误信息输出至此。默认地，你终端内的进程都将它与你的显示器相连，正如 <dfn>标准输出</dfn>。一定要明白，标准错误输出只是另一个插件（plug）。它的作用也不仅限于输出错误信息，实际上，bash 会把它用在绝大多数的消息输出中，<em>包括你的终端提示符</em>。</dd>
+    </dl>
+
+    <p>除以上这三种文件描述符外，进程还可以根据需要用自身编号创建新的文件描述符，并把他们与其他文件、设备或进程相连。</p>
+
+    <p>如果一个程序需要把它的输出发送到另一个程序的输入，而不是发至你的显示器，这个程序就会命令内核把它的标准输出与另一个程序的标准输入连通。如此一来，所有发送至标准输出文件描述符的信息都会流向另一个程序的标准输入文件描述符。信息在文件、设备和进程间的这种流动被称作 <dfn>流（streams）</dfn>。</p>
+
+    <p>流指的就是在一个运行着的系统中，信息（更具体地，<dfn>字节（bytes）</dfn>）通过连接 (links) 在文件、设备和进程中的流动。流可以携带任何类型的字节信息，接收端则必须按照发送顺序吸收这些字节。假设我有一个程序会向另一个相连的程序输出名字，那么第二个程序只有首先读取了流中的第一个名字才能看到第二个名字是什么。读取第二个名字后，下一个就是流中的第三个名字。当程序从流中读取某个名字后，可以把它存储在某个地方以备之后所需。从流中读取某个名字就会吸收掉流中的这些字节，流会继续向前。流不会倒转，被读取后的名字也不能被再次读取。</p>
+
+    <img src="/img/bashguide1_streams.png" alt="进程的文件描述符通过流与文档、设备或其他进程连接。">
+
+    <p>在上面这个例子中，两个 bash 进程通过流连接在一起。第一个 bash 进程从键盘读取它的输入，然后把输出同时发送至标准输出与标准错误输出。其中，标准错误输出与终端显示相连，而标准输出则与第二个进程相连。注意看上图中，进程一的 <dfn>FD 1</dfn> 连着进程二的 <dfn>FD 0</dfn>。当进程二从它的标准输入读取信息时，就会吸收掉进程一的标准输出。进程二的标准输出与终端的显示相连。运行以上代码后，终端中会有如下内容显示出来：</p>
+
+<pre>
+Your name?
+<kbd>Maarten Billemont</kbd>
+Hello, Maarten Billemont
+</pre>
+
+    <p>注意看，终端仅显示这些文本：与终端显示相连的命令执行结果，以及在终端内发送给程序的输入信息。</p>
+
+    <p>一定要理解，<strong>文件描述符是特定于每个进程的</strong>：只有同时指明具体某个进程，提及“标准输出”才有意义。在上面例子中，你会注意到，进程一的标准输入与进程二的标准输入是不同的。你也会看到，进程一的 FD 1（标准输出）连接的是进程二的 FD 0（标准输入）。文件描述符并不会描述连接进程的流本身，他们描述的只是连接得以实现的进程的插件。</p>
+
+    <footer>
+        每当启动一个程序，系统就会为它创建一个运行的 <dfn>进程</dfn>。进程都有插件，被称作 <dfn>文件描述符</dfn>，他们使得进程可以连通 <dfn>流</dfn> 从而抵达其他文件、设备或进程。
+    </footer>
+</section>
+
+
+<aside class="nav">
+    
+    
+    
+        
+
+        
+    
+        
+            <a href="/commands/">Next up: 命令与参数</a>
+            
+</aside>
+
+
+
+        
+<footer>
+    <a href="https://codelab.club/">CodeLab</a> — <a href="/attributions.html"> 署名 </a><br>
+    
+        <a href="https://github.com/CodeLabClub">
+            <span class="icon  icon--github">
+                <svg viewBox="0 0 16 16">
+                    <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+                </svg>
+            </span>
+            <span class="username">CodeLabClub</span>
+        </a>
+    
+<!--
+    
+-->
+</footer>
+
+<a href="https://github.com/CodeLabClub/4BashGuide" class="fork"><img src="https://camo.githubusercontent.com/52760788cde945287fbb584134c4cbc2bc36f904/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f77686974655f6666666666662e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png"></a>
+
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
+
+        <script src="/js/plugins.js"></script>
+        <script src="/js/vendor/toc.bower.min.js"></script>
+        <script src="/js/main.js"></script>
+
+        <script async defer src="https://static.factlink.com/lib/dist/factlink_loader.min.js"></script>
+
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-24338692-4', 'bash.academy');
+          ga('require', 'displayfeatures');
+          ga('send', 'pageview');
+
+        </script>
+    </body>
+</html>
